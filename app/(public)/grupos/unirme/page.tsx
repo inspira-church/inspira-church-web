@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 export default async function GroupJoinPage() {
   const groups = await getPublicGroups();
   const groupOptions = groups.map((g) => ({
-    value: g.slug,
+    id: g.id,
+    slug: g.slug,
     label: `${g.name} — ${g.locality ?? g.city}`,
   }));
 

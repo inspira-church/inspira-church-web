@@ -1,27 +1,29 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import type { ActionState } from "@/lib/form-errors";
+import { submitGroupJoin } from "@/lib/actions/group-join";
 
 interface GroupJoinFormProps {
-  groupOptions: { value: string; label: string }[];
+  groupOptions: { id: string; slug: string; label: string }[];
 }
 
-/**
- * UI del formulario "quiero pertenecer a un grupo". El envío real se
- * conecta en la Fase 11 (inserción en `group_join_requests`).
- */
+const initialState: ActionState = {};
+
 export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
   const searchParams = useSearchParams();
-  const preselected = searchParams.get("grupo") ?? "";
-  const [submitted, setSubmitted] = useState(false);
+  const preselectedSlug = searchParams.get("grupo") ?? "";
+  const preselectedId = groupOptions.find((g) => g.slug === preselectedSlug)?.id ?? "";
 
-  if (submitted) {
+  const [state, formAction, pending] = useActionState(submitGroupJoin, initialState);
+
+  if (state.success) {
     return (
       <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
         <p className="font-display text-xl font-semibold text-ink">
@@ -36,13 +38,13 @@ export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-5"
-    >
+    <form action={formAction} className="space-y-5">
+      {state.error && (
+        <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
+          {state.error}
+        </p>
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField label="Nombre" name="firstName" autoComplete="given-name" required />
         <TextField label="Apellidos" name="lastName" autoComplete="family-name" required />
@@ -66,10 +68,10 @@ export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
 
       <SelectField
         label="Grupo de interés"
-        name="groupSlug"
+        name="groupId"
         placeholder="No estoy seguro — recomiéndenme uno"
-        options={groupOptions}
-        defaultValue={preselected}
+        options={groupOptions.map((g) => ({ value: g.id, label: g.label }))}
+        defaultValue={preselectedId}
       />
 
       <TextField
@@ -85,9 +87,12 @@ export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
         required
         label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
       />
+      {state.fieldErrors?.consent && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+      )}
 
-      <Button type="submit" size="lg">
-        Enviar solicitud
+      <Button type="submit" size="lg" disabled={pending}>
+        {pending ? "Enviando…" : "Enviar solicitud"}
       </Button>
     </form>
   );

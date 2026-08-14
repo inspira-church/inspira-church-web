@@ -1,20 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import { submitPrayerRequest } from "@/lib/actions/prayer-request";
+import type { ActionState } from "@/lib/form-errors";
 
-/**
- * UI del formulario de petición de oración. El envío real se conecta en la
- * Fase 11 (inserción en `prayer_requests`, visible solo dentro del panel
- * administrativo).
- */
+const initialState: ActionState = {};
+
 export function PrayerRequestForm() {
-  const [submitted, setSubmitted] = useState(false);
+  const [state, formAction, pending] = useActionState(submitPrayerRequest, initialState);
 
-  if (submitted) {
+  if (state.success) {
     return (
       <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
         <p className="font-display text-xl font-semibold text-ink">
@@ -28,13 +27,13 @@ export function PrayerRequestForm() {
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-5"
-    >
+    <form action={formAction} className="space-y-5">
+      {state.error && (
+        <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
+          {state.error}
+        </p>
+      )}
+
       <TextField label="Nombre" name="name" autoComplete="name" required />
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -60,6 +59,9 @@ export function PrayerRequestForm() {
         required
         rows={6}
       />
+      {state.fieldErrors?.requestText && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.requestText}</p>
+      )}
 
       <CheckboxField
         name="isPrivate"
@@ -71,9 +73,12 @@ export function PrayerRequestForm() {
         required
         label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
       />
+      {state.fieldErrors?.consent && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+      )}
 
-      <Button type="submit" size="lg">
-        Enviar petición
+      <Button type="submit" size="lg" disabled={pending}>
+        {pending ? "Enviando…" : "Enviar petición"}
       </Button>
     </form>
   );

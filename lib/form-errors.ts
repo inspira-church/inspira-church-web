@@ -11,4 +11,6 @@ export function firstFieldErrors(issues: { path: PropertyKey[]; message: string 
 export interface ActionState {
   error?: string;
   fieldErrors?: Record<string, string>;
+  /** Formularios que confirman inline (no redirigen) lo usan para mostrar el estado de éxito. */
+  success?: boolean;
 }

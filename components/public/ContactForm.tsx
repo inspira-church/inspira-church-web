@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import { submitContact } from "@/lib/actions/contact";
+import type { ActionState } from "@/lib/form-errors";
 
 const REASON_OPTIONS = [
   { value: "visitar", label: "Quiero visitar la iglesia" },
@@ -16,16 +18,12 @@ const REASON_OPTIONS = [
   { value: "otro", label: "Otro" },
 ];
 
-/**
- * UI del formulario general de contacto. El envío real (Server Action,
- * verificación Turnstile, límite de tasa, inserción en `contacts`) se
- * conecta en la Fase 11 — por ahora solo valida y muestra confirmación
- * local, para poder probar la experiencia completa del formulario.
- */
-export function ContactForm() {
-  const [submitted, setSubmitted] = useState(false);
+const initialState: ActionState = {};
 
-  if (submitted) {
+export function ContactForm() {
+  const [state, formAction, pending] = useActionState(submitContact, initialState);
+
+  if (state.success) {
     return (
       <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
         <p className="font-display text-xl font-semibold text-ink">
@@ -39,13 +37,13 @@ export function ContactForm() {
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-5"
-    >
+    <form action={formAction} className="space-y-5">
+      {state.error && (
+        <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
+          {state.error}
+        </p>
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField label="Nombre" name="name" autoComplete="name" required />
         <TextField
@@ -65,6 +63,9 @@ export function ContactForm() {
         options={REASON_OPTIONS}
         required
       />
+      {state.fieldErrors?.reason && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.reason}</p>
+      )}
 
       <TextAreaField label="Mensaje" name="message" />
 
@@ -73,9 +74,12 @@ export function ContactForm() {
         required
         label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
       />
+      {state.fieldErrors?.consent && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+      )}
 
-      <Button type="submit" size="lg">
-        Enviar mensaje
+      <Button type="submit" size="lg" disabled={pending}>
+        {pending ? "Enviando…" : "Enviar mensaje"}
       </Button>
     </form>
   );
