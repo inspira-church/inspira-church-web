@@ -2,19 +2,20 @@ import type { Metadata } from "next";
 import { EventCard } from "@/components/public/EventCard";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { events } from "@/lib/mock-data";
+import { getPublishedEvents } from "@/lib/queries/events";
 
 export const metadata: Metadata = {
   title: "Eventos | Inspira Church",
   description: "Próximos eventos y actividades de Inspira Church.",
 };
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const events = await getPublishedEvents();
   const upcoming = events
-    .filter((e) => e.published && e.status !== "finalizado")
+    .filter((e) => e.status !== "finalizado")
     .sort((a, b) => a.eventDate.localeCompare(b.eventDate));
   const past = events
-    .filter((e) => e.published && e.status === "finalizado")
+    .filter((e) => e.status === "finalizado")
     .sort((a, b) => b.eventDate.localeCompare(a.eventDate));
 
   return (

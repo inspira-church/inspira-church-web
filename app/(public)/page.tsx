@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { formatTime } from "@/lib/format";
-import { events } from "@/lib/mock-data";
 import { getPublicGroups } from "@/lib/queries/growth-groups";
+import { getPublishedEvents } from "@/lib/queries/events";
 import { getActiveSchedules } from "@/lib/queries/schedules";
 import { getFeaturedSermon } from "@/lib/queries/sermons";
 import { getSermonSeriesById } from "@/lib/queries/sermon-series";
@@ -16,11 +16,12 @@ import { getTeamMemberById } from "@/lib/queries/team-members";
 
 export default async function HomePage() {
   const featuredSermon = await getFeaturedSermon();
-  const [featuredSeries, featuredPreacher, schedules, growthGroups] = await Promise.all([
+  const [featuredSeries, featuredPreacher, schedules, growthGroups, events] = await Promise.all([
     getSermonSeriesById(featuredSermon?.series_id ?? null),
     getTeamMemberById(featuredSermon?.preacher_id ?? null),
     getActiveSchedules(),
     getPublicGroups(),
+    getPublishedEvents(),
   ]);
 
   const upcomingEvents = events

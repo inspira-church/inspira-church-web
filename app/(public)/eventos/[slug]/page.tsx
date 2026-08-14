@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 import { formatDate, formatTime } from "@/lib/format";
-import { events, getEventBySlug } from "@/lib/mock-data";
+import { getPublishedEventBySlug } from "@/lib/queries/events";
 import type { EventStatus } from "@/types/content";
 
 interface PageProps {
@@ -19,13 +19,9 @@ const STATUS_LABEL: Record<EventStatus, string> = {
   cancelado: "Cancelado",
 };
 
-export function generateStaticParams() {
-  return events.map((e) => ({ slug: e.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const event = getEventBySlug(slug);
+  const event = await getPublishedEventBySlug(slug);
   if (!event) return {};
   return {
     title: `${event.name} | Inspira Church`,
@@ -35,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EventPage({ params }: PageProps) {
   const { slug } = await params;
-  const event = getEventBySlug(slug);
+  const event = await getPublishedEventBySlug(slug);
   if (!event) notFound();
 
   return (
@@ -43,14 +39,16 @@ export default async function EventPage({ params }: PageProps) {
       <div className="grid gap-10 lg:grid-cols-[1fr_400px]">
         <div>
           <div className="relative aspect-video overflow-hidden rounded-lg bg-paper-raised">
-            <Image
-              src={event.imageUrl}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              priority
-            />
+            {event.imageUrl && (
+              <Image
+                src={event.imageUrl}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                priority
+              />
+            )}
           </div>
 
           <Badge
@@ -62,7 +60,9 @@ export default async function EventPage({ params }: PageProps) {
           <h1 className="mt-3 text-balance font-display text-4xl font-semibold text-ink sm:text-5xl">
             {event.name}
           </h1>
-          <p className="mt-4 text-lg text-ink-soft">{event.description}</p>
+          {event.description && (
+            <p className="mt-4 text-lg text-ink-soft">{event.description}</p>
+          )}
         </div>
 
         <aside className="space-y-6">

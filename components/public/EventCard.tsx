@@ -8,7 +8,7 @@ import type { EventStatus } from "@/types/content";
 interface EventCardProps {
   slug: string;
   name: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   eventDate: string;
   eventTime?: string | null;
   locationName?: string | null;
@@ -33,13 +33,15 @@ export function EventCard({
   return (
     <Card as={Link} href={`/eventos/${slug}`} interactive className="group block overflow-hidden">
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">
-        <Image
-          src={imageUrl}
-          alt=""
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-        />
+        {imageUrl && (
+          <Image
+            src={imageUrl}
+            alt=""
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          />
+        )}
         <Badge
           variant={status === "proximo" ? "accent" : "neutral"}
           className="absolute left-3 top-3 bg-paper-raised/95"
