@@ -1,15 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
+import type { AuthUser } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Refresca la sesión de Supabase en cada request y propaga la cookie
- * actualizada. Se llama desde proxy.ts.
- *
- * Esta fase (3) solo deja la sesión viva de punta a punta; la protección
- * real de /admin (redirigir sin sesión, bloquear por rol) se agrega en la
- * Fase 6, cuando exista la página de login.
+ * Refresca la sesión de Supabase en cada request, propaga la cookie
+ * actualizada y devuelve el usuario autenticado (o null) para que proxy.ts
+ * decida si protege la ruta — evita crear un segundo cliente de Supabase
+ * solo para volver a preguntar quién es.
  */
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest
+): Promise<{ response: NextResponse; user: AuthUser | null }> {
   let response = NextResponse.next({ request })
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -19,12 +20,14 @@ export async function updateSession(request: NextRequest) {
   // no conectado aún). Sin este corte, el proxy —que corre en cada
   // request— rompería absolutamente todo el sitio, incluidas las páginas
   // públicas que no usan Supabase. Avisa una sola vez por proceso, no en
-  // cada request.
+  // cada request. `user: null` hace que proxy.ts trate esto igual que
+  // "nadie ha iniciado sesión", que es lo correcto: sin Supabase conectado
+  // no hay forma legítima de estar autenticado.
   if (!supabaseUrl || !supabaseAnonKey) {
     if (process.env.NODE_ENV !== 'production') {
       warnMissingSupabaseEnvOnce()
     }
-    return response
+    return { response, user: null }
   }
 
   const supabase = createServerClient(
@@ -50,9 +53,11 @@ export async function updateSession(request: NextRequest) {
 
   // Dispara el refresco del token si expiró; sin esto, sesiones largas se
   // cierran solas a media navegación.
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  return response
+  return { response, user }
 }
 
 let warned = false

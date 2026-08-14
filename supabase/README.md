@@ -1,6 +1,7 @@
 # Supabase — Inspira Church
 
-Esquema definitivo de la Fase 2. Diez migraciones en `migrations/`, en orden:
+Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Once migraciones en
+`migrations/`, en orden:
 
 | Archivo | Contenido |
 |---|---|
@@ -14,6 +15,7 @@ Esquema definitivo de la Fase 2. Diez migraciones en `migrations/`, en orden:
 | `008_forms.sql` | Contactos, solicitudes de grupo, peticiones de oración |
 | `009_ministries_settings_media.sql` | Ministerios, configuración del sitio, biblioteca de medios |
 | `010_audit_logs.sql` | Bitácora de auditoría (solo inserción) |
+| `011_storage_buckets.sql` | Buckets de Storage + políticas (ver más abajo, ya no es manual) |
 
 ## Aplicar las migraciones
 
@@ -46,34 +48,18 @@ puede degradarla, desactivarla ni borrarla desde la aplicación.
 
 ## Buckets de Storage
 
-Crear cinco buckets, todos **públicos de lectura** (las imágenes del sitio no
-son sensibles) con escritura restringida a `authenticated` + rol staff, según
-la organización del brief (§22):
+Los crea `011_storage_buckets.sql`: cinco buckets (`sermons`, `events`,
+`pastors`, `groups`, `site`), todos **públicos de lectura** (las imágenes del
+sitio no son sensibles), con `file_size_limit` (5 MB) y `allowed_mime_types`
+(`jpeg`, `png`, `webp`) aplicados por Supabase Storage en el servidor — no
+solo confiados al formulario del navegador (brief §22). Escritura restringida
+a `authenticated` + rol staff, igual que el resto del esquema.
 
-```
-sermons/
-events/
-pastors/
-groups/
-site/
-```
-
-Política sugerida por bucket (ejemplo con `sermons`, repetir por bucket):
-
-```sql
-create policy "sermons_public_read"
-on storage.objects for select
-to anon, authenticated
-using (bucket_id = 'sermons');
-
-create policy "sermons_staff_write"
-on storage.objects for insert
-to authenticated
-with check (bucket_id = 'sermons' and public.is_editor_or_admin());
-```
-
-Validar en la Server Action de subida (no solo confiar en el bucket): tipo
-MIME real, tamaño máximo, y que el nombre de archivo no incluya rutas (`../`).
+La subida real de archivos ocurre desde el navegador con el cliente de
+Supabase (`lib/supabase/client.ts`), directo al bucket — el `anon key` más
+estas políticas RLS son suficiente protección, no hace falta pasar el archivo
+por el servidor de Next.js. Después de subir, una Server Action guarda los
+metadatos en `media` (Fase 8, `lib/actions/media.ts`).
 
 ## Notas abiertas para confirmar antes de producción
 

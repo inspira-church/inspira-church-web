@@ -1,0 +1,78 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface SermonFiltersProps {
+  preachers: Option[];
+  series: Option[];
+  topics: Option[];
+}
+
+const SELECT_CLASSES =
+  "rounded-md border border-border-strong bg-paper-raised px-3 py-2 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
+
+export function SermonFilters({ preachers, series, topics }: SermonFiltersProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function updateParam(key: string, value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`/predicas${params.toString() ? `?${params.toString()}` : ""}`);
+  }
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <select
+        className={SELECT_CLASSES}
+        value={searchParams.get("predicador") ?? ""}
+        onChange={(e) => updateParam("predicador", e.target.value)}
+        aria-label="Filtrar por predicador"
+      >
+        <option value="">Todos los predicadores</option>
+        {preachers.map((p) => (
+          <option key={p.value} value={p.value}>
+            {p.label}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className={SELECT_CLASSES}
+        value={searchParams.get("serie") ?? ""}
+        onChange={(e) => updateParam("serie", e.target.value)}
+        aria-label="Filtrar por serie"
+      >
+        <option value="">Todas las series</option>
+        {series.map((s) => (
+          <option key={s.value} value={s.value}>
+            {s.label}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className={SELECT_CLASSES}
+        value={searchParams.get("tema") ?? ""}
+        onChange={(e) => updateParam("tema", e.target.value)}
+        aria-label="Filtrar por tema"
+      >
+        <option value="">Todos los temas</option>
+        {topics.map((t) => (
+          <option key={t.value} value={t.value}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}

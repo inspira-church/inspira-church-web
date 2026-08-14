@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Sistema de diseño — Inspira Church (Fase 4)
+ *
+ * Los tokens crudos viven en :root / prefers-color-scheme como variables
+ * CSS; @theme inline los expone como utilidades de Tailwind (bg-paper,
+ * text-ink, etc.). Cambiar de tema no requiere el prefijo `dark:` en cada
+ * componente: la variable cambia de valor y la misma clase se repinta sola.
+ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --paper: #faf9f6;
+  --paper-raised: #ffffff;
+
+  --ink: #1c1b18;
+  --ink-soft: #57534a;
+  --ink-faint: #8a8577;
+
+  /* Verde-azulado profundo: crecimiento y renovación, no dorado litúrgico. */
+  --accent: #1f6f5c;
+  --accent-strong: #175646;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4efec;
+
+  --border: #e4e0d6;
+  --border-strong: #cfc9b8;
+
+  --danger: #b23b3b;
+  --danger-soft: #f5e4e1;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #171613;
+    --paper-raised: #1e1d19;
+
+    --ink: #ede9e1;
+    --ink-soft: #afa99b;
+    --ink-faint: #78735f;
+
+    --accent: #4fbfa0;
+    --accent-strong: #6fd1b4;
+    --accent-ink: #0b211c;
+    --accent-soft: #16332c;
+
+    --border: #2c2a25;
+    --border-strong: #3d3a33;
+
+    --danger: #e38a82;
+    --danger-soft: #3a2320;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-display: var(--font-petrona);
+  --font-sans: var(--font-figtree);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
 }
