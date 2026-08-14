@@ -6,19 +6,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 import { dayName, formatTime } from "@/lib/format";
-import { getGroupBySlug, growthGroups } from "@/lib/mock-data";
+import { getPublicGroupBySlug } from "@/lib/queries/growth-groups";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return growthGroups.map((g) => ({ slug: g.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const group = getGroupBySlug(slug);
+  const group = await getPublicGroupBySlug(slug);
   if (!group) return {};
   return {
     title: `${group.name} | Grupos de crecimiento | Inspira Church`,
@@ -28,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GroupPage({ params }: PageProps) {
   const { slug } = await params;
-  const group = getGroupBySlug(slug);
+  const group = await getPublicGroupBySlug(slug);
   if (!group) notFound();
 
   const place = [group.sector, group.locality].filter(Boolean).join(", ");

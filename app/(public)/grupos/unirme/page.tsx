@@ -3,13 +3,20 @@ import { Suspense } from "react";
 import { GroupJoinForm } from "@/components/public/GroupJoinForm";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getPublicGroups } from "@/lib/queries/growth-groups";
 
 export const metadata: Metadata = {
   title: "Quiero pertenecer a un grupo | Inspira Church",
   description: "Cuéntanos un poco de ti y te conectamos con un grupo de crecimiento.",
 };
 
-export default function GroupJoinPage() {
+export default async function GroupJoinPage() {
+  const groups = await getPublicGroups();
+  const groupOptions = groups.map((g) => ({
+    value: g.slug,
+    label: `${g.name} — ${g.locality ?? g.city}`,
+  }));
+
   return (
     <Section className="pt-16 sm:pt-24">
       <div className="mx-auto max-w-xl">
@@ -20,7 +27,7 @@ export default function GroupJoinPage() {
         />
         <div className="mt-10">
           <Suspense fallback={null}>
-            <GroupJoinForm />
+            <GroupJoinForm groupOptions={groupOptions} />
           </Suspense>
         </div>
       </div>

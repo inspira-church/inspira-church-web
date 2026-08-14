@@ -7,21 +7,19 @@ import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
-import { growthGroups } from "@/lib/mock-data";
+
+interface GroupJoinFormProps {
+  groupOptions: { value: string; label: string }[];
+}
 
 /**
  * UI del formulario "quiero pertenecer a un grupo". El envío real se
  * conecta en la Fase 11 (inserción en `group_join_requests`).
  */
-export function GroupJoinForm() {
+export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
   const searchParams = useSearchParams();
   const preselected = searchParams.get("grupo") ?? "";
   const [submitted, setSubmitted] = useState(false);
-
-  const groupOptions = growthGroups.map((g) => ({
-    value: g.slug,
-    label: `${g.name} — ${g.locality ?? g.city}`,
-  }));
 
   if (submitted) {
     return (

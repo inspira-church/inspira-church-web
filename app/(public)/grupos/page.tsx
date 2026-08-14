@@ -3,7 +3,7 @@ import { GroupFilters } from "@/components/public/GroupFilters";
 import { GroupsExplorer } from "@/components/public/GroupsExplorer";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { growthGroups } from "@/lib/mock-data";
+import { getPublicGroups } from "@/lib/queries/growth-groups";
 
 export const metadata: Metadata = {
   title: "Grupos de crecimiento | Inspira Church",
@@ -17,6 +17,7 @@ export default async function GroupsPage({
   searchParams: Promise<{ ubicacion?: string; dia?: string; tipo?: string }>;
 }) {
   const { ubicacion, dia, tipo } = await searchParams;
+  const growthGroups = await getPublicGroups();
 
   const localities = Array.from(
     new Set(growthGroups.map((g) => g.locality).filter((v): v is string => !!v))

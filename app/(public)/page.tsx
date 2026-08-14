@@ -7,16 +7,20 @@ import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { formatTime } from "@/lib/format";
-import { events, growthGroups, schedules } from "@/lib/mock-data";
+import { events } from "@/lib/mock-data";
+import { getPublicGroups } from "@/lib/queries/growth-groups";
+import { getActiveSchedules } from "@/lib/queries/schedules";
 import { getFeaturedSermon } from "@/lib/queries/sermons";
 import { getSermonSeriesById } from "@/lib/queries/sermon-series";
 import { getTeamMemberById } from "@/lib/queries/team-members";
 
 export default async function HomePage() {
   const featuredSermon = await getFeaturedSermon();
-  const [featuredSeries, featuredPreacher] = await Promise.all([
+  const [featuredSeries, featuredPreacher, schedules, growthGroups] = await Promise.all([
     getSermonSeriesById(featuredSermon?.series_id ?? null),
     getTeamMemberById(featuredSermon?.preacher_id ?? null),
+    getActiveSchedules(),
+    getPublicGroups(),
   ]);
 
   const upcomingEvents = events
@@ -24,7 +28,7 @@ export default async function HomePage() {
     .slice(0, 3);
 
   const sundayServices = schedules.filter(
-    (s) => s.type === "servicio" && s.dayOfWeek === 0
+    (s) => s.type === "servicio" && s.day_of_week === 0
   );
 
   const featuredGroups = growthGroups.slice(0, 3);
@@ -77,7 +81,7 @@ export default async function HomePage() {
                 className="rounded-lg border border-border bg-paper px-5 py-4"
               >
                 <p className="font-display text-2xl font-semibold text-ink">
-                  {formatTime(s.timeOfDay)}
+                  {formatTime(s.time_of_day)}
                 </p>
                 <p className="text-sm text-ink-faint">{s.location}</p>
               </div>
