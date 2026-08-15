@@ -1,8 +1,14 @@
 "use server";
 
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { contactSchema } from "@/lib/validations/contact";
+
+const RATE_LIMIT_ERROR =
+  "Enviaste varios mensajes seguidos. Espera unos minutos antes de intentar de nuevo.";
+const BOT_CHECK_ERROR = "No pudimos verificar que eres una persona. Intenta de nuevo.";
 
 function parseForm(formData: FormData) {
   return {
@@ -20,6 +26,15 @@ export async function submitContact(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const ip = await getClientIp();
+  if (!checkRateLimit(`contact:${ip}`)) {
+    return { error: RATE_LIMIT_ERROR };
+  }
+
+  if (!(await verifyTurnstile(formData))) {
+    return { error: BOT_CHECK_ERROR };
+  }
+
   const parsed = contactSchema.safeParse(parseForm(formData));
   if (!parsed.success) {
     return { fieldErrors: firstFieldErrors(parsed.error.issues) };

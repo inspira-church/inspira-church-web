@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import { TurnstileWidget } from "@/components/public/TurnstileWidget";
 import { submitPrayerRequest } from "@/lib/actions/prayer-request";
 import type { ActionState } from "@/lib/form-errors";
 
@@ -76,6 +77,8 @@ export function PrayerRequestForm() {
       {state.fieldErrors?.consent && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
       )}
+
+      <TurnstileWidget />
 
       <Button type="submit" size="lg" disabled={pending}>
         {pending ? "Enviando…" : "Enviar petición"}

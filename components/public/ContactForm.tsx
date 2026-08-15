@@ -6,6 +6,7 @@ import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import { TurnstileWidget } from "@/components/public/TurnstileWidget";
 import { submitContact } from "@/lib/actions/contact";
 import type { ActionState } from "@/lib/form-errors";
 
@@ -77,6 +78,8 @@ export function ContactForm() {
       {state.fieldErrors?.consent && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
       )}
+
+      <TurnstileWidget />
 
       <Button type="submit" size="lg" disabled={pending}>
         {pending ? "Enviando…" : "Enviar mensaje"}

@@ -7,6 +7,7 @@ import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
+import { TurnstileWidget } from "@/components/public/TurnstileWidget";
 import type { ActionState } from "@/lib/form-errors";
 import { submitGroupJoin } from "@/lib/actions/group-join";
 
@@ -90,6 +91,8 @@ export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
       {state.fieldErrors?.consent && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
       )}
+
+      <TurnstileWidget />
 
       <Button type="submit" size="lg" disabled={pending}>
         {pending ? "Enviando…" : "Enviar solicitud"}

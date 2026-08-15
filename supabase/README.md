@@ -61,6 +61,28 @@ estas políticas RLS son suficiente protección, no hace falta pasar el archivo
 por el servidor de Next.js. Después de subir, una Server Action guarda los
 metadatos en `media` (Fase 8, `lib/actions/media.ts`).
 
+## Auditoría de RLS (Fase 12)
+
+Revisión completa de las 15 tablas/vista antes de cerrar la fase de
+seguridad. Confirmado:
+
+- Ninguna tabla usa `FORCE ROW LEVEL SECURITY` — necesario para que la vista
+  `public_growth_groups` siga funcionando (depende de que el dueño de la
+  tabla, que la crea, pueda saltarse la RLS al leerla).
+- `contacts`, `group_join_requests` y `prayer_requests` solo permiten
+  `INSERT` a `anon` — nunca `SELECT`, `UPDATE` ni `DELETE`. Un visitante
+  puede escribir su propio envío, jamás leer los de otros.
+- `growth_groups` no tiene ninguna política de `SELECT` para `anon`: el
+  único camino público es la vista, que expone columnas explícitas (nunca
+  `exact_address` ni `leader_phone_private`). Verificado en vivo en la Fase
+  9 inspeccionando el HTML completo de una página de grupo real.
+- `audit_logs` no tiene política de `UPDATE` ni `DELETE` — con RLS activa y
+  sin una política que lo permita, la operación queda denegada por defecto,
+  incluso para un admin desde la API.
+- `is_admin()` / `is_editor_or_admin()` son `SECURITY DEFINER` con
+  `search_path` fijo — evita tanto el ciclo de RLS sobre sí mismas como el
+  secuestro de `search_path`.
+
 ## Notas abiertas para confirmar antes de producción
 
 - **Peticiones de oración privadas**: hoy solo el Admin las lee
