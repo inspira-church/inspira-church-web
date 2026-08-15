@@ -107,8 +107,11 @@ supabase/
   administrativo (no es contenido público).
 - **Metadata por página** — título/descripción en cada ruta pública, más
   OpenGraph/Twitter por defecto en `app/layout.tsx` (`metadataBase` desde
-  `NEXT_PUBLIC_SITE_URL`). Pendiente: imagen OG real (hoy no hay logo/imagen
-  de marca — hereda solo texto).
+  `NEXT_PUBLIC_SITE_URL`).
+- **Logo e íconos** — `public/logo.png` (Header, Footer), `app/icon.png` /
+  `app/apple-icon.png` (favicon y pantalla de inicio en iOS, convención de
+  Next.js) y `app/opengraph-image.tsx` (genera la imagen 1200×630 con el
+  logo para cuando se comparte el sitio en redes).
 - **ISR en el sitio público** — `lib/supabase/public.ts` es un cliente de
   Supabase sin `cookies()`; usarlo en `lib/queries/*` (en vez del cliente de
   `lib/supabase/server.ts`) es lo que permite que `app/(public)/layout.tsx`

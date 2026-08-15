@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SocialLinks } from "@/components/public/SocialLinks";
 import { Container } from "@/components/ui/Container";
@@ -24,9 +25,12 @@ export function Footer({
     <footer className="border-t border-border bg-paper-raised">
       <Container className="grid gap-10 py-16 sm:grid-cols-3">
         <div>
-          <p className="font-display text-xl font-semibold text-ink">
-            {SITE_CONFIG.name}
-          </p>
+          <div className="flex items-center gap-2.5">
+            <Image src="/logo.png" alt="" width={36} height={36} className="h-9 w-9" />
+            <p className="font-display text-xl font-semibold text-ink">
+              {SITE_CONFIG.name}
+            </p>
+          </div>
           <p className="mt-3 max-w-xs text-sm text-ink-soft">
             {SITE_CONFIG.description}
           </p>

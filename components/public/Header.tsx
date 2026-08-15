@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -17,10 +18,13 @@ export function Header() {
       <Container className="flex h-16 items-center justify-between sm:h-20">
         <Link
           href="/"
-          className="font-display text-xl font-semibold text-ink sm:text-2xl"
+          className="flex items-center gap-2.5"
           onClick={() => setOpen(false)}
         >
-          Inspira Church
+          <Image src="/logo.png" alt="" width={40} height={40} className="h-10 w-10" priority />
+          <span className="font-display text-xl font-semibold text-ink sm:text-2xl">
+            Inspira Church
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
