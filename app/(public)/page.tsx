@@ -12,17 +12,20 @@ import { getPublishedEvents } from "@/lib/queries/events";
 import { getActiveSchedules } from "@/lib/queries/schedules";
 import { getFeaturedSermon } from "@/lib/queries/sermons";
 import { getSermonSeriesById } from "@/lib/queries/sermon-series";
+import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMemberById } from "@/lib/queries/team-members";
 
 export default async function HomePage() {
   const featuredSermon = await getFeaturedSermon();
-  const [featuredSeries, featuredPreacher, schedules, growthGroups, events] = await Promise.all([
-    getSermonSeriesById(featuredSermon?.series_id ?? null),
-    getTeamMemberById(featuredSermon?.preacher_id ?? null),
-    getActiveSchedules(),
-    getPublicGroups(),
-    getPublishedEvents(),
-  ]);
+  const [featuredSeries, featuredPreacher, schedules, growthGroups, events, settings] =
+    await Promise.all([
+      getSermonSeriesById(featuredSermon?.series_id ?? null),
+      getTeamMemberById(featuredSermon?.preacher_id ?? null),
+      getActiveSchedules(),
+      getPublicGroups(),
+      getPublishedEvents(),
+      getSiteSettings(),
+    ]);
 
   const upcomingEvents = events
     .filter((e) => e.status === "proximo")
@@ -62,7 +65,11 @@ export default async function HomePage() {
             </Button>
           </div>
           <div className="mt-6">
-            <WhatsAppButton variant="inline" />
+            <WhatsAppButton
+              variant="inline"
+              message={settings.whatsappMessage}
+              number={settings.whatsappNumber}
+            />
           </div>
         </div>
       </Section>

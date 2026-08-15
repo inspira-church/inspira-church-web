@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface WhatsAppButtonProps {
   message?: string;
+  number?: string;
   /** "floating" flota fija sobre el contenido; "inline" se usa dentro de otro layout (p. ej. el footer). */
   variant?: "floating" | "inline";
   className?: string;
@@ -10,12 +11,13 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton({
   message,
+  number,
   variant = "floating",
   className,
 }: WhatsAppButtonProps) {
   return (
     <a
-      href={whatsappLink(message)}
+      href={whatsappLink(message, number)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribir por WhatsApp"

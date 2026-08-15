@@ -22,7 +22,10 @@ export function LoginForm() {
 
       {(state.error || callbackError) && (
         <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
-          {state.error ?? "El enlace ya no es válido. Solicita uno nuevo."}
+          {state.error ??
+            (callbackError === "account_disabled"
+              ? "Tu cuenta fue desactivada. Contacta a un Administrador."
+              : "El enlace ya no es válido. Solicita uno nuevo.")}
         </p>
       )}
 

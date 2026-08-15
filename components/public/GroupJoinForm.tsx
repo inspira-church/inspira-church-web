@@ -13,11 +13,12 @@ import { submitGroupJoin } from "@/lib/actions/group-join";
 
 interface GroupJoinFormProps {
   groupOptions: { id: string; slug: string; label: string }[];
+  privacyPolicyUrl?: string;
 }
 
 const initialState: ActionState = {};
 
-export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
+export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormProps) {
   const searchParams = useSearchParams();
   const preselectedSlug = searchParams.get("grupo") ?? "";
   const preselectedId = groupOptions.find((g) => g.slug === preselectedSlug)?.id ?? "";
@@ -86,7 +87,24 @@ export function GroupJoinForm({ groupOptions }: GroupJoinFormProps) {
       <CheckboxField
         name="consent"
         required
-        label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
+        label={
+          privacyPolicyUrl ? (
+            <>
+              Autorizo el tratamiento de mis datos personales conforme a la{" "}
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-accent"
+              >
+                política de privacidad
+              </a>{" "}
+              de Inspira Church.
+            </>
+          ) : (
+            "Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
+          )
+        }
       />
       {state.fieldErrors?.consent && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>

@@ -2,7 +2,28 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS, SITE_CONFIG, whatsappLink } from "@/lib/constants";
 
-export function Footer() {
+interface FooterProps {
+  whatsappNumber?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+}
+
+const SOCIAL_LINKS = [
+  { key: "facebookUrl" as const, label: "Facebook" },
+  { key: "instagramUrl" as const, label: "Instagram" },
+  { key: "youtubeUrl" as const, label: "YouTube" },
+];
+
+export function Footer({
+  whatsappNumber,
+  facebookUrl,
+  instagramUrl,
+  youtubeUrl,
+}: FooterProps) {
+  const socials = { facebookUrl, instagramUrl, youtubeUrl };
+  const hasSocials = Boolean(facebookUrl || instagramUrl || youtubeUrl);
+
   return (
     <footer className="border-t border-border bg-paper-raised">
       <Container className="grid gap-10 py-16 sm:grid-cols-3">
@@ -40,7 +61,7 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">
             <li>{SITE_CONFIG.city}</li>
             <li>
-              <a href={whatsappLink()} className="hover:text-accent">
+              <a href={whatsappLink(undefined, whatsappNumber)} className="hover:text-accent">
                 Escríbenos por WhatsApp
               </a>
             </li>
@@ -49,6 +70,21 @@ export function Footer() {
                 Enviar una petición de oración
               </Link>
             </li>
+            {hasSocials && (
+              <li className="flex gap-3 pt-1">
+                {SOCIAL_LINKS.filter((social) => socials[social.key]).map((social) => (
+                  <a
+                    key={social.key}
+                    href={socials[social.key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-accent"
+                  >
+                    {social.label}
+                  </a>
+                ))}
+              </li>
+            )}
           </ul>
         </div>
       </Container>

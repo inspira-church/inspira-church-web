@@ -1,11 +1,15 @@
-import { PlaceholderModule } from "@/components/admin/PlaceholderModule";
+import { SettingsForm } from "@/components/admin/SettingsForm";
+import { getSiteSettings } from "@/lib/queries/settings";
 
-export default function AdminSettingsPage() {
+export default async function SettingsPage() {
+  const settings = await getSiteSettings();
+
   return (
-    <PlaceholderModule
-      title="Configuración"
-      description="WhatsApp, redes sociales y textos legales del sitio. Solo Administrador."
-      phase="Fase 12"
-    />
+    <div>
+      <h1 className="font-display text-2xl font-semibold text-ink">Configuración</h1>
+      <div className="mt-8">
+        <SettingsForm defaultValues={settings} />
+      </div>
+    </div>
   );
 }

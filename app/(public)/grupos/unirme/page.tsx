@@ -4,6 +4,7 @@ import { GroupJoinForm } from "@/components/public/GroupJoinForm";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getPublicGroups } from "@/lib/queries/growth-groups";
+import { getSiteSettings } from "@/lib/queries/settings";
 
 export const metadata: Metadata = {
   title: "Quiero pertenecer a un grupo | Inspira Church",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GroupJoinPage() {
-  const groups = await getPublicGroups();
+  const [groups, settings] = await Promise.all([getPublicGroups(), getSiteSettings()]);
   const groupOptions = groups.map((g) => ({
     id: g.id,
     slug: g.slug,
@@ -28,7 +29,7 @@ export default async function GroupJoinPage() {
         />
         <div className="mt-10">
           <Suspense fallback={null}>
-            <GroupJoinForm groupOptions={groupOptions} />
+            <GroupJoinForm groupOptions={groupOptions} privacyPolicyUrl={settings.privacyPolicyUrl} />
           </Suspense>
         </div>
       </div>

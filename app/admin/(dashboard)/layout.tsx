@@ -20,9 +20,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, active")
     .eq("id", user.id)
     .single();
+
+  if (profile && !profile.active) {
+    await supabase.auth.signOut();
+    redirect("/admin/login?error=account_disabled");
+  }
 
   const role = profile?.role ?? "editor";
 

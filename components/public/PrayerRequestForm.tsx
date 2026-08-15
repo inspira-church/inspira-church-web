@@ -11,7 +11,7 @@ import type { ActionState } from "@/lib/form-errors";
 
 const initialState: ActionState = {};
 
-export function PrayerRequestForm() {
+export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string }) {
   const [state, formAction, pending] = useActionState(submitPrayerRequest, initialState);
 
   if (state.success) {
@@ -72,7 +72,24 @@ export function PrayerRequestForm() {
       <CheckboxField
         name="consent"
         required
-        label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
+        label={
+          privacyPolicyUrl ? (
+            <>
+              Autorizo el tratamiento de mis datos personales conforme a la{" "}
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-accent"
+              >
+                política de privacidad
+              </a>{" "}
+              de Inspira Church.
+            </>
+          ) : (
+            "Autorizo el tratamiento de mis datos personales conforme a la política de privacidad de Inspira Church."
+          )
+        }
       />
       {state.fieldErrors?.consent && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>

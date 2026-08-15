@@ -10,8 +10,11 @@ export const SITE_CONFIG = {
     "Hola, me gustaría más información sobre Inspira Church.",
 };
 
-export function whatsappLink(message = SITE_CONFIG.whatsappDefaultMessage) {
-  return `https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
+export function whatsappLink(
+  message = SITE_CONFIG.whatsappDefaultMessage,
+  number = SITE_CONFIG.whatsappNumber
+) {
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 
 export const DAY_NAMES = [
