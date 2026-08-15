@@ -109,13 +109,10 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 10. ✅ CRUD: Eventos
 11. ✅ Formularios públicos conectados + bandejas admin
 12. ✅ Seguridad: Turnstile, límite de tasa, cabeceras, auditoría RLS
+12.5. ✅ Módulos Usuarios y Configuración (invitar staff, WhatsApp/redes/política de privacidad)
 13. ⬜ SEO y rendimiento
 14. ⬜ Pruebas
 15. ⬜ Producción
-
-Pendientes dentro del alcance original que quedaron para más adelante:
-módulos **Usuarios** y **Configuración** del panel (necesitan la
-`service_role key` por primera vez para crear cuentas de staff).
 
 ## Despliegue
 
