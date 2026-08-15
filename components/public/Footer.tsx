@@ -1,8 +1,29 @@
+import {
+  CalendarDays,
+  HeartHandshake,
+  Home,
+  Mail,
+  MapPin,
+  Mic,
+  MessageCircle,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { SocialLinks } from "@/components/public/SocialLinks";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS, SITE_CONFIG, whatsappLink } from "@/lib/constants";
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+  "/": Home,
+  "/nosotros": UserRound,
+  "/predicas": Mic,
+  "/grupos": Users,
+  "/eventos": CalendarDays,
+  "/contacto": Mail,
+};
 
 interface FooterProps {
   whatsappNumber?: string;
@@ -49,16 +70,20 @@ export function Footer({
             Explora
           </p>
           <ul className="mt-3 space-y-2">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-ink-soft hover:text-accent"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const Icon = NAV_ICONS[link.href];
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="flex items-center gap-2 text-sm text-ink-soft hover:text-accent"
+                  >
+                    {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -67,14 +92,22 @@ export function Footer({
             Contacto
           </p>
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">
-            <li>{SITE_CONFIG.city}</li>
+            <li className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              {SITE_CONFIG.city}
+            </li>
             <li>
-              <a href={whatsappLink(undefined, whatsappNumber)} className="hover:text-accent">
+              <a
+                href={whatsappLink(undefined, whatsappNumber)}
+                className="flex items-center gap-2 hover:text-accent"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
                 Escríbenos por WhatsApp
               </a>
             </li>
             <li>
-              <Link href="/oracion" className="hover:text-accent">
+              <Link href="/oracion" className="flex items-center gap-2 hover:text-accent">
+                <HeartHandshake className="h-4 w-4" aria-hidden="true" />
                 Enviar una petición de oración
               </Link>
             </li>
