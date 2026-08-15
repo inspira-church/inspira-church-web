@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SocialLinks } from "@/components/public/SocialLinks";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS, SITE_CONFIG, whatsappLink } from "@/lib/constants";
 
@@ -6,24 +7,19 @@ interface FooterProps {
   whatsappNumber?: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  tiktokUrl?: string;
+  xUrl?: string;
   youtubeUrl?: string;
 }
-
-const SOCIAL_LINKS = [
-  { key: "facebookUrl" as const, label: "Facebook" },
-  { key: "instagramUrl" as const, label: "Instagram" },
-  { key: "youtubeUrl" as const, label: "YouTube" },
-];
 
 export function Footer({
   whatsappNumber,
   facebookUrl,
   instagramUrl,
+  tiktokUrl,
+  xUrl,
   youtubeUrl,
 }: FooterProps) {
-  const socials = { facebookUrl, instagramUrl, youtubeUrl };
-  const hasSocials = Boolean(facebookUrl || instagramUrl || youtubeUrl);
-
   return (
     <footer className="border-t border-border bg-paper-raised">
       <Container className="grid gap-10 py-16 sm:grid-cols-3">
@@ -34,6 +30,14 @@ export function Footer({
           <p className="mt-3 max-w-xs text-sm text-ink-soft">
             {SITE_CONFIG.description}
           </p>
+          <SocialLinks
+            className="mt-5"
+            facebookUrl={facebookUrl}
+            instagramUrl={instagramUrl}
+            tiktokUrl={tiktokUrl}
+            xUrl={xUrl}
+            youtubeUrl={youtubeUrl}
+          />
         </div>
 
         <div>
@@ -70,21 +74,6 @@ export function Footer({
                 Enviar una petición de oración
               </Link>
             </li>
-            {hasSocials && (
-              <li className="flex gap-3 pt-1">
-                {SOCIAL_LINKS.filter((social) => socials[social.key]).map((social) => (
-                  <a
-                    key={social.key}
-                    href={socials[social.key]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-accent"
-                  >
-                    {social.label}
-                  </a>
-                ))}
-              </li>
-            )}
           </ul>
         </div>
       </Container>

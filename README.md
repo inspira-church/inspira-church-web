@@ -136,6 +136,7 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 11. ✅ Formularios públicos conectados + bandejas admin
 12. ✅ Seguridad: Turnstile, límite de tasa, cabeceras, auditoría RLS
 12.5. ✅ Módulos Usuarios y Configuración (invitar staff, WhatsApp/redes/política de privacidad)
+12.6. ✅ Apartado de redes sociales (Facebook, Instagram, TikTok, X, YouTube) en Configuración y footer
 13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
 14. ⬜ Pruebas
 15. ⬜ Producción

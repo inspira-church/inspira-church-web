@@ -6,6 +6,8 @@ export interface SiteSettings {
   whatsappMessage: string;
   facebookUrl: string;
   instagramUrl: string;
+  tiktokUrl: string;
+  xUrl: string;
   youtubeUrl: string;
   privacyPolicyUrl: string;
 }
@@ -15,6 +17,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
   whatsappMessage: SITE_CONFIG.whatsappDefaultMessage,
   facebookUrl: "",
   instagramUrl: "",
+  tiktokUrl: "",
+  xUrl: "",
   youtubeUrl: "",
   privacyPolicyUrl: "",
 };

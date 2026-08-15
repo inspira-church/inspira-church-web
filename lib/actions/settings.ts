@@ -11,6 +11,8 @@ function parseForm(formData: FormData) {
     whatsappMessage: formData.get("whatsappMessage"),
     facebookUrl: formData.get("facebookUrl") || undefined,
     instagramUrl: formData.get("instagramUrl") || undefined,
+    tiktokUrl: formData.get("tiktokUrl") || undefined,
+    xUrl: formData.get("xUrl") || undefined,
     youtubeUrl: formData.get("youtubeUrl") || undefined,
     privacyPolicyUrl: formData.get("privacyPolicyUrl") || undefined,
   };

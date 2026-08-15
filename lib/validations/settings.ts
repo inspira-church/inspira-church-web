@@ -8,6 +8,8 @@ export const siteSettingsSchema = z.object({
   whatsappMessage: z.string().trim().min(1, "Ingresa un mensaje por defecto."),
   facebookUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   instagramUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
+  tiktokUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
+  xUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   youtubeUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   privacyPolicyUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
 });

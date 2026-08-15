@@ -66,6 +66,28 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
       )}
 
       <TextField
+        label="TikTok"
+        name="tiktokUrl"
+        type="url"
+        defaultValue={defaultValues.tiktokUrl}
+        hint="Opcional"
+      />
+      {state.fieldErrors?.tiktokUrl && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.tiktokUrl}</p>
+      )}
+
+      <TextField
+        label="X (Twitter)"
+        name="xUrl"
+        type="url"
+        defaultValue={defaultValues.xUrl}
+        hint="Opcional"
+      />
+      {state.fieldErrors?.xUrl && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.xUrl}</p>
+      )}
+
+      <TextField
         label="YouTube"
         name="youtubeUrl"
         type="url"
