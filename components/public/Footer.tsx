@@ -15,6 +15,7 @@ import Link from "next/link";
 import { SocialLinks } from "@/components/public/SocialLinks";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS, SITE_CONFIG, whatsappLink } from "@/lib/constants";
+import { googleMapsLink } from "@/lib/maps";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/": Home,
@@ -32,6 +33,9 @@ interface FooterProps {
   tiktokUrl?: string;
   xUrl?: string;
   youtubeUrl?: string;
+  churchAddress?: string;
+  churchLat?: number | null;
+  churchLng?: number | null;
 }
 
 export function Footer({
@@ -41,7 +45,11 @@ export function Footer({
   tiktokUrl,
   xUrl,
   youtubeUrl,
+  churchAddress,
+  churchLat,
+  churchLng,
 }: FooterProps) {
+  const hasLocation = churchLat != null && churchLng != null;
   return (
     <footer className="border-t border-border bg-paper-raised">
       <Container className="grid gap-10 py-16 sm:grid-cols-3">
@@ -93,8 +101,19 @@ export function Footer({
           </p>
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">
             <li className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" aria-hidden="true" />
-              {SITE_CONFIG.city}
+              <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {hasLocation ? (
+                <a
+                  href={googleMapsLink(churchLat!, churchLng!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-accent"
+                >
+                  {churchAddress || SITE_CONFIG.city}
+                </a>
+              ) : (
+                churchAddress || SITE_CONFIG.city
+              )}
             </li>
             <li>
               <a

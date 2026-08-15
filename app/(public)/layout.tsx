@@ -26,6 +26,9 @@ export default async function PublicLayout({ children }: { children: ReactNode }
         tiktokUrl={settings.tiktokUrl}
         xUrl={settings.xUrl}
         youtubeUrl={settings.youtubeUrl}
+        churchAddress={settings.churchAddress}
+        churchLat={settings.churchLat}
+        churchLng={settings.churchLng}
       />
       <WhatsAppButton message={settings.whatsappMessage} number={settings.whatsappNumber} />
     </div>

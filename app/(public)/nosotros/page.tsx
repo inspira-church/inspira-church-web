@@ -4,6 +4,7 @@ import { TeamMemberCard } from "@/components/public/TeamMemberCard";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SITE_CONFIG } from "@/lib/constants";
+import { googleMapsLink, wazeLink } from "@/lib/maps";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getActiveTeamMembers } from "@/lib/queries/team-members";
 
@@ -164,14 +165,24 @@ export default async function AboutPage() {
               {settings.churchAddress && (
                 <p className="text-ink-soft">{settings.churchAddress}</p>
               )}
-              <a
-                href={`https://www.google.com/maps?q=${settings.churchLat},${settings.churchLng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
-              >
-                Cómo llegar en Google Maps →
-              </a>
+              <div className="mt-4 flex flex-col gap-2">
+                <a
+                  href={googleMapsLink(settings.churchLat!, settings.churchLng!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Cómo llegar en Google Maps →
+                </a>
+                <a
+                  href={wazeLink(settings.churchLat!, settings.churchLng!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Cómo llegar en Waze →
+                </a>
+              </div>
             </div>
           </div>
         </Section>
