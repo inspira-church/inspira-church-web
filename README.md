@@ -69,9 +69,12 @@ components/
 ├─ admin/              Shell del panel, formularios de cada módulo
 └─ ui/                 Primitivos de diseño (Button, Card, campos de formulario…)
 lib/
-├─ supabase/           Clientes de Supabase (server, browser, proxy)
+├─ supabase/           Clientes de Supabase — server (cookies, sesión),
+│                       public (sin cookies, ISR), admin (service_role),
+│                       browser, proxy
 ├─ actions/            Server Actions (mutaciones) por módulo
-├─ queries/             Lecturas del sitio público por módulo
+├─ queries/             Lecturas del sitio público por módulo (cliente
+│                       `public`, cacheables — ver Rendimiento)
 ├─ validations/         Esquemas Zod por módulo
 ├─ rate-limit.ts        Límite de tasa en memoria (Fase 12)
 └─ turnstile.ts         Verificación de Cloudflare Turnstile (Fase 12)
@@ -93,6 +96,29 @@ supabase/
 - **Cloudflare Turnstile** en Contacto, Oración y "Unirme a un grupo" —
   gratis, se activa solo con las dos variables de entorno configuradas.
 
+## SEO y rendimiento
+
+- **`app/sitemap.ts`** — sitemap dinámico: rutas estáticas del sitio público
+  más prédicas, series, grupos y eventos publicados, leídos en vivo de
+  Supabase.
+- **`app/robots.ts`** — permite todo excepto `/admin` y `/auth`; referencia
+  el sitemap.
+- **`app/admin/layout.tsx`** — `noindex, nofollow` en todo el panel
+  administrativo (no es contenido público).
+- **Metadata por página** — título/descripción en cada ruta pública, más
+  OpenGraph/Twitter por defecto en `app/layout.tsx` (`metadataBase` desde
+  `NEXT_PUBLIC_SITE_URL`). Pendiente: imagen OG real (hoy no hay logo/imagen
+  de marca — hereda solo texto).
+- **ISR en el sitio público** — `lib/supabase/public.ts` es un cliente de
+  Supabase sin `cookies()`; usarlo en `lib/queries/*` (en vez del cliente de
+  `lib/supabase/server.ts`) es lo que permite que `app/(public)/layout.tsx`
+  declare `export const revalidate = 60` y Next.js sirva esas páginas
+  cacheadas (`○`) en vez de golpear Supabase en cada visita. Las páginas con
+  filtros por `searchParams` (`/predicas`, `/grupos`) siguen siendo
+  dinámicas a propósito. El panel admin (`app/admin`) sigue usando el
+  cliente con cookies y permanece 100% dinámico — es un CMS, necesita
+  consistencia inmediata.
+
 ## Estado del proyecto
 
 Desarrollo por fases (ver documento de arquitectura). Completadas:
@@ -110,7 +136,7 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 11. ✅ Formularios públicos conectados + bandejas admin
 12. ✅ Seguridad: Turnstile, límite de tasa, cabeceras, auditoría RLS
 12.5. ✅ Módulos Usuarios y Configuración (invitar staff, WhatsApp/redes/política de privacidad)
-13. ⬜ SEO y rendimiento
+13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
 14. ⬜ Pruebas
 15. ⬜ Producción
 

@@ -1,5 +1,5 @@
 import { SITE_CONFIG } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient as createClient } from "@/lib/supabase/public";
 
 export interface SiteSettings {
   whatsappNumber: string;
