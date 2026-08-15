@@ -162,6 +162,7 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 12.5. ✅ Módulos Usuarios y Configuración (invitar staff, WhatsApp/redes/política de privacidad)
 12.6. ✅ Apartado de redes sociales (Facebook, Instagram, TikTok, X, YouTube) en Configuración y footer
 12.7. ✅ Logo real de Inspira Church (Header, Footer, favicon, imagen OG)
+12.8. ✅ Mapa de ubicación en Nosotros, configurable desde Configuración
 13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
 14. ✅ Pruebas (unitarias con Vitest, end-to-end con Playwright)
 15. ⬜ Producción

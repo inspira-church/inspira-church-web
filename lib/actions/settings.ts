@@ -15,6 +15,9 @@ function parseForm(formData: FormData) {
     xUrl: formData.get("xUrl") || undefined,
     youtubeUrl: formData.get("youtubeUrl") || undefined,
     privacyPolicyUrl: formData.get("privacyPolicyUrl") || undefined,
+    churchAddress: formData.get("churchAddress") || undefined,
+    churchLat: formData.get("churchLat") || undefined,
+    churchLng: formData.get("churchLng") || undefined,
   };
 }
 

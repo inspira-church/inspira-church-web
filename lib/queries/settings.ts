@@ -10,6 +10,9 @@ export interface SiteSettings {
   xUrl: string;
   youtubeUrl: string;
   privacyPolicyUrl: string;
+  churchAddress: string;
+  churchLat: number | null;
+  churchLng: number | null;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -21,6 +24,9 @@ const DEFAULT_SETTINGS: SiteSettings = {
   xUrl: "",
   youtubeUrl: "",
   privacyPolicyUrl: "",
+  churchAddress: "",
+  churchLat: null,
+  churchLng: null,
 };
 
 /** Toda la configuración vive en una sola fila (key='general') como jsonb. */

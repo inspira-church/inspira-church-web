@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { SinglePointMap } from "@/components/public/SinglePointMap";
 import { TeamMemberCard } from "@/components/public/TeamMemberCard";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { SITE_CONFIG } from "@/lib/constants";
+import { getSiteSettings } from "@/lib/queries/settings";
 import { getActiveTeamMembers } from "@/lib/queries/team-members";
 
 export const metadata: Metadata = {
@@ -37,9 +40,13 @@ const BELIEFS = [
 ];
 
 export default async function AboutPage() {
-  const teamMembers = await getActiveTeamMembers();
+  const [teamMembers, settings] = await Promise.all([
+    getActiveTeamMembers(),
+    getSiteSettings(),
+  ]);
   const pastors = teamMembers.filter((t) => t.type === "pastor");
   const leaders = teamMembers.filter((t) => t.type === "lider");
+  const hasLocation = settings.churchLat !== null && settings.churchLng !== null;
 
   return (
     <>
@@ -140,6 +147,35 @@ export default async function AboutPage() {
           ))}
         </div>
       </Section>
+
+      {hasLocation && (
+        <Section>
+          <SectionHeading eyebrow="Visítanos" title="Cómo llegar" />
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+            <div className="h-80 overflow-hidden rounded-lg border border-border lg:h-96">
+              <SinglePointMap
+                lat={settings.churchLat!}
+                lng={settings.churchLng!}
+                label={SITE_CONFIG.name}
+                sublabel={settings.churchAddress || undefined}
+              />
+            </div>
+            <div>
+              {settings.churchAddress && (
+                <p className="text-ink-soft">{settings.churchAddress}</p>
+              )}
+              <a
+                href={`https://www.google.com/maps?q=${settings.churchLat},${settings.churchLng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
+              >
+                Cómo llegar en Google Maps →
+              </a>
+            </div>
+          </div>
+        </Section>
+      )}
     </>
   );
 }

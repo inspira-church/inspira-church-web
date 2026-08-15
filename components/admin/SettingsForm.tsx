@@ -109,6 +109,39 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.privacyPolicyUrl}</p>
       )}
 
+      <TextField
+        label="Dirección de la iglesia"
+        name="churchAddress"
+        defaultValue={defaultValues.churchAddress}
+        hint="Opcional — se muestra en la página Nosotros, junto al mapa."
+      />
+      {state.fieldErrors?.churchAddress && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.churchAddress}</p>
+      )}
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <TextField
+          label="Latitud"
+          name="churchLat"
+          type="number"
+          step="any"
+          defaultValue={defaultValues.churchLat ?? ""}
+          hint="Opcional — si defines lat. y long., el mapa aparece en Nosotros."
+        />
+        <TextField
+          label="Longitud"
+          name="churchLng"
+          type="number"
+          step="any"
+          defaultValue={defaultValues.churchLng ?? ""}
+        />
+      </div>
+      {(state.fieldErrors?.churchLat || state.fieldErrors?.churchLng) && (
+        <p className="-mt-3 text-xs text-danger">
+          {state.fieldErrors.churchLat ?? state.fieldErrors.churchLng}
+        </p>
+      )}
+
       <SubmitButton>Guardar</SubmitButton>
     </form>
   );

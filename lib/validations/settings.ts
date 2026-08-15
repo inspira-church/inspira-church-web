@@ -12,6 +12,9 @@ export const siteSettingsSchema = z.object({
   xUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   youtubeUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   privacyPolicyUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
+  churchAddress: z.string().trim().max(300).optional(),
+  churchLat: z.coerce.number().min(-90).max(90).optional(),
+  churchLng: z.coerce.number().min(-180).max(180).optional(),
 });
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;
