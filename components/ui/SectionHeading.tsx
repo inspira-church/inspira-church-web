@@ -7,6 +7,8 @@ interface SectionHeadingProps {
   description?: ReactNode;
   align?: "left" | "center";
   className?: string;
+  /** "h1" cuando este es el único encabezado principal de la página (por defecto "h2", para subsecciones). */
+  as?: "h1" | "h2";
 }
 
 export function SectionHeading({
@@ -15,6 +17,7 @@ export function SectionHeading({
   description,
   align = "left",
   className,
+  as: Heading = "h2",
 }: SectionHeadingProps) {
   return (
     <div
@@ -29,9 +32,9 @@ export function SectionHeading({
           {eyebrow}
         </p>
       )}
-      <h2 className="mt-2 text-balance font-display text-3xl font-semibold text-ink sm:text-4xl">
+      <Heading className="mt-2 text-balance font-display text-3xl font-semibold text-ink sm:text-4xl">
         {title}
-      </h2>
+      </Heading>
       {description && (
         <p className="mt-4 text-lg text-ink-soft">{description}</p>
       )}

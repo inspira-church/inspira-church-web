@@ -16,6 +16,7 @@ export default async function PrayerPage() {
     <Section className="pt-16 sm:pt-24">
       <div className="mx-auto max-w-xl">
         <SectionHeading
+          as="h1"
           eyebrow="Oración"
           title="Oramos contigo"
           description="No estás solo en esto. Cuéntanos tu petición y nuestro equipo de oración la acompañará."

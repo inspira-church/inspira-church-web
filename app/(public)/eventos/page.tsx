@@ -22,6 +22,7 @@ export default async function EventsPage() {
     <>
       <Section className="pt-16 sm:pt-24">
         <SectionHeading
+          as="h1"
           eyebrow="Agenda"
           title="Eventos"
           description="Todo lo que está pasando en Inspira Church."

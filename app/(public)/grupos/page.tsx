@@ -37,6 +37,7 @@ export default async function GroupsPage({
   return (
     <Section className="pt-16 sm:pt-24">
       <SectionHeading
+        as="h1"
         eyebrow="Comunidad"
         title="Encuentra un grupo de crecimiento"
         description="Reuniones pequeñas cerca de ti. Filtra por ubicación, día o tipo de grupo, o mira todos en el mapa."

@@ -23,6 +23,7 @@ export default async function GroupJoinPage() {
     <Section className="pt-16 sm:pt-24">
       <div className="mx-auto max-w-xl">
         <SectionHeading
+          as="h1"
           eyebrow="Grupos de crecimiento"
           title="Quiero pertenecer a un grupo"
           description="Completa tus datos y el líder del grupo se pondrá en contacto contigo."

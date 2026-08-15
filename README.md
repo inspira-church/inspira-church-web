@@ -55,6 +55,27 @@ npm run dev
 Abre [http://localhost:3000](http://localhost:3000). El sitio público vive en
 `/` y el panel administrativo en `/admin`.
 
+## Pruebas
+
+```bash
+npm test          # unitarias (Vitest) — validaciones Zod y helpers puros
+npm run test:watch
+npm run test:e2e  # end-to-end (Playwright) — requiere `npx playwright install chromium` una vez
+```
+
+- **Unitarias** (`tests/unit/`) — los 13 esquemas de `lib/validations/*` y los
+  helpers puros (`lib/format.ts`, `lib/slugify.ts`, `lib/rate-limit.ts`,
+  `lib/form-errors.ts`, `lib/utils.ts`, `lib/constants.ts`). No tocan
+  Supabase.
+- **End-to-end** (`tests/e2e/`) — navegación del sitio público, protección de
+  `/admin/**` sin sesión, y validación en el navegador de los 3 formularios
+  públicos. Se detienen antes del envío real a propósito: el proyecto no
+  tiene un Supabase de *staging* separado del real, así que una prueba
+  automatizada que complete un envío dejaría filas de prueba en la base de
+  datos de producción cada vez que alguien corra la suite. Cuando exista un
+  proyecto de Supabase de pruebas, vale la pena agregar el envío real de
+  punta a punta.
+
 ## Estructura
 
 ```
@@ -140,8 +161,9 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 12. ✅ Seguridad: Turnstile, límite de tasa, cabeceras, auditoría RLS
 12.5. ✅ Módulos Usuarios y Configuración (invitar staff, WhatsApp/redes/política de privacidad)
 12.6. ✅ Apartado de redes sociales (Facebook, Instagram, TikTok, X, YouTube) en Configuración y footer
+12.7. ✅ Logo real de Inspira Church (Header, Footer, favicon, imagen OG)
 13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
-14. ⬜ Pruebas
+14. ✅ Pruebas (unitarias con Vitest, end-to-end con Playwright)
 15. ⬜ Producción
 
 ## Despliegue

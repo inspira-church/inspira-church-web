@@ -17,6 +17,7 @@ export default async function ContactPage() {
     <Section className="pt-16 sm:pt-24">
       <div className="mx-auto max-w-xl">
         <SectionHeading
+          as="h1"
           eyebrow="Hablemos"
           title="Contáctanos"
           description="Cuéntanos qué necesitas — visitarnos, unirte a un grupo, pedir oración o simplemente saludar."

@@ -44,6 +44,7 @@ export default async function SermonsPage({
   return (
     <Section className="pt-16 sm:pt-24">
       <SectionHeading
+        as="h1"
         eyebrow="Enseñanza"
         title="Prédicas"
         description="Todas nuestras prédicas, organizadas por serie, predicador y tema."
