@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   Clock,
+  FileText,
   HeartHandshake,
   Image as ImageIcon,
   Inbox,
@@ -30,6 +31,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: "/admin/grupos", label: "Grupos", icon: Users },
   { href: "/admin/horarios", label: "Horarios", icon: Clock },
   { href: "/admin/equipo", label: "Pastores y líderes", icon: UserRound },
+  { href: "/admin/nosotros", label: "Página Nosotros", icon: FileText, adminOnly: true },
   { href: "/admin/formularios", label: "Formularios", icon: Inbox },
   { href: "/admin/oracion", label: "Peticiones de oración", icon: HeartHandshake },
   { href: "/admin/usuarios", label: "Usuarios", icon: ShieldCheck, adminOnly: true },

@@ -5,6 +5,7 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SITE_CONFIG } from "@/lib/constants";
 import { googleMapsLink, wazeLink } from "@/lib/maps";
+import { getAboutContent } from "@/lib/queries/about";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getActiveTeamMembers } from "@/lib/queries/team-members";
 
@@ -14,36 +15,11 @@ export const metadata: Metadata = {
     "Historia, misión, visión, valores y equipo pastoral de Inspira Church.",
 };
 
-const VALUES = [
-  {
-    title: "Cercanía",
-    description: "Creemos en relaciones reales, no en multitudes anónimas.",
-  },
-  {
-    title: "Excelencia",
-    description: "Hacemos las cosas con calidad, como ofrenda y no como obligación.",
-  },
-  {
-    title: "Generosidad",
-    description: "Damos con libertad — el tiempo, los recursos y la casa.",
-  },
-  {
-    title: "Crecimiento",
-    description: "Nadie se queda igual: siempre hay un siguiente paso.",
-  },
-];
-
-const BELIEFS = [
-  "Creemos en un solo Dios, revelado en tres personas: Padre, Hijo y Espíritu Santo.",
-  "Creemos que la Biblia es la Palabra inspirada de Dios y nuestra guía para la fe y la vida.",
-  "Creemos que la salvación es por gracia, mediante la fe en Jesucristo.",
-  "Creemos en la iglesia local como una familia llamada a amar, servir y hacer discípulos.",
-];
-
 export default async function AboutPage() {
-  const [teamMembers, settings] = await Promise.all([
+  const [teamMembers, settings, about] = await Promise.all([
     getActiveTeamMembers(),
     getSiteSettings(),
+    getAboutContent(),
   ]);
   const pastors = teamMembers.filter((t) => t.type === "pastor");
   const leaders = teamMembers.filter((t) => t.type === "lider");
@@ -54,17 +30,12 @@ export default async function AboutPage() {
       <Section className="pt-16 sm:pt-24">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-            Nuestra historia
+            {about.historyEyebrow}
           </p>
           <h1 className="mt-3 text-balance font-display text-4xl font-semibold text-ink sm:text-5xl">
-            Una familia antes que una institución
+            {about.historyTitle}
           </h1>
-          <p className="mt-5 text-lg text-ink-soft">
-            Inspira Church comenzó como una reunión de pocas familias en una
-            sala, con el deseo simple de acompañarse en la fe. Con los años
-            crecimos, pero no cambiamos lo esencial: seguimos siendo un lugar
-            donde te conocen por tu nombre, no por tu asistencia.
-          </p>
+          <p className="mt-5 text-lg text-ink-soft">{about.historyText}</p>
         </div>
       </Section>
 
@@ -72,29 +43,23 @@ export default async function AboutPage() {
         <div className="grid gap-10 sm:grid-cols-2">
           <div>
             <h2 className="font-display text-2xl font-semibold text-ink">
-              Misión
+              {about.missionTitle}
             </h2>
-            <p className="mt-3 text-ink-soft">
-              Ayudar a las personas a conocer a Jesús, crecer en comunidad y
-              servir con su vida.
-            </p>
+            <p className="mt-3 text-ink-soft">{about.missionText}</p>
           </div>
           <div>
             <h2 className="font-display text-2xl font-semibold text-ink">
-              Visión
+              {about.visionTitle}
             </h2>
-            <p className="mt-3 text-ink-soft">
-              Ser una iglesia que inspira a cada generación a vivir su fe de
-              forma real, cercana y transformadora.
-            </p>
+            <p className="mt-3 text-ink-soft">{about.visionText}</p>
           </div>
         </div>
       </Section>
 
       <Section>
-        <SectionHeading eyebrow="Lo que nos mueve" title="Nuestros valores" />
+        <SectionHeading eyebrow={about.valuesEyebrow} title={about.valuesTitle} />
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {VALUES.map((value) => (
+          {about.values.map((value) => (
             <div key={value.title}>
               <h3 className="font-display text-lg font-semibold text-ink">
                 {value.title}
@@ -106,9 +71,9 @@ export default async function AboutPage() {
       </Section>
 
       <Section tone="raised">
-        <SectionHeading eyebrow="Lo que creemos" title="Nuestras creencias" />
+        <SectionHeading eyebrow={about.beliefsEyebrow} title={about.beliefsTitle} />
         <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-          {BELIEFS.map((belief) => (
+          {about.beliefs.map((belief) => (
             <li key={belief} className="flex gap-3 text-ink-soft">
               <span aria-hidden="true" className="mt-1 text-accent">
                 —
