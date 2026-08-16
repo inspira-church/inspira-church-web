@@ -142,6 +142,16 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
         </p>
       )}
 
+      <TextField
+        label="YouTube Channel ID (para el aviso de En Vivo)"
+        name="youtubeChannelId"
+        defaultValue={defaultValues.youtubeChannelId}
+        hint="Opcional — YouTube Studio → Configuración → Canal → Avanzada. Empieza con 'UC'. Si lo defines, Inicio muestra una sección En Vivo automáticamente cuando el canal está transmitiendo."
+      />
+      {state.fieldErrors?.youtubeChannelId && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeChannelId}</p>
+      )}
+
       <SubmitButton>Guardar</SubmitButton>
     </form>
   );

@@ -13,6 +13,7 @@ export interface SiteSettings {
   churchAddress: string;
   churchLat: number | null;
   churchLng: number | null;
+  youtubeChannelId: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -27,6 +28,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   churchAddress: "",
   churchLat: null,
   churchLng: null,
+  youtubeChannelId: "",
 };
 
 /** Toda la configuración vive en una sola fila (key='general') como jsonb. */

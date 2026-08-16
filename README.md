@@ -42,9 +42,26 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SITE_URL` | Servidor | Opcional. Origen del sitio para enlaces de correos de Auth |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cliente | Opcional en desarrollo — sin ella, los formularios funcionan sin verificación anti-bot |
 | `TURNSTILE_SECRET_KEY` | Solo servidor | Opcional en desarrollo, ver nota anterior |
+| `YOUTUBE_API_KEY` | Solo servidor | Opcional. Sin ella, la sección "En vivo" de Inicio permanece oculta (ver abajo) |
 
 Aplica las migraciones de base de datos (`supabase/migrations/`) siguiendo
 `supabase/README.md`, incluyendo el bootstrap del primer usuario admin.
+
+### "En vivo" en Inicio
+
+La página de Inicio muestra automáticamente una sección "En vivo" (con el
+video embebido) cuando el canal de YouTube configurado está transmitiendo, y
+no muestra nada el resto del tiempo. Requiere dos cosas en Configuración /
+`.env.local`:
+
+1. `youtubeChannelId` en `/admin/configuracion` — el Channel ID (empieza con
+   `UC`), en YouTube Studio → Configuración → Canal → Avanzada.
+2. `YOUTUBE_API_KEY` en `.env.local` — habilita "YouTube Data API v3" en
+   [console.cloud.google.com](https://console.cloud.google.com) y crea una
+   clave de API (gratis, cuota generosa para este uso).
+
+Sin cualquiera de las dos, la sección simplemente no aparece nunca — no
+rompe nada ni muestra errores.
 
 ## Ejecución local
 
@@ -164,6 +181,7 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 12.7. ✅ Logo real de Inspira Church (Header, Footer, favicon, imagen OG)
 12.8. ✅ Mapa de ubicación en Nosotros, configurable desde Configuración
 12.9. ✅ Módulo "Página Nosotros": historia, misión, visión, valores y creencias editables desde el panel
+12.10. ✅ Sección "En vivo" en Inicio — aparece automáticamente cuando el canal de YouTube está transmitiendo
 13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
 14. ✅ Pruebas (unitarias con Vitest, end-to-end con Playwright)
 15. ⬜ Producción

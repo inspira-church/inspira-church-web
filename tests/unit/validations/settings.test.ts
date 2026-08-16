@@ -51,4 +51,20 @@ describe("siteSettingsSchema", () => {
   it("rechaza mensaje de WhatsApp vacío", () => {
     expect(siteSettingsSchema.safeParse({ ...valid, whatsappMessage: "" }).success).toBe(false);
   });
+
+  it("acepta un Channel ID de YouTube válido", () => {
+    expect(
+      siteSettingsSchema.safeParse({ ...valid, youtubeChannelId: "UC" + "a".repeat(22) }).success
+    ).toBe(true);
+  });
+
+  it("acepta Channel ID vacío (opcional)", () => {
+    expect(siteSettingsSchema.safeParse({ ...valid, youtubeChannelId: "" }).success).toBe(true);
+  });
+
+  it("rechaza un Channel ID que no empieza con UC o tiene largo distinto", () => {
+    expect(siteSettingsSchema.safeParse({ ...valid, youtubeChannelId: "abc123" }).success).toBe(
+      false
+    );
+  });
 });

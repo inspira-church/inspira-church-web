@@ -15,6 +15,12 @@ export const siteSettingsSchema = z.object({
   churchAddress: z.string().trim().max(300).optional(),
   churchLat: z.coerce.number().min(-90).max(90).optional(),
   churchLng: z.coerce.number().min(-180).max(180).optional(),
+  youtubeChannelId: z
+    .string()
+    .trim()
+    .regex(/^UC[\w-]{22}$/, "El Channel ID empieza con \"UC\" y tiene 24 caracteres.")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;

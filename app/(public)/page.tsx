@@ -3,6 +3,7 @@ import { EventCard } from "@/components/public/EventCard";
 import { GroupCard } from "@/components/public/GroupCard";
 import { SermonCard } from "@/components/public/SermonCard";
 import { WhatsAppButton } from "@/components/public/WhatsAppButton";
+import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -14,6 +15,7 @@ import { getFeaturedSermon } from "@/lib/queries/sermons";
 import { getSermonSeriesById } from "@/lib/queries/sermon-series";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMemberById } from "@/lib/queries/team-members";
+import { getCurrentLiveVideo } from "@/lib/youtube";
 
 export default async function HomePage() {
   const featuredSermon = await getFeaturedSermon();
@@ -26,6 +28,7 @@ export default async function HomePage() {
       getPublishedEvents(),
       getSiteSettings(),
     ]);
+  const liveVideo = await getCurrentLiveVideo(settings.youtubeChannelId || null);
 
   const upcomingEvents = events
     .filter((e) => e.status === "proximo")
@@ -73,6 +76,25 @@ export default async function HomePage() {
           </div>
         </div>
       </Section>
+
+      {/* En vivo — solo aparece mientras el canal está transmitiendo */}
+      {liveVideo && (
+        <Section tone="raised">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-danger px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              <span className="h-2 w-2 rounded-full bg-white" aria-hidden="true" />
+              En vivo
+            </span>
+            <p className="font-display text-2xl font-semibold text-ink">{liveVideo.title}</p>
+          </div>
+          <div className="mt-6 max-w-3xl">
+            <YouTubeEmbed
+              url={`https://www.youtube.com/watch?v=${liveVideo.videoId}`}
+              title={liveVideo.title}
+            />
+          </div>
+        </Section>
+      )}
 
       {/* Próximo servicio / horarios */}
       <Section tone="raised">

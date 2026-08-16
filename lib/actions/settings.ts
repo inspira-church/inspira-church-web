@@ -18,6 +18,7 @@ function parseForm(formData: FormData) {
     churchAddress: formData.get("churchAddress") || undefined,
     churchLat: formData.get("churchLat") || undefined,
     churchLng: formData.get("churchLng") || undefined,
+    youtubeChannelId: formData.get("youtubeChannelId") || undefined,
   };
 }
 
