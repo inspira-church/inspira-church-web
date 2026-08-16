@@ -29,6 +29,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
         churchAddress={settings.churchAddress}
         churchLat={settings.churchLat}
         churchLng={settings.churchLng}
+        privacyPolicyUrl={settings.privacyPolicyUrl}
       />
       <WhatsAppButton message={settings.whatsappMessage} number={settings.whatsappNumber} />
     </div>

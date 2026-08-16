@@ -36,6 +36,7 @@ interface FooterProps {
   churchAddress?: string;
   churchLat?: number | null;
   churchLng?: number | null;
+  privacyPolicyUrl?: string;
 }
 
 export function Footer({
@@ -48,6 +49,7 @@ export function Footer({
   churchAddress,
   churchLat,
   churchLng,
+  privacyPolicyUrl,
 }: FooterProps) {
   const hasLocation = churchLat != null && churchLng != null;
   return (
@@ -135,11 +137,21 @@ export function Footer({
       </Container>
 
       <div className="border-t border-border py-6">
-        <Container>
+        <Container className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <p className="text-xs text-ink-faint">
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos los derechos
             reservados.
           </p>
+          {privacyPolicyUrl && (
+            <a
+              href={privacyPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-ink-faint hover:text-accent hover:underline"
+            >
+              Política de privacidad
+            </a>
+          )}
         </Container>
       </div>
     </footer>
