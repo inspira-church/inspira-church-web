@@ -3,23 +3,47 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS } from "@/lib/constants";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
+/** Dorado cálido de la identidad de cartel (mismo tono que Inicio y el footer). */
+const GOLD_CLASSES =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-paper/90 backdrop-blur">
-      <Container className="flex h-20 items-center justify-between sm:h-24">
+    <header
+      className={cn(
+        "sticky top-0 z-30 border-b border-white/10 transition-all duration-300 ease-out",
+        scrolled
+          ? "bg-black/90 shadow-[0_2px_24px_rgba(0,0,0,0.35)] backdrop-blur-md"
+          : "bg-black/70 backdrop-blur-sm"
+      )}
+    >
+      <Container
+        className={cn(
+          "flex items-center justify-between transition-all duration-300 ease-out",
+          scrolled ? "h-16 sm:h-20" : "h-20 sm:h-24"
+        )}
+      >
         <Link
           href="/"
-          className="flex items-center gap-2.5"
+          className={cn("flex items-center gap-2 rounded-sm", GOLD_CLASSES)}
           onClick={() => setOpen(false)}
         >
           <Image
@@ -27,15 +51,18 @@ export function Header() {
             alt=""
             width={96}
             height={96}
-            className="h-16 w-16 object-contain sm:h-20 sm:w-20"
+            className={cn(
+              "object-contain transition-all duration-300 ease-out",
+              scrolled ? "h-12 w-12 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"
+            )}
             priority
           />
-          <span className={cn(anton.className, "text-lg text-ink sm:text-xl")}>
+          <span className={cn(anton.className, "text-lg text-white sm:text-xl")}>
             Inspira Church
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-7 md:flex">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -44,19 +71,35 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-semibold transition-colors",
-                  active ? "text-accent" : "text-ink-soft hover:text-ink"
+                  "group relative rounded-sm py-2 text-sm font-semibold transition-colors duration-200",
+                  active ? "text-[#d9a94a]" : "text-white/70 hover:text-[#d9a94a]",
+                  GOLD_CLASSES
                 )}
               >
                 {link.label}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-[#d9a94a] transition-transform duration-300 ease-out group-hover:scale-x-100",
+                    active && "scale-x-100"
+                  )}
+                />
               </Link>
             );
           })}
         </nav>
 
         <div className="hidden md:block">
-          <Button as={Link} href="/contacto" size="sm">
-            Visítanos
+          <Button
+            as={Link}
+            href="/contacto"
+            size="sm"
+            className={cn(
+              "bg-[#d9a94a] text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#e6ba5f]",
+              GOLD_CLASSES
+            )}
+          >
+            Planea tu visita
           </Button>
         </div>
 
@@ -64,8 +107,12 @@ export function Header() {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
+          aria-controls="mobile-nav"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          className="flex h-10 w-10 items-center justify-center rounded-md text-ink md:hidden"
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-md text-white md:hidden",
+            GOLD_CLASSES
+          )}
         >
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
             {open ? (
@@ -88,25 +135,40 @@ export function Header() {
       </Container>
 
       {open && (
-        <nav className="border-t border-border bg-paper md:hidden">
+        <nav
+          id="mobile-nav"
+          aria-label="Menú principal"
+          className="border-t border-white/10 bg-black/95 backdrop-blur-md md:hidden"
+        >
           <Container className="flex flex-col gap-1 py-4">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-2.5 text-base font-semibold text-ink hover:bg-paper-raised"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-md px-2 py-2.5 text-base font-semibold transition-colors hover:bg-white/5",
+                    active ? "text-[#d9a94a]" : "text-white/80 hover:text-[#d9a94a]",
+                    GOLD_CLASSES
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <Button
               as={Link}
               href="/contacto"
-              className="mt-2 justify-center"
+              className={cn(
+                "mt-2 justify-center bg-[#d9a94a] text-black transition-all duration-200 ease-out hover:bg-[#e6ba5f]",
+                GOLD_CLASSES
+              )}
               onClick={() => setOpen(false)}
             >
-              Visítanos
+              Planea tu visita
             </Button>
           </Container>
         </nav>

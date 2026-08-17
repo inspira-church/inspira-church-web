@@ -1,18 +1,18 @@
+import { CalendarDays, HandHeart, MapPin, Users, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Hero } from "@/components/public/Hero";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Container } from "@/components/ui/Container";
-import { dayName, formatDate, formatDateShort, formatTime } from "@/lib/format";
-import { anton, caveat, CAMPAIGN_COLORS } from "@/lib/fonts";
-import { SITE_CONFIG } from "@/lib/constants";
-import { getPublicGroups } from "@/lib/queries/growth-groups";
+import { dayName, formatDate, formatTime } from "@/lib/format";
+import { anton, caveat, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { PRAYER_TOPIC, SITE_CONFIG } from "@/lib/constants";
+import { googleMapsLink } from "@/lib/maps";
 import { getPublishedEvents } from "@/lib/queries/events";
 import { getHeroSlides } from "@/lib/queries/media";
 import { getActiveSchedules } from "@/lib/queries/schedules";
-import { getFeaturedSermon } from "@/lib/queries/sermons";
-import { getSermonSeriesById } from "@/lib/queries/sermon-series";
+import { getLatestSermonByTopic } from "@/lib/queries/sermons";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMemberById } from "@/lib/queries/team-members";
 import { getCurrentLiveVideo } from "@/lib/youtube";
@@ -63,6 +63,37 @@ function TextLink({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
+/** "Oración Presencial." / "oración virtual" -> "Presencial" / "Virtual". Deja el nombre tal cual si no reconoce la modalidad. */
+function prayerModality(name: string) {
+  const normalized = name.toLowerCase();
+  if (normalized.includes("presencial")) return "Presencial";
+  if (normalized.includes("virtual")) return "Virtual";
+  return name;
+}
+
+/** Ícono discreto según el nombre del horario — solo apoya la lectura, no reemplaza el texto. */
+function scheduleIcon(name: string): LucideIcon {
+  const normalized = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+  if (normalized.includes("oracion")) return HandHeart;
+  if (normalized.includes("joven")) return Users;
+  return CalendarDays;
+}
+
+/** Día y mes por separado para el bloque de fecha destacado de las tarjetas de evento. */
+function eventDateParts(iso: string) {
+  const date = new Date(`${iso}T00:00:00`);
+  return {
+    day: date.toLocaleDateString("es-CO", { day: "2-digit" }),
+    month: date
+      .toLocaleDateString("es-CO", { month: "short" })
+      .replace(".", "")
+      .toUpperCase(),
+  };
+}
+
 function PosterButton({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
@@ -75,13 +106,11 @@ function PosterButton({ href, children }: { href: string; children: ReactNode })
 }
 
 export default async function HomePage() {
-  const featuredSermon = await getFeaturedSermon();
-  const [featuredSeries, featuredPreacher, schedules, growthGroups, events, settings, heroSlides] =
+  const prayerRecording = await getLatestSermonByTopic(PRAYER_TOPIC);
+  const [prayerPreacher, schedules, events, settings, heroSlides] =
     await Promise.all([
-      getSermonSeriesById(featuredSermon?.series_id ?? null),
-      getTeamMemberById(featuredSermon?.preacher_id ?? null),
+      getTeamMemberById(prayerRecording?.preacher_id ?? null),
       getActiveSchedules(),
-      getPublicGroups(),
       getPublishedEvents(),
       getSiteSettings(),
       getHeroSlides(),
@@ -90,9 +119,12 @@ export default async function HomePage() {
 
   const upcomingEvents = events
     .filter((e) => e.status === "proximo")
-    .slice(0, 3);
+    .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
+    .slice(0, 4);
 
-  const featuredGroups = growthGroups.slice(0, 3);
+  const prayerSchedules = schedules.filter((s) =>
+    s.name.toLowerCase().startsWith("oración")
+  );
 
   return (
     <>
@@ -102,33 +134,85 @@ export default async function HomePage() {
       {/* Bienvenida */}
       <section className="border-b border-white/10 bg-black pb-10 pt-16 sm:pb-14 sm:pt-24">
         <Container>
-          <Eyebrow color={CAMPAIGN_COLORS[0]}>Bienvenido a Inspira Church</Eyebrow>
-          <PosterHeading>
-            Una comunidad que
-            <span className="block" style={{ color: CAMPAIGN_COLORS[0] }}>
-              te inspira a crecer
-            </span>
-          </PosterHeading>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <Eyebrow color={CAMPAIGN_COLORS[0]}>Bienvenido a Inspira Church</Eyebrow>
+              <h2
+                className={cn(
+                  anton.className,
+                  "mt-5 text-balance text-4xl uppercase leading-[1.05] text-white sm:text-5xl"
+                )}
+              >
+                Una comunidad que
+                <span className="block" style={{ color: CAMPAIGN_COLORS[0] }}>
+                  te inspira a crecer
+                </span>
+              </h2>
+              <p className={cn(hind.className, "mt-5 max-w-sm text-white/70")}>
+                Un lugar para encontrarte con Dios, crecer en comunidad y
+                caminar en propósito.
+              </p>
+              <Link
+                href="/contacto"
+                className="group mt-7 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
+                style={{ backgroundColor: CAMPAIGN_COLORS[0] }}
+              >
+                Planea tu visita
+                <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+            </div>
 
-          <div className="mt-8 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {schedules.map((s) => (
-              <div key={s.id}>
-                <p className="text-xs font-bold uppercase tracking-widest text-white/50">
-                  {s.name}
-                </p>
-                <p className="mt-1 text-lg text-white/85">
-                  {dayName(s.day_of_week)}, {formatTime(s.time_of_day)}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+              {schedules.map((s) => {
+                const Icon = scheduleIcon(s.name);
+                return (
+                  <div key={s.id} className="border-t border-white/10 pt-4">
+                    <div className="flex items-center gap-1.5 text-white/45">
+                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <p className="text-xs font-bold uppercase tracking-widest">
+                        {s.name}
+                      </p>
+                    </div>
+                    <p className="mt-2 text-sm text-white/60">
+                      {dayName(s.day_of_week)}
+                    </p>
+                    <p className={cn(anton.className, "mt-0.5 text-2xl text-white")}>
+                      {formatTime(s.time_of_day)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 border-t border-white/10 pt-8">
+            <div>
+              <div className="flex items-center gap-1.5 text-white/45">
+                <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <p className="text-xs font-bold uppercase tracking-widest">
+                  Sede Bogotá
                 </p>
               </div>
-            ))}
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-white/50">
-                Sede Bogotá
-              </p>
-              <p className="mt-1 text-lg text-white/85">
-                {settings.churchAddress || SITE_CONFIG.city}
+              <p className="mt-2 text-lg text-white/85">
+                {(settings.churchAddress || SITE_CONFIG.city).replace(/,\s*/, " · ")}
               </p>
             </div>
+            {settings.churchLat != null && settings.churchLng != null && (
+              <a
+                href={googleMapsLink(settings.churchLat, settings.churchLng)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide transition-colors duration-200"
+                style={{ color: CAMPAIGN_COLORS[0] }}
+              >
+                Cómo llegar
+                <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1">
+                  →
+                </span>
+              </a>
+            )}
           </div>
         </Container>
       </section>
@@ -157,273 +241,298 @@ export default async function HomePage() {
       )}
 
       {/* Elige tu camino */}
-      <section className="border-b border-white/10 bg-black py-16 sm:py-24">
+      <section className="border-b border-white/10 bg-[#0d0d0d] pb-16 pt-8 sm:pb-24 sm:pt-12">
         <Container>
-          <Eyebrow color={CAMPAIGN_COLORS[4]}>Por dónde empezar</Eyebrow>
-          <PosterHeading>Elige tu camino</PosterHeading>
+          <Eyebrow color={CAMPAIGN_COLORS[4]}>¿Eres nuevo?</Eyebrow>
+          <PosterHeading>Te estábamos esperando</PosterHeading>
+          <p
+            className={cn(caveat.className, "mt-2 -rotate-1 text-3xl")}
+            style={{ color: CAMPAIGN_COLORS[4] }}
+          >
+            ¡En Inspira Church siempre habrá un lugar para ti!
+          </p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            <Link
-              href="/contacto"
-              className="group block p-10 transition-opacity hover:opacity-90"
-              style={{ backgroundColor: `${CAMPAIGN_COLORS[4]}4d` }}
+          <Link
+            href="/primera-vez"
+            className="group mt-10 flex items-center justify-between border-y-2 py-5 transition-colors hover:bg-white/5"
+            style={{ borderColor: CAMPAIGN_COLORS[4] }}
+          >
+            <span
+              className={cn(
+                anton.className,
+                "text-xl uppercase tracking-wide text-white sm:text-2xl"
+              )}
             >
-              <p
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: CAMPAIGN_COLORS[4] }}
-              >
-                Primera vez
-              </p>
-              <p
-                className={cn(
-                  anton.className,
-                  "mt-2 text-3xl uppercase leading-[0.95] text-white sm:text-4xl"
-                )}
-              >
-                Visito por primera vez
-              </p>
-              <p
-                className={cn(caveat.className, "mt-5 -rotate-1 text-2xl")}
-                style={{ color: CAMPAIGN_COLORS[4] }}
-              >
-                sin compromiso, solo para conocernos
-              </p>
-              <p
-                className="mt-6 text-sm font-bold uppercase tracking-wide"
-                style={{ color: CAMPAIGN_COLORS[4] }}
-              >
-                Empezar aquí{" "}
-                <span className="inline-block transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </p>
-            </Link>
+              Sigue la flecha
+            </span>
+            <span
+              className="text-3xl transition-transform group-hover:translate-x-2"
+              style={{ color: CAMPAIGN_COLORS[4] }}
+              aria-hidden="true"
+            >
+              →
+            </span>
+          </Link>
+        </Container>
+      </section>
 
-            <Link
-              href="/grupos"
-              className="group block p-10 transition-opacity hover:opacity-90"
-              style={{ backgroundColor: `${CAMPAIGN_COLORS[1]}4d` }}
-            >
-              <p
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: CAMPAIGN_COLORS[1] }}
+      {/* Tres pasos */}
+      <section className="border-b border-white/10 bg-black pb-16 pt-8 sm:pb-24 sm:pt-12">
+        <Container>
+          <Eyebrow color={CAMPAIGN_COLORS[2]}>Tu recorrido en Inspira</Eyebrow>
+          <PosterHeading>Tres pasos para conocernos</PosterHeading>
+          <p className={cn(hind.className, "mt-3 max-w-xl text-base text-white/70")}>
+            Empieza por aquí. Tres formas sencillas de descubrir quiénes
+            somos, conectar y crecer juntos.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-6">
+            {[
+              {
+                color: CAMPAIGN_COLORS[2],
+                num: "01",
+                step: "Paso 1",
+                title: "Conoce nuestra historia",
+                description:
+                  "Descubre quiénes somos, qué creemos y hacia dónde vamos.",
+                cta: "Conócenos",
+                href: "/nosotros",
+              },
+              {
+                color: CAMPAIGN_COLORS[3],
+                num: "02",
+                step: "Paso 2",
+                title: "Encuentra tu grupo",
+                description:
+                  "La vida es mejor en comunidad. Conecta, comparte y crece.",
+                cta: "Ver grupos",
+                href: "/grupos",
+              },
+              {
+                color: CAMPAIGN_COLORS[4],
+                num: "03",
+                step: "Paso 3",
+                title: "Crece en la palabra",
+                description:
+                  "Escucha el mensaje de esta semana y sigue creciendo en tu fe.",
+                cta: "Ver prédicas",
+                href: "/predicas",
+              },
+            ].map((s) => (
+              <Link
+                key={s.step}
+                href={s.href}
+                className="group relative block overflow-hidden px-7 py-7 transition-all duration-300 ease-out hover:-translate-y-1 hover:brightness-110 sm:px-10 sm:py-8"
+                style={{ backgroundColor: `${s.color}4d` }}
               >
-                Ya soy parte
-              </p>
-              <p
-                className={cn(
-                  anton.className,
-                  "mt-2 text-3xl uppercase leading-[0.95] text-white sm:text-4xl"
-                )}
-              >
-                Ya soy parte de Inspira
-              </p>
-              <p
-                className={cn(caveat.className, "mt-5 -rotate-1 text-2xl")}
-                style={{ color: CAMPAIGN_COLORS[1] }}
-              >
-                grupo, prédica y oración
-              </p>
-              <p
-                className="mt-6 text-sm font-bold uppercase tracking-wide"
-                style={{ color: CAMPAIGN_COLORS[1] }}
-              >
-                Continuar{" "}
-                <span className="inline-block transition-transform group-hover:translate-x-1">
-                  →
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    anton.className,
+                    "pointer-events-none absolute -right-2 bottom-0 select-none text-[6rem] leading-none sm:-right-3 sm:text-[9rem]"
+                  )}
+                  style={{ color: s.color, opacity: 0.22 }}
+                >
+                  {s.num}
                 </span>
-              </p>
-            </Link>
+
+                <div className="relative z-10 max-w-lg">
+                  <p
+                    className="text-xs font-bold uppercase tracking-widest"
+                    style={{ color: s.color }}
+                  >
+                    {s.step}
+                  </p>
+                  <p
+                    className={cn(
+                      anton.className,
+                      "mt-1.5 text-2xl uppercase leading-[0.95] text-white sm:text-3xl"
+                    )}
+                  >
+                    {s.title}
+                  </p>
+                  <p className={cn(hind.className, "mt-3 text-sm text-white/70 sm:text-base")}>
+                    {s.description}
+                  </p>
+                  <p
+                    className="mt-4 text-sm font-bold uppercase tracking-wide"
+                    style={{ color: s.color }}
+                  >
+                    {s.cta}{" "}
+                    <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                      →
+                    </span>
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </Container>
       </section>
 
-      {/* Predicación destacada */}
-      {featuredSermon && (
-        <section className="border-b border-white/10 bg-black py-16 sm:py-24">
-          <Container>
-            <Eyebrow color={CAMPAIGN_COLORS[0]}>Predicación destacada</Eyebrow>
-            <PosterHeading>Lo último</PosterHeading>
+      {/* Oración de la semana */}
+      <section className="border-b border-white/10 bg-[#0d0d0d] pb-16 pt-8 sm:pb-24 sm:pt-12">
+        <Container>
+          <Eyebrow color={CAMPAIGN_COLORS[0]}>Nuestro tiempo de oración</Eyebrow>
+          <PosterHeading>Ora con nosotros</PosterHeading>
+          <p className={cn(hind.className, "mt-4 max-w-2xl text-white/70")}>
+            Revive nuestra oración más reciente y acompáñanos cada semana en
+            este tiempo de búsqueda, fe y comunión con Dios.
+          </p>
 
-            <div className="mt-10 grid gap-8 sm:grid-cols-2">
-              <Link
-                href={`/predicas/${featuredSermon.slug}`}
-                className="group relative block aspect-video overflow-hidden border border-white/10 bg-[#0d0d0d]"
-              >
-                {featuredSermon.thumbnail_url && (
-                  <Image
-                    src={featuredSermon.thumbnail_url}
-                    alt=""
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(min-width: 640px) 50vw, 100vw"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
-                <span
-                  className="absolute inset-x-0 top-0 h-1"
-                  style={{ background: CAMPAIGN_COLORS[0] }}
-                  aria-hidden="true"
+          <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
+            <Link
+              href={prayerRecording ? `/predicas/${prayerRecording.slug}` : "/predicas"}
+              className="group relative block aspect-video overflow-hidden border border-white/10 bg-[#0d0d0d]"
+            >
+              {prayerRecording?.thumbnail_url ? (
+                <Image
+                  src={prayerRecording.thumbnail_url}
+                  alt=""
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                 />
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  {featuredSeries?.name && (
-                    <p
-                      className="text-xs font-bold uppercase tracking-wide"
-                      style={{ color: CAMPAIGN_COLORS[0] }}
-                    >
-                      {featuredSeries.name}
-                    </p>
-                  )}
-                  <h3 className={cn(anton.className, "mt-1 text-2xl uppercase leading-tight text-white")}>
-                    {featuredSermon.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-white/60">
-                    {featuredPreacher?.full_name ? `${featuredPreacher.full_name} · ` : ""}
-                    {formatDate(featuredSermon.sermon_date)}
+              ) : (
+                <div className="flex h-full items-center justify-center px-8 text-center">
+                  <p className="text-sm text-white/40">
+                    Muy pronto vas a poder revivir aquí nuestra última oración.
                   </p>
                 </div>
-              </Link>
+              )}
+              <span
+                className="absolute inset-x-0 top-0 h-1"
+                style={{ background: CAMPAIGN_COLORS[0] }}
+                aria-hidden="true"
+              />
+            </Link>
 
-              <div className="flex flex-col justify-center">
-                {featuredSermon.description && (
-                  <p className="text-white/70">{featuredSermon.description}</p>
-                )}
-                <div className="mt-6">
-                  <PosterButton href="/predicas">Ver todas las prédicas</PosterButton>
+            <div className="flex flex-col gap-6">
+              {prayerRecording ? (
+                <div>
+                  <h3
+                    className={cn(
+                      anton.className,
+                      "text-2xl uppercase leading-tight text-white sm:text-3xl"
+                    )}
+                  >
+                    {prayerRecording.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-white/60">
+                    {prayerPreacher?.full_name ? `${prayerPreacher.full_name} · ` : ""}
+                    {formatDate(prayerRecording.sermon_date)}
+                  </p>
+                  {prayerRecording.description && (
+                    <p className="mt-4 text-white/70">{prayerRecording.description}</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-white/60">
+                  Aún no hay una grabación de oración publicada.
+                </p>
+              )}
+
+              <div className="border-t border-white/10 pt-6">
+                <p
+                  className="text-xs font-bold uppercase tracking-widest"
+                  style={{ color: CAMPAIGN_COLORS[0] }}
+                >
+                  Horarios de oración
+                </p>
+                <div className="mt-3 flex flex-col gap-1.5">
+                  {prayerSchedules.length > 0 ? (
+                    prayerSchedules.map((s) => (
+                      <p key={s.id} className="text-lg text-white/85">
+                        {dayName(s.day_of_week)} · {formatTime(s.time_of_day)} ·{" "}
+                        {prayerModality(s.name)}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-lg text-white/85">Próximamente</p>
+                  )}
                 </div>
               </div>
+
+              <div>
+                <PosterButton href="/oraciones">Ver todas las oraciones →</PosterButton>
+              </div>
             </div>
-          </Container>
-        </section>
-      )}
+          </div>
+        </Container>
+      </section>
 
       {/* Próximos eventos */}
-      <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
+      <section className="border-b border-white/10 bg-black py-16 sm:py-24">
         <Container>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-xl">
               <Eyebrow color={CAMPAIGN_COLORS[2]}>Agenda</Eyebrow>
               <PosterHeading>Próximos eventos</PosterHeading>
+              <p className={cn(hind.className, "mt-3 text-white/70")}>
+                Entérate de lo que viene y encuentra un espacio para conectar,
+                crecer y participar en comunidad.
+              </p>
             </div>
             <TextLink href="/eventos">Ver todos los eventos</TextLink>
           </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event, i) => {
-              const c = CAMPAIGN_COLORS[(i + 2) % CAMPAIGN_COLORS.length];
-              return (
-                <Link
-                  key={event.id}
-                  href={`/eventos/${event.slug}`}
-                  className="group relative block aspect-[4/3] overflow-hidden border border-white/10 bg-black"
-                >
-                  {event.imageUrl && (
-                    <Image
-                      src={event.imageUrl}
-                      alt=""
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
-                  <span className="absolute inset-x-0 top-0 h-1" style={{ background: c }} aria-hidden="true" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <p className="text-xs font-bold uppercase tracking-wide" style={{ color: c }}>
-                      {formatDateShort(event.eventDate)}
-                      {event.eventTime ? ` · ${formatTime(event.eventTime)}` : ""}
-                    </p>
-                    <h3 className={cn(anton.className, "mt-1 text-xl uppercase leading-tight text-white")}>
+          {upcomingEvents.length > 0 ? (
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {upcomingEvents.map((event, i) => {
+                const c = CAMPAIGN_COLORS[(i + 2) % CAMPAIGN_COLORS.length];
+                const { day, month } = eventDateParts(event.eventDate);
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/eventos/${event.slug}`}
+                    className="group flex flex-col border border-white/10 bg-black p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:brightness-110"
+                  >
+                    <div className="flex items-baseline gap-1.5" style={{ color: c }}>
+                      <span className={cn(anton.className, "text-4xl leading-none")}>{day}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">{month}</span>
+                    </div>
+                    <h3
+                      className={cn(
+                        anton.className,
+                        "mt-3 text-xl uppercase leading-tight text-white"
+                      )}
+                    >
                       {event.name}
                     </h3>
-                    {event.locationName && (
-                      <p className="mt-1 text-sm text-white/60">{event.locationName}</p>
+                    {event.description && (
+                      <p className={cn(hind.className, "mt-2 line-clamp-2 text-sm text-white/60")}>
+                        {event.description}
+                      </p>
                     )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </Container>
-      </section>
-
-      {/* Grupos de crecimiento */}
-      <section className="border-b border-white/10 bg-black py-16 sm:py-24">
-        <Container>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <Eyebrow color={CAMPAIGN_COLORS[3]}>Comunidad</Eyebrow>
-              <PosterHeading>Grupos de crecimiento</PosterHeading>
-              <p className="mt-3 max-w-md text-white/60">
-                Reuniones pequeñas en distintos sectores de la ciudad — el
-                lugar más rápido para hacer amigos de verdad.
+                    <p className="mt-4 text-sm text-white/50">
+                      {event.eventTime ? formatTime(event.eventTime) : ""}
+                      {event.eventTime && event.locationName ? " · " : ""}
+                      {event.locationName}
+                    </p>
+                    <p
+                      className="mt-auto pt-5 text-sm font-bold uppercase tracking-wide"
+                      style={{ color: c }}
+                    >
+                      {event.registrationUrl ? "Inscribirme" : "Ver más"}{" "}
+                      <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                        →
+                      </span>
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-10 border border-dashed border-white/15 bg-black px-8 py-14 text-center">
+              <p className="text-white/50">
+                Muy pronto vamos a anunciar nuevos eventos — vuelve pronto
+                para no perdértelos.
               </p>
             </div>
-            <TextLink href="/grupos">Ver todos los grupos</TextLink>
-          </div>
-
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredGroups.map((group, i) => {
-              const c = CAMPAIGN_COLORS[(i + 3) % CAMPAIGN_COLORS.length];
-              const place = [group.sector, group.locality].filter(Boolean).join(", ");
-              return (
-                <Link
-                  key={group.id}
-                  href={`/grupos/${group.slug}`}
-                  className="group relative flex min-h-[13rem] flex-col justify-between overflow-hidden border border-white/10 bg-[#0d0d0d] p-6"
-                >
-                  <span
-                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-15"
-                    style={{ background: c }}
-                    aria-hidden="true"
-                  />
-                  <div className="relative flex items-start justify-between gap-3">
-                    <h3 className={cn(anton.className, "text-xl uppercase leading-tight text-white")}>
-                      {group.name}
-                    </h3>
-                    <span
-                      className="shrink-0 border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
-                      style={{ borderColor: c, color: c }}
-                    >
-                      {group.groupType}
-                    </span>
-                  </div>
-                  <div className="relative">
-                    {place && <p className="text-sm text-white/60">{place}</p>}
-                    <p className="mt-2 text-sm font-semibold text-white">
-                      {dayName(group.dayOfWeek)} · {formatTime(group.timeOfDay)}
-                    </p>
-                    {group.leaderFullName && (
-                      <p className="mt-1 text-sm text-white/50">Lidera {group.leaderFullName}</p>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          )}
         </Container>
       </section>
 
-      {/* Info breve */}
-      <section className="bg-[#0d0d0d] py-16 sm:py-24">
-        <Container>
-          <div className="max-w-2xl">
-            <Eyebrow color={CAMPAIGN_COLORS[4]}>Quiénes somos</Eyebrow>
-            <PosterHeading>Más que un servicio de domingo</PosterHeading>
-            <p className={cn(caveat.className, "mt-2 -rotate-1 text-3xl text-[#23d3d9]")}>
-              somos familia, no solo domingo
-            </p>
-            <p className="mt-5 text-white/70">
-              Inspira Church nació con el deseo de ser una comunidad cercana
-              y familiar, donde cada persona pueda crecer en su fe, encontrar
-              propósito y servir a los demás.
-            </p>
-            <div className="mt-6">
-              <PosterButton href="/nosotros">Conócenos</PosterButton>
-            </div>
-          </div>
-        </Container>
-      </section>
     </>
   );
 }

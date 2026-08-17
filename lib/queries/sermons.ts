@@ -46,6 +46,33 @@ export async function getSermonsBySeriesId(seriesId: string) {
   return data ?? [];
 }
 
+/**
+ * Prédicas publicadas con un tema dado, sin distinguir mayúsculas/minúsculas
+ * (el campo "Temas" del admin es texto libre, así que "Oración" y "oración"
+ * deben tratarse igual). Usado por Inicio y /oraciones.
+ */
+export async function getPublishedSermonsByTopic(topic: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("sermons")
+    .select(
+      "id, title, slug, series_id, preacher_id, description, thumbnail_url, sermon_date, topics"
+    )
+    .eq("published", true)
+    .order("sermon_date", { ascending: false });
+
+  const normalized = topic.trim().toLowerCase();
+  return (data ?? []).filter((row) =>
+    (row.topics ?? []).some((t: string) => t.trim().toLowerCase() === normalized)
+  );
+}
+
+/** Última prédica publicada con un tema dado — usado para "Oración de la semana" en Inicio. */
+export async function getLatestSermonByTopic(topic: string) {
+  const [latest] = await getPublishedSermonsByTopic(topic);
+  return latest ?? null;
+}
+
 export async function getFeaturedSermon() {
   const supabase = await createClient();
   const { data } = await supabase

@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Heart,
   HeartHandshake,
   Home,
   Mail,
@@ -23,6 +24,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/": Home,
   "/nosotros": UserRound,
   "/predicas": Mic,
+  "/oraciones": Heart,
   "/grupos": Users,
   "/eventos": CalendarDays,
   "/contacto": Mail,
@@ -54,27 +56,31 @@ export function Footer({
   privacyPolicyUrl,
 }: FooterProps) {
   const hasLocation = churchLat != null && churchLng != null;
+  const addressDisplay = (churchAddress || SITE_CONFIG.city).replace(/,\s*/, " · ");
+
   return (
-    <footer className="border-t border-border bg-paper-raised">
-      <Container className="grid gap-10 py-16 sm:grid-cols-3">
+    <footer className="border-t border-white/10 bg-[#0d0d0d]">
+      <Container className="grid gap-12 py-16 sm:grid-cols-3 sm:py-20">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt=""
-              width={68}
-              height={68}
-              className="h-16 w-16 object-contain"
+              width={76}
+              height={76}
+              className="h-[4.5rem] w-[4.5rem] object-contain"
             />
-            <p className={cn(anton.className, "text-lg text-ink")}>
+            <p className={cn(anton.className, "text-xl text-white")}>
               {SITE_CONFIG.name}
             </p>
           </div>
-          <p className="mt-3 max-w-xs text-sm font-semibold text-ink-soft">
-            {SITE_CONFIG.description}
+          <p className="mt-4 max-w-[16rem] text-sm leading-relaxed text-white/60">
+            Una iglesia cercana y familiar, donde puedes conectar, crecer y
+            caminar con Dios en comunidad.
           </p>
           <SocialLinks
-            className="mt-5"
+            className="mt-6"
+            linkClassName="text-white/50 hover:text-[#d9a94a]"
             facebookUrl={facebookUrl}
             instagramUrl={instagramUrl}
             tiktokUrl={tiktokUrl}
@@ -84,19 +90,19 @@ export function Footer({
         </div>
 
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#d9a94a]/80">
             Explora
           </p>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-4 space-y-3">
             {NAV_LINKS.map((link) => {
               const Icon = NAV_ICONS[link.href];
               return (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-accent"
+                    className="flex items-center gap-2.5 text-sm font-medium text-white/70 transition-colors hover:text-[#d9a94a]"
                   >
-                    {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+                    {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}
                     {link.label}
                   </Link>
                 </li>
@@ -106,37 +112,40 @@ export function Footer({
         </div>
 
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#d9a94a]/80">
             Contacto
           </p>
-          <ul className="mt-3 space-y-2 text-sm font-semibold text-ink-soft">
-            <li className="flex items-center gap-2">
+          <ul className="mt-4 space-y-3 text-sm font-medium text-white/70">
+            <li className="flex items-center gap-2.5">
               <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
               {hasLocation ? (
                 <a
                   href={googleMapsLink(churchLat!, churchLng!)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-accent"
+                  className="transition-colors hover:text-[#d9a94a]"
                 >
-                  {churchAddress || SITE_CONFIG.city}
+                  {addressDisplay}
                 </a>
               ) : (
-                churchAddress || SITE_CONFIG.city
+                addressDisplay
               )}
             </li>
             <li>
               <a
                 href={whatsappLink(undefined, whatsappNumber)}
-                className="flex items-center gap-2 hover:text-accent"
+                className="flex items-center gap-2.5 transition-colors hover:text-[#d9a94a]"
               >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Escríbenos por WhatsApp
               </a>
             </li>
             <li>
-              <Link href="/oracion" className="flex items-center gap-2 hover:text-accent">
-                <HeartHandshake className="h-4 w-4" aria-hidden="true" />
+              <Link
+                href="/oracion"
+                className="flex items-center gap-2.5 transition-colors hover:text-[#d9a94a]"
+              >
+                <HeartHandshake className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Enviar una petición de oración
               </Link>
             </li>
@@ -144,21 +153,32 @@ export function Footer({
         </div>
       </Container>
 
-      <div className="border-t border-border py-6">
-        <Container className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <p className="text-xs text-ink-faint">
+      <div className="border-t border-white/10">
+        <Container className="flex flex-col gap-2 py-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-white/40">
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos los derechos
             reservados.
           </p>
           {privacyPolicyUrl && (
-            <a
-              href={privacyPolicyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-ink-faint hover:text-accent hover:underline"
-            >
-              Política de privacidad
-            </a>
+            <p className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-[#d9a94a] hover:underline"
+              >
+                Política de privacidad
+              </a>
+              <span aria-hidden="true">·</span>
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-[#d9a94a] hover:underline"
+              >
+                Tratamiento de datos
+              </a>
+            </p>
           )}
         </Container>
       </div>

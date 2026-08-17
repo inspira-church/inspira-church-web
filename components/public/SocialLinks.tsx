@@ -7,6 +7,8 @@ interface SocialLinksProps {
   xUrl?: string;
   youtubeUrl?: string;
   className?: string;
+  /** Clases del enlace individual — permite adaptar el color al fondo donde se use. */
+  linkClassName?: string;
 }
 
 function FacebookIcon() {
@@ -66,12 +68,12 @@ const SOCIAL_PLATFORMS = [
   { key: "youtubeUrl" as const, label: "YouTube", Icon: YouTubeIcon },
 ];
 
-export function SocialLinks({ className, ...urls }: SocialLinksProps) {
+export function SocialLinks({ className, linkClassName, ...urls }: SocialLinksProps) {
   const active = SOCIAL_PLATFORMS.filter((platform) => urls[platform.key]);
   if (active.length === 0) return null;
 
   return (
-    <div className={cn("flex items-center gap-4", className)}>
+    <div className={cn("flex items-center gap-3", className)}>
       {active.map(({ key, label, Icon }) => (
         <a
           key={key}
@@ -79,7 +81,10 @@ export function SocialLinks({ className, ...urls }: SocialLinksProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}
-          className="text-ink-soft transition-colors hover:text-accent"
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:text-accent",
+            linkClassName
+          )}
         >
           <Icon />
         </a>

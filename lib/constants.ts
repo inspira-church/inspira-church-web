@@ -31,10 +31,14 @@ export const DAY_NAMES = [
   "Sábado",
 ] as const;
 
+/** Tag en `sermons.topics` que marca una grabación como oración (no prédica). */
+export const PRAYER_TOPIC = "Oración";
+
 export const NAV_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/predicas", label: "Prédicas" },
+  { href: "/oraciones", label: "Oraciones" },
   { href: "/grupos", label: "Grupos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/contacto", label: "Contacto" },
