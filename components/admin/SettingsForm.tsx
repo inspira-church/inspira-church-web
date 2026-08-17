@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
 import { updateSiteSettings } from "@/lib/actions/settings";
 import type { ActionState } from "@/lib/form-errors";
@@ -150,6 +151,39 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
       />
       {state.fieldErrors?.youtubeChannelId && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeChannelId}</p>
+      )}
+
+      <div className="border-t border-border pt-5">
+        <p className="font-display text-lg font-semibold text-ink">
+          Texto del hero de Inicio
+        </p>
+        <p className="mt-1 text-sm text-ink-faint">
+          Los dos textos que aparecen sobre el slide de fotos, alternando.
+          Encierra una palabra o frase entre <code>**dobles asteriscos**</code>{" "}
+          para que se muestre en negrita.
+        </p>
+      </div>
+
+      <TextAreaField
+        label="Texto 1 del hero"
+        name="heroText1"
+        defaultValue={defaultValues.heroText1}
+        rows={2}
+        required
+      />
+      {state.fieldErrors?.heroText1 && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.heroText1}</p>
+      )}
+
+      <TextAreaField
+        label="Texto 2 del hero"
+        name="heroText2"
+        defaultValue={defaultValues.heroText2}
+        rows={2}
+        required
+      />
+      {state.fieldErrors?.heroText2 && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.heroText2}</p>
       )}
 
       <SubmitButton>Guardar</SubmitButton>

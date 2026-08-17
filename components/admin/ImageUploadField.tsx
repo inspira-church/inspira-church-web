@@ -15,6 +15,8 @@ interface ImageUploadFieldProps {
   bucket: MediaBucket;
   defaultValue?: string | null;
   hint?: string;
+  /** Por defecto usa el bucket. Sirve para distinguir "slots" dentro de un mismo bucket (ver hero de Inicio). */
+  module?: string;
 }
 
 function sanitizeFilename(filename: string) {
@@ -40,6 +42,7 @@ export function ImageUploadField({
   bucket,
   defaultValue,
   hint,
+  module: mediaModule,
 }: ImageUploadFieldProps) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [uploading, setUploading] = useState(false);
@@ -79,7 +82,7 @@ export function ImageUploadField({
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,
-        module: bucket,
+        module: mediaModule ?? bucket,
       });
 
       if ("error" in result) {

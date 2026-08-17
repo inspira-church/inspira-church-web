@@ -14,6 +14,8 @@ export interface SiteSettings {
   churchLat: number | null;
   churchLng: number | null;
   youtubeChannelId: string;
+  heroText1: string;
+  heroText2: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -29,6 +31,10 @@ const DEFAULT_SETTINGS: SiteSettings = {
   churchLat: null,
   churchLng: null,
   youtubeChannelId: "",
+  heroText1:
+    "Somos una iglesia donde el **amor de Dios** restaura vidas y transforma **familias**.",
+  heroText2:
+    "Vivimos para **adorar a Dios**, conscientes de que **su presencia** nos acompaña cada día.",
 };
 
 /** Toda la configuración vive en una sola fila (key='general') como jsonb. */

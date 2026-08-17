@@ -21,6 +21,8 @@ export const siteSettingsSchema = z.object({
     .regex(/^UC[\w-]{22}$/, "El Channel ID empieza con \"UC\" y tiene 24 caracteres.")
     .optional()
     .or(z.literal("")),
+  heroText1: z.string().trim().min(1, "Ingresa el primer texto del hero.").max(200),
+  heroText2: z.string().trim().min(1, "Ingresa el segundo texto del hero.").max(200),
 });
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;

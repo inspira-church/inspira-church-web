@@ -15,7 +15,9 @@ import Link from "next/link";
 import { SocialLinks } from "@/components/public/SocialLinks";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS, SITE_CONFIG, whatsappLink } from "@/lib/constants";
+import { anton } from "@/lib/fonts";
 import { googleMapsLink } from "@/lib/maps";
+import { cn } from "@/lib/utils";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/": Home,
@@ -57,12 +59,18 @@ export function Footer({
       <Container className="grid gap-10 py-16 sm:grid-cols-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="" width={36} height={36} className="h-9 w-9" />
-            <p className="font-display text-xl font-semibold text-ink">
+            <Image
+              src="/logo.png"
+              alt=""
+              width={68}
+              height={68}
+              className="h-16 w-16 object-contain"
+            />
+            <p className={cn(anton.className, "text-lg text-ink")}>
               {SITE_CONFIG.name}
             </p>
           </div>
-          <p className="mt-3 max-w-xs text-sm text-ink-soft">
+          <p className="mt-3 max-w-xs text-sm font-semibold text-ink-soft">
             {SITE_CONFIG.description}
           </p>
           <SocialLinks
@@ -86,7 +94,7 @@ export function Footer({
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-ink-soft hover:text-accent"
+                    className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-accent"
                   >
                     {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
                     {link.label}
@@ -101,7 +109,7 @@ export function Footer({
           <p className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
             Contacto
           </p>
-          <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+          <ul className="mt-3 space-y-2 text-sm font-semibold text-ink-soft">
             <li className="flex items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
               {hasLocation ? (

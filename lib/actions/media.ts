@@ -59,6 +59,9 @@ export async function createMediaRecord(input: CreateMediaInput): Promise<Create
   } = supabase.storage.from(data.bucket).getPublicUrl(data.path);
 
   revalidatePath("/admin/medios");
+  if (parsed.data.module?.startsWith("hero-slide-")) {
+    revalidatePath("/");
+  }
   return { data: { id: data.id, url: publicUrl } };
 }
 

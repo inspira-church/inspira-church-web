@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS } from "@/lib/constants";
+import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -15,14 +16,21 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-paper/90 backdrop-blur">
-      <Container className="flex h-16 items-center justify-between sm:h-20">
+      <Container className="flex h-20 items-center justify-between sm:h-24">
         <Link
           href="/"
           className="flex items-center gap-2.5"
           onClick={() => setOpen(false)}
         >
-          <Image src="/logo.png" alt="" width={40} height={40} className="h-10 w-10" priority />
-          <span className="font-display text-xl font-semibold text-ink sm:text-2xl">
+          <Image
+            src="/logo.png"
+            alt=""
+            width={96}
+            height={96}
+            className="h-16 w-16 object-contain sm:h-20 sm:w-20"
+            priority
+          />
+          <span className={cn(anton.className, "text-lg text-ink sm:text-xl")}>
             Inspira Church
           </span>
         </Link>
@@ -36,7 +44,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-medium transition-colors",
+                  "text-sm font-semibold transition-colors",
                   active ? "text-accent" : "text-ink-soft hover:text-ink"
                 )}
               >
@@ -87,7 +95,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-2.5 text-base font-medium text-ink hover:bg-paper-raised"
+                className="rounded-md px-2 py-2.5 text-base font-semibold text-ink hover:bg-paper-raised"
               >
                 {link.label}
               </Link>

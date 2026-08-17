@@ -1,6 +1,6 @@
 # Supabase — Inspira Church
 
-Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Once migraciones en
+Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Doce migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -16,6 +16,7 @@ Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Once migraciones en
 | `009_ministries_settings_media.sql` | Ministerios, configuración del sitio, biblioteca de medios |
 | `010_audit_logs.sql` | Bitácora de auditoría (solo inserción) |
 | `011_storage_buckets.sql` | Buckets de Storage + políticas (ver más abajo, ya no es manual) |
+| `012_media_public_hero_read.sql` | Lectura pública acotada de `media` para el slide del hero de Inicio |
 
 ## Aplicar las migraciones
 
