@@ -14,7 +14,7 @@ interface GroupFiltersProps {
 }
 
 const SELECT_CLASSES =
-  "rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a]";
+  "rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50]";
 
 export function GroupFilters({ localities, types }: GroupFiltersProps) {
   const router = useRouter();

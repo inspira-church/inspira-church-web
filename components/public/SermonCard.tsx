@@ -22,7 +22,7 @@ export function SermonCard({
   sermonDate,
   preacherName,
   seriesName,
-  accentColor = "#d9a94a",
+  accentColor = "#FF7F50",
 }: SermonCardProps) {
   return (
     <Link

@@ -80,7 +80,7 @@ export function Footer({
           </p>
           <SocialLinks
             className="mt-6"
-            linkClassName="text-white/50 hover:text-[#d9a94a]"
+            linkClassName="text-white/50 hover:text-[#FF7F50]"
             facebookUrl={facebookUrl}
             instagramUrl={instagramUrl}
             tiktokUrl={tiktokUrl}
@@ -90,7 +90,7 @@ export function Footer({
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-[#d9a94a]/80">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#FF7F50]/80">
             Explora
           </p>
           <ul className="mt-4 space-y-3">
@@ -100,7 +100,7 @@ export function Footer({
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2.5 text-sm font-medium text-white/70 transition-colors hover:text-[#d9a94a]"
+                    className="flex items-center gap-2.5 text-sm font-medium text-white/70 transition-colors hover:text-[#FF7F50]"
                   >
                     {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}
                     {link.label}
@@ -112,7 +112,7 @@ export function Footer({
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-[#d9a94a]/80">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#FF7F50]/80">
             Contacto
           </p>
           <ul className="mt-4 space-y-3 text-sm font-medium text-white/70">
@@ -123,7 +123,7 @@ export function Footer({
                   href={googleMapsLink(churchLat!, churchLng!)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-colors hover:text-[#d9a94a]"
+                  className="transition-colors hover:text-[#FF7F50]"
                 >
                   {addressDisplay}
                 </a>
@@ -134,7 +134,7 @@ export function Footer({
             <li>
               <a
                 href={whatsappLink(undefined, whatsappNumber)}
-                className="flex items-center gap-2.5 transition-colors hover:text-[#d9a94a]"
+                className="flex items-center gap-2.5 transition-colors hover:text-[#FF7F50]"
               >
                 <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Escríbenos por WhatsApp
@@ -143,7 +143,7 @@ export function Footer({
             <li>
               <Link
                 href="/oracion"
-                className="flex items-center gap-2.5 transition-colors hover:text-[#d9a94a]"
+                className="flex items-center gap-2.5 transition-colors hover:text-[#FF7F50]"
               >
                 <HeartHandshake className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Enviar una petición de oración
@@ -165,7 +165,7 @@ export function Footer({
                 href={privacyPolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-[#d9a94a] hover:underline"
+                className="transition-colors hover:text-[#FF7F50] hover:underline"
               >
                 Política de privacidad
               </a>
@@ -174,7 +174,7 @@ export function Footer({
                 href={privacyPolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-[#d9a94a] hover:underline"
+                className="transition-colors hover:text-[#FF7F50] hover:underline"
               >
                 Tratamiento de datos
               </a>

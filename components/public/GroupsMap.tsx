@@ -15,7 +15,7 @@ export interface MapGroup {
 
 const pinIcon = L.divIcon({
   className: "",
-  html: `<svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.7-6.3-14-14-14Z" fill="#d9a94a"/><circle cx="14" cy="14" r="5.5" fill="#171613"/></svg>`,
+  html: `<svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.7-6.3-14-14-14Z" fill="#FF7F50"/><circle cx="14" cy="14" r="5.5" fill="#171613"/></svg>`,
   iconSize: [28, 36],
   iconAnchor: [14, 36],
   popupAnchor: [0, -32],
@@ -44,7 +44,7 @@ export function GroupsMap({ groups, center }: GroupsMapProps) {
           <Popup>
             <p className="font-semibold">{group.name}</p>
             {group.sector && <p>{group.sector}</p>}
-            <Link href={`/grupos/${group.slug}`} className="text-[#b8863a]">
+            <Link href={`/grupos/${group.slug}`} className="text-[#c1502e]">
               Ver grupo →
             </Link>
           </Popup>

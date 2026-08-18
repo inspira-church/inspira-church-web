@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
  */
 
 const fieldClasses =
-  "mt-1.5 w-full rounded-md border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-white/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a]";
+  "mt-1.5 w-full rounded-md border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-white/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50]";
 
 interface CartelFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -29,7 +29,7 @@ export function CartelField({ label, hint, id, name, required, className, ...res
     <div>
       <label htmlFor={fieldId} className="text-xs font-bold uppercase tracking-wide text-white/70">
         {label}
-        {required && <span className="text-[#d9a94a]"> *</span>}
+        {required && <span className="text-[#FF7F50]"> *</span>}
       </label>
       <input
         id={fieldId}
@@ -64,7 +64,7 @@ export function CartelSelect({
     <div>
       <label htmlFor={fieldId} className="text-xs font-bold uppercase tracking-wide text-white/70">
         {label}
-        {required && <span className="text-[#d9a94a]"> *</span>}
+        {required && <span className="text-[#FF7F50]"> *</span>}
       </label>
       <select
         id={fieldId}
@@ -108,7 +108,7 @@ export function CartelTextArea({
     <div>
       <label htmlFor={fieldId} className="text-xs font-bold uppercase tracking-wide text-white/70">
         {label}
-        {required && <span className="text-[#d9a94a]"> *</span>}
+        {required && <span className="text-[#FF7F50]"> *</span>}
       </label>
       <textarea
         id={fieldId}
@@ -136,7 +136,7 @@ export function CartelCheckbox({ label, id, name, required, ...rest }: CartelChe
         id={fieldId}
         name={name}
         required={required}
-        className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/25 bg-white/5 text-[#d9a94a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a]"
+        className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/25 bg-white/5 text-[#FF7F50] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50]"
         {...rest}
       />
       <span>{label}</span>
@@ -163,7 +163,7 @@ export function CartelSubmitButton({
       type="submit"
       disabled={disabled ?? pending}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-md bg-[#d9a94a] px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110 disabled:pointer-events-none disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 rounded-md bg-[#FF7F50] px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110 disabled:pointer-events-none disabled:opacity-60",
         className
       )}
       {...rest}

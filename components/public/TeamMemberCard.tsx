@@ -16,7 +16,7 @@ export function TeamMemberCard({
   roleTitle,
   photoUrl,
   bio,
-  accentColor = "#d9a94a",
+  accentColor = "#FF7F50",
 }: TeamMemberCardProps) {
   return (
     <div>

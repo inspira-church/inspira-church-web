@@ -49,7 +49,7 @@ export function GroupsExplorer({ groups }: GroupsExplorerProps) {
             className={cn(
               "rounded px-4 py-1.5 text-sm font-bold uppercase tracking-wide transition-colors",
               view === option
-                ? "bg-[#d9a94a] text-black"
+                ? "bg-[#FF7F50] text-black"
                 : "text-white/60 hover:text-white"
             )}
           >

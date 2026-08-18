@@ -10,9 +10,9 @@ import { NAV_LINKS } from "@/lib/constants";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
-/** Dorado cálido de la identidad de cartel (mismo tono que Inicio y el footer). */
+/** Coral cálido de la identidad de cartel (mismo tono que Inicio y el footer). */
 const GOLD_CLASSES =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50] focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 export function Header() {
   const pathname = usePathname();
@@ -72,7 +72,7 @@ export function Header() {
                 href={link.href}
                 className={cn(
                   "group relative rounded-sm py-2 text-sm font-semibold transition-colors duration-200",
-                  active ? "text-[#d9a94a]" : "text-white/70 hover:text-[#d9a94a]",
+                  active ? "text-[#FF7F50]" : "text-white/70 hover:text-[#FF7F50]",
                   GOLD_CLASSES
                 )}
               >
@@ -80,7 +80,7 @@ export function Header() {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-[#d9a94a] transition-transform duration-300 ease-out group-hover:scale-x-100",
+                    "absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-[#FF7F50] transition-transform duration-300 ease-out group-hover:scale-x-100",
                     active && "scale-x-100"
                   )}
                 />
@@ -95,7 +95,7 @@ export function Header() {
             href="/contacto"
             size="sm"
             className={cn(
-              "bg-[#d9a94a] text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#e6ba5f]",
+              "bg-[#FF7F50] text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#ff9670]",
               GOLD_CLASSES
             )}
           >
@@ -151,7 +151,7 @@ export function Header() {
                   onClick={() => setOpen(false)}
                   className={cn(
                     "rounded-md px-2 py-2.5 text-base font-semibold transition-colors hover:bg-white/5",
-                    active ? "text-[#d9a94a]" : "text-white/80 hover:text-[#d9a94a]",
+                    active ? "text-[#FF7F50]" : "text-white/80 hover:text-[#FF7F50]",
                     GOLD_CLASSES
                   )}
                 >
@@ -163,7 +163,7 @@ export function Header() {
               as={Link}
               href="/contacto"
               className={cn(
-                "mt-2 justify-center bg-[#d9a94a] text-black transition-all duration-200 ease-out hover:bg-[#e6ba5f]",
+                "mt-2 justify-center bg-[#FF7F50] text-black transition-all duration-200 ease-out hover:bg-[#ff9670]",
                 GOLD_CLASSES
               )}
               onClick={() => setOpen(false)}

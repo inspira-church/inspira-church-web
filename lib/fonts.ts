@@ -12,4 +12,4 @@ export const caveat = Caveat({ weight: "700", subsets: ["latin"] });
 export const hind = Hind({ weight: ["400", "600"], subsets: ["latin"] });
 
 /** Color de campaña que rota por tarjeta — el mismo patrón real de @inspira.church en Instagram. */
-export const CAMPAIGN_COLORS = ["#d9a94a", "#23d3d9", "#ff8a3d", "#3e6fa8", "#9c2b3a"] as const;
+export const CAMPAIGN_COLORS = ["#FF7F50", "#23d3d9", "#ff8a3d", "#3e6fa8", "#9c2b3a"] as const;

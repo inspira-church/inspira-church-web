@@ -85,7 +85,7 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
                 href={privacyPolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:text-[#d9a94a]"
+                className="underline hover:text-[#FF7F50]"
               >
                 política de privacidad
               </a>{" "}

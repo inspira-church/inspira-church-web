@@ -202,7 +202,7 @@ export default async function HomePage() {
                 "text-xl uppercase tracking-wide text-white sm:text-2xl"
               )}
             >
-              Sigue la flecha
+              Da el siguiente paso
             </span>
             <span
               className="text-3xl transition-transform group-hover:translate-x-2"

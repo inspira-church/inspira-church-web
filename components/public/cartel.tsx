@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 
 /**
  * Piezas compartidas del lenguaje visual de cartel real de @inspira.church
- * (negro, Anton, acento dorado/color de campaña rotativo) — usado en
- * Inicio y en las páginas que continúan directamente desde ahí (por
- * ejemplo /primera-vez). El resto del sitio (Nosotros, Prédicas, Grupos,
- * Eventos, Contacto, /oraciones) y el panel admin siguen con el sistema
- * de diseño original en globals.css, sin cambios.
+ * (negro, Anton, acento coral/color de campaña rotativo) — usado en todo
+ * el sitio público (Inicio, Primera vez, Nosotros, Prédicas, Oraciones,
+ * Grupos, Eventos, Contacto). El panel admin sigue con su propio sistema
+ * de diseño oscuro en globals.css ([data-admin-theme]), sin relación con
+ * este.
  */
 
 export function Eyebrow({ children, color }: { children: ReactNode; color: string }) {
@@ -60,7 +60,7 @@ export function PosterButton({ href, children }: { href: string; children: React
   );
 }
 
-/** Botón sólido dorado/color de campaña — CTA principal (ej. "Planea tu visita"). */
+/** Botón sólido coral/color de campaña — CTA principal (ej. "Planea tu visita"). */
 export function GoldButton({
   href,
   children,
