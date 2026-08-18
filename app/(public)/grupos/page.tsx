@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { Eyebrow, PosterHeading } from "@/components/public/cartel";
 import { GroupFilters } from "@/components/public/GroupFilters";
 import { GroupsExplorer } from "@/components/public/GroupsExplorer";
-import { Section } from "@/components/ui/Section";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Container } from "@/components/ui/Container";
+import { hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { getPublicGroups } from "@/lib/queries/growth-groups";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Grupos de crecimiento | Inspira Church",
   description:
     "Encuentra un grupo de crecimiento cerca de ti: filtra por ubicación, día y tipo de grupo.",
 };
+
+/** Grupos hereda el color que Inicio ya le asocia en "Tres pasos" (paso 2 → /grupos). */
+const PAGE_COLOR = CAMPAIGN_COLORS[3];
 
 export default async function GroupsPage({
   searchParams,
@@ -35,21 +40,26 @@ export default async function GroupsPage({
     .filter((g) => !tipo || g.groupType === tipo);
 
   return (
-    <Section className="pt-16 sm:pt-24">
-      <SectionHeading
-        as="h1"
-        eyebrow="Comunidad"
-        title="Encuentra un grupo de crecimiento"
-        description="Reuniones pequeñas cerca de ti. Filtra por ubicación, día o tipo de grupo, o mira todos en el mapa."
-      />
+    <>
+      <section className="border-b border-white/10 bg-black pb-10 pt-16 sm:pb-14 sm:pt-24">
+        <Container>
+          <Eyebrow color={PAGE_COLOR}>Comunidad</Eyebrow>
+          <PosterHeading>Encuentra un grupo de crecimiento</PosterHeading>
+          <p className={cn(hind.className, "mt-4 max-w-xl text-white/70")}>
+            Reuniones pequeñas cerca de ti. Filtra por ubicación, día o tipo de grupo, o mira
+            todos en el mapa.
+          </p>
+        </Container>
+      </section>
 
-      <div className="mt-8">
-        <GroupFilters localities={localities} types={types} />
-      </div>
-
-      <div className="mt-8">
-        <GroupsExplorer groups={filtered} />
-      </div>
-    </Section>
+      <section className="bg-[#0d0d0d] py-16 sm:py-24">
+        <Container>
+          <GroupFilters localities={localities} types={types} />
+          <div className="mt-8">
+            <GroupsExplorer groups={filtered} />
+          </div>
+        </Container>
+      </section>
+    </>
   );
 }

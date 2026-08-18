@@ -2,14 +2,18 @@
 
 import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
-import { Button } from "@/components/ui/Button";
-import { CheckboxField } from "@/components/ui/CheckboxField";
-import { SelectField } from "@/components/ui/SelectField";
-import { TextAreaField } from "@/components/ui/TextAreaField";
-import { TextField } from "@/components/ui/TextField";
+import {
+  CartelCheckbox,
+  CartelField,
+  CartelSelect,
+  CartelSubmitButton,
+  CartelTextArea,
+} from "@/components/public/cartel-form";
 import { TurnstileWidget } from "@/components/public/TurnstileWidget";
 import type { ActionState } from "@/lib/form-errors";
 import { submitGroupJoin } from "@/lib/actions/group-join";
+import { anton, hind } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
 interface GroupJoinFormProps {
   groupOptions: { id: string; slug: string; label: string }[];
@@ -27,11 +31,11 @@ export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormP
 
   if (state.success) {
     return (
-      <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
-        <p className="font-display text-xl font-semibold text-ink">
+      <div className="border border-white/10 bg-[#0d0d0d] p-8 text-center">
+        <p className={cn(anton.className, "text-xl uppercase text-white")}>
           ¡Listo! Recibimos tu solicitud
         </p>
-        <p className="mt-2 text-ink-soft">
+        <p className={cn(hind.className, "mt-2 text-white/60")}>
           El líder del grupo se pondrá en contacto contigo para darte la
           bienvenida.
         </p>
@@ -42,33 +46,33 @@ export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormP
   return (
     <form action={formAction} className="space-y-5">
       {state.error && (
-        <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
+        <p className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-white">
           {state.error}
         </p>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <TextField label="Nombre" name="firstName" autoComplete="given-name" required />
-        <TextField label="Apellidos" name="lastName" autoComplete="family-name" required />
-        <TextField label="Teléfono" name="phone" type="tel" autoComplete="tel" required />
-        <TextField label="WhatsApp" name="whatsapp" type="tel" hint="Opcional" />
-        <TextField
+        <CartelField label="Nombre" name="firstName" autoComplete="given-name" required />
+        <CartelField label="Apellidos" name="lastName" autoComplete="family-name" required />
+        <CartelField label="Teléfono" name="phone" type="tel" autoComplete="tel" required />
+        <CartelField label="WhatsApp" name="whatsapp" type="tel" hint="Opcional" />
+        <CartelField
           label="Correo electrónico"
           name="email"
           type="email"
           autoComplete="email"
           hint="Opcional"
         />
-        <TextField label="Edad" name="age" type="number" min={0} hint="Opcional" />
+        <CartelField label="Edad" name="age" type="number" min={0} hint="Opcional" />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <TextField label="Ciudad" name="city" defaultValue="Bogotá" required />
-        <TextField label="Localidad" name="locality" />
-        <TextField label="Barrio" name="neighborhood" />
+        <CartelField label="Ciudad" name="city" defaultValue="Bogotá" required />
+        <CartelField label="Localidad" name="locality" />
+        <CartelField label="Barrio" name="neighborhood" />
       </div>
 
-      <SelectField
+      <CartelSelect
         label="Grupo de interés"
         name="groupId"
         placeholder="No estoy seguro — recomiéndenme uno"
@@ -76,15 +80,15 @@ export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormP
         defaultValue={preselectedId}
       />
 
-      <TextField
+      <CartelField
         label="Disponibilidad"
         name="availability"
         placeholder="Ej: entre semana en la noche, fines de semana…"
       />
 
-      <TextAreaField label="Observaciones" name="notes" hint="Opcional" rows={4} />
+      <CartelTextArea label="Observaciones" name="notes" hint="Opcional" rows={4} />
 
-      <CheckboxField
+      <CartelCheckbox
         name="consent"
         required
         label={
@@ -95,7 +99,7 @@ export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormP
                 href={privacyPolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:text-accent"
+                className="underline hover:text-[#d9a94a]"
               >
                 política de privacidad
               </a>{" "}
@@ -107,14 +111,14 @@ export function GroupJoinForm({ groupOptions, privacyPolicyUrl }: GroupJoinFormP
         }
       />
       {state.fieldErrors?.consent && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+        <p className="-mt-3 text-xs text-red-400">{state.fieldErrors.consent}</p>
       )}
 
       <TurnstileWidget />
 
-      <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Enviando…" : "Enviar solicitud"}
-      </Button>
+      <CartelSubmitButton pending={pending} pendingText="Enviando…">
+        Enviar solicitud
+      </CartelSubmitButton>
     </form>
   );
 }

@@ -65,14 +65,20 @@ export function GoldButton({
   href,
   children,
   color,
+  target,
+  rel,
 }: {
   href: string;
   children: ReactNode;
   color: string;
+  target?: string;
+  rel?: string;
 }) {
   return (
     <Link
       href={href}
+      target={target}
+      rel={rel}
       className="group inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
       style={{ backgroundColor: color }}
     >

@@ -14,7 +14,7 @@ interface GroupFiltersProps {
 }
 
 const SELECT_CLASSES =
-  "rounded-md border border-border-strong bg-paper-raised px-3 py-2 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
+  "rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a94a]";
 
 export function GroupFilters({ localities, types }: GroupFiltersProps) {
   const router = useRouter();
@@ -38,9 +38,9 @@ export function GroupFilters({ localities, types }: GroupFiltersProps) {
         onChange={(e) => updateParam("ubicacion", e.target.value)}
         aria-label="Filtrar por ubicación"
       >
-        <option value="">Todas las localidades</option>
+        <option value="" className="bg-black">Todas las localidades</option>
         {localities.map((l) => (
-          <option key={l.value} value={l.value}>
+          <option key={l.value} value={l.value} className="bg-black">
             {l.label}
           </option>
         ))}
@@ -52,9 +52,9 @@ export function GroupFilters({ localities, types }: GroupFiltersProps) {
         onChange={(e) => updateParam("dia", e.target.value)}
         aria-label="Filtrar por día"
       >
-        <option value="">Todos los días</option>
+        <option value="" className="bg-black">Todos los días</option>
         {DAY_NAMES.map((day, index) => (
-          <option key={day} value={String(index)}>
+          <option key={day} value={String(index)} className="bg-black">
             {day}
           </option>
         ))}
@@ -66,9 +66,9 @@ export function GroupFilters({ localities, types }: GroupFiltersProps) {
         onChange={(e) => updateParam("tipo", e.target.value)}
         aria-label="Filtrar por tipo de grupo"
       >
-        <option value="">Todos los tipos</option>
+        <option value="" className="bg-black">Todos los tipos</option>
         {types.map((t) => (
-          <option key={t.value} value={t.value}>
+          <option key={t.value} value={t.value} className="bg-black">
             {t.label}
           </option>
         ))}

@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
-import { Badge } from "@/components/ui/Badge";
-import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
+import { anton, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { formatDate } from "@/lib/format";
 import { getSermonBySlug } from "@/lib/queries/sermons";
 import { getSermonSeriesById } from "@/lib/queries/sermon-series";
 import { getTeamMemberById } from "@/lib/queries/team-members";
+import { cn } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -34,41 +35,53 @@ export default async function SermonPage({ params }: PageProps) {
   ]);
 
   return (
-    <Section className="pt-16 sm:pt-24">
-      <div className="mx-auto max-w-3xl">
-        {series && (
-          <Link
-            href={`/series/${series.slug}`}
-            className="text-sm font-semibold uppercase tracking-wide text-accent hover:underline"
-          >
-            {series.name}
-          </Link>
-        )}
-        <h1 className="mt-2 text-balance font-display text-4xl font-semibold text-ink sm:text-5xl">
-          {sermon.title}
-        </h1>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-ink-faint">
-          {preacher && <span>{preacher.full_name}</span>}
-          <span>·</span>
-          <span>{formatDate(sermon.sermon_date)}</span>
-        </div>
-
-        <div className="mt-8">
-          <YouTubeEmbed url={sermon.youtube_url} title={sermon.title} />
-        </div>
-
-        {sermon.description && (
-          <p className="mt-8 text-lg text-ink-soft">{sermon.description}</p>
-        )}
-
-        {sermon.topics && sermon.topics.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
-            {sermon.topics.map((topic: string) => (
-              <Badge key={topic}>{topic}</Badge>
-            ))}
+    <section className="bg-black pb-16 pt-16 sm:pb-24 sm:pt-24">
+      <Container>
+        <div className="mx-auto max-w-3xl">
+          {series && (
+            <Link
+              href={`/series/${series.slug}`}
+              className="text-sm font-bold uppercase tracking-wide transition-colors hover:brightness-110"
+              style={{ color: CAMPAIGN_COLORS[4] }}
+            >
+              {series.name}
+            </Link>
+          )}
+          <h1 className={cn(anton.className, "mt-2 text-balance text-4xl uppercase leading-[0.95] text-white sm:text-5xl")}>
+            {sermon.title}
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/50">
+            {preacher && <span>{preacher.full_name}</span>}
+            <span>·</span>
+            <span>{formatDate(sermon.sermon_date)}</span>
           </div>
-        )}
-      </div>
-    </Section>
+
+          <div className="mt-8">
+            <YouTubeEmbed url={sermon.youtube_url} title={sermon.title} />
+          </div>
+
+          {sermon.description && (
+            <p className={cn(hind.className, "mt-8 text-lg text-white/70")}>{sermon.description}</p>
+          )}
+
+          {sermon.topics && sermon.topics.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {sermon.topics.map((topic: string, i: number) => (
+                <span
+                  key={topic}
+                  className="border px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                  style={{
+                    borderColor: CAMPAIGN_COLORS[i % CAMPAIGN_COLORS.length],
+                    color: CAMPAIGN_COLORS[i % CAMPAIGN_COLORS.length],
+                  }}
+                >
+                  {topic}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </Container>
+    </section>
   );
 }

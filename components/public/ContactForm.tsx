@@ -1,14 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/Button";
-import { CheckboxField } from "@/components/ui/CheckboxField";
-import { SelectField } from "@/components/ui/SelectField";
-import { TextAreaField } from "@/components/ui/TextAreaField";
-import { TextField } from "@/components/ui/TextField";
+import {
+  CartelCheckbox,
+  CartelField,
+  CartelSelect,
+  CartelSubmitButton,
+  CartelTextArea,
+} from "@/components/public/cartel-form";
 import { TurnstileWidget } from "@/components/public/TurnstileWidget";
 import { submitContact } from "@/lib/actions/contact";
+import { anton, hind } from "@/lib/fonts";
 import type { ActionState } from "@/lib/form-errors";
+import { cn } from "@/lib/utils";
 
 const REASON_OPTIONS = [
   { value: "visitar", label: "Quiero visitar la iglesia" },
@@ -26,11 +30,11 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
 
   if (state.success) {
     return (
-      <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
-        <p className="font-display text-xl font-semibold text-ink">
+      <div className="border border-white/10 bg-[#0d0d0d] p-8 text-center">
+        <p className={cn(anton.className, "text-xl uppercase text-white")}>
           ¡Gracias por escribirnos!
         </p>
-        <p className="mt-2 text-ink-soft">
+        <p className={cn(hind.className, "mt-2 text-white/60")}>
           Alguien de nuestro equipo se pondrá en contacto contigo pronto.
         </p>
       </div>
@@ -40,24 +44,24 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
   return (
     <form action={formAction} className="space-y-5">
       {state.error && (
-        <p className="rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-ink">
+        <p className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-white">
           {state.error}
         </p>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <TextField label="Nombre" name="name" autoComplete="name" required />
-        <TextField
+        <CartelField label="Nombre" name="name" autoComplete="name" required />
+        <CartelField
           label="Correo electrónico"
           name="email"
           type="email"
           autoComplete="email"
         />
-        <TextField label="Teléfono" name="phone" type="tel" autoComplete="tel" />
-        <TextField label="WhatsApp" name="whatsapp" type="tel" />
+        <CartelField label="Teléfono" name="phone" type="tel" autoComplete="tel" />
+        <CartelField label="WhatsApp" name="whatsapp" type="tel" />
       </div>
 
-      <SelectField
+      <CartelSelect
         label="Motivo del contacto"
         name="reason"
         placeholder="Selecciona una opción"
@@ -65,12 +69,12 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
         required
       />
       {state.fieldErrors?.reason && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.reason}</p>
+        <p className="-mt-3 text-xs text-red-400">{state.fieldErrors.reason}</p>
       )}
 
-      <TextAreaField label="Mensaje" name="message" />
+      <CartelTextArea label="Mensaje" name="message" />
 
-      <CheckboxField
+      <CartelCheckbox
         name="consent"
         required
         label={
@@ -81,7 +85,7 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
                 href={privacyPolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:text-accent"
+                className="underline hover:text-[#d9a94a]"
               >
                 política de privacidad
               </a>{" "}
@@ -93,14 +97,14 @@ export function ContactForm({ privacyPolicyUrl }: { privacyPolicyUrl?: string })
         }
       />
       {state.fieldErrors?.consent && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+        <p className="-mt-3 text-xs text-red-400">{state.fieldErrors.consent}</p>
       )}
 
       <TurnstileWidget />
 
-      <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Enviando…" : "Enviar mensaje"}
-      </Button>
+      <CartelSubmitButton pending={pending} pendingText="Enviando…">
+        Enviar mensaje
+      </CartelSubmitButton>
     </form>
   );
 }

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { GroupCard } from "@/components/public/GroupCard";
+import { CAMPAIGN_COLORS } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import type { GrowthGroup } from "@/types/content";
 
@@ -11,7 +12,7 @@ const GroupsMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center text-sm text-ink-faint">
+      <div className="flex h-full items-center justify-center text-sm text-white/50">
         Cargando mapa…
       </div>
     ),
@@ -37,7 +38,7 @@ export function GroupsExplorer({ groups }: GroupsExplorerProps) {
       <div
         role="tablist"
         aria-label="Vista de grupos"
-        className="inline-flex rounded-md border border-border-strong p-1"
+        className="inline-flex rounded-md border border-white/15 p-1"
       >
         {(["tarjetas", "mapa"] as const).map((option) => (
           <button
@@ -46,10 +47,10 @@ export function GroupsExplorer({ groups }: GroupsExplorerProps) {
             aria-selected={view === option}
             onClick={() => setView(option)}
             className={cn(
-              "rounded px-4 py-1.5 text-sm font-medium capitalize transition-colors",
+              "rounded px-4 py-1.5 text-sm font-bold uppercase tracking-wide transition-colors",
               view === option
-                ? "bg-accent text-accent-ink"
-                : "text-ink-soft hover:text-ink"
+                ? "bg-[#d9a94a] text-black"
+                : "text-white/60 hover:text-white"
             )}
           >
             {option}
@@ -58,12 +59,14 @@ export function GroupsExplorer({ groups }: GroupsExplorerProps) {
       </div>
 
       {groups.length === 0 ? (
-        <p className="mt-10 text-ink-soft">
-          No encontramos grupos con esos filtros. Prueba quitando alguno.
-        </p>
+        <div className="mt-10 border border-dashed border-white/15 bg-black px-8 py-14 text-center">
+          <p className="text-white/50">
+            No encontramos grupos con esos filtros. Prueba quitando alguno.
+          </p>
+        </div>
       ) : view === "tarjetas" ? (
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {groups.map((group) => (
+          {groups.map((group, i) => (
             <GroupCard
               key={group.id}
               slug={group.slug}
@@ -74,11 +77,12 @@ export function GroupsExplorer({ groups }: GroupsExplorerProps) {
               locality={group.locality}
               sector={group.sector}
               leaderFullName={group.leaderFullName}
+              accentColor={CAMPAIGN_COLORS[(i + 3) % CAMPAIGN_COLORS.length]}
             />
           ))}
         </div>
       ) : (
-        <div className="mt-8 h-[480px] overflow-hidden rounded-lg border border-border">
+        <div className="mt-8 h-[480px] overflow-hidden border border-white/10">
           <GroupsMap
             center={BOGOTA_CENTER}
             groups={groupsOnMap.map((g) => ({

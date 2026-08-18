@@ -1,10 +1,14 @@
 import Image from "next/image";
+import { anton, hind } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
 interface TeamMemberCardProps {
   fullName: string;
   roleTitle: string;
   photoUrl?: string | null;
   bio?: string | null;
+  /** Color de acento rotativo (CAMPAIGN_COLORS) para el cargo. */
+  accentColor?: string;
 }
 
 export function TeamMemberCard({
@@ -12,10 +16,11 @@ export function TeamMemberCard({
   roleTitle,
   photoUrl,
   bio,
+  accentColor = "#d9a94a",
 }: TeamMemberCardProps) {
   return (
     <div>
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-paper-raised">
+      <div className="relative aspect-square overflow-hidden border border-white/10 bg-[#0d0d0d]">
         {photoUrl && (
           <Image
             src={photoUrl}
@@ -26,11 +31,13 @@ export function TeamMemberCard({
           />
         )}
       </div>
-      <p className="mt-4 font-display text-lg font-semibold text-ink">
+      <p className={cn(anton.className, "mt-4 text-lg uppercase leading-tight text-white")}>
         {fullName}
       </p>
-      <p className="text-sm text-accent">{roleTitle}</p>
-      {bio && <p className="mt-2 text-sm text-ink-soft">{bio}</p>}
+      <p className="mt-1 text-xs font-bold uppercase tracking-widest" style={{ color: accentColor }}>
+        {roleTitle}
+      </p>
+      {bio && <p className={cn(hind.className, "mt-2 text-sm text-white/60")}>{bio}</p>}
     </div>
   );
 }
