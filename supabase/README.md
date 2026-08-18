@@ -17,6 +17,7 @@ Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Doce migraciones en
 | `010_audit_logs.sql` | Bitácora de auditoría (solo inserción) |
 | `011_storage_buckets.sql` | Buckets de Storage + políticas (ver más abajo, ya no es manual) |
 | `012_media_public_hero_read.sql` | Lectura pública acotada de `media` para el slide del hero de Inicio |
+| `013_site_bucket_hero_media_formats.sql` | Bucket "site": admite GIF y video corto (MP4/WebM/MOV), hasta 40 MB |
 
 ## Aplicar las migraciones
 

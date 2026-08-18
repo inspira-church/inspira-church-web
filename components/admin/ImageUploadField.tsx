@@ -17,6 +17,15 @@ interface ImageUploadFieldProps {
   hint?: string;
   /** Por defecto usa el bucket. Sirve para distinguir "slots" dentro de un mismo bucket (ver hero de Inicio). */
   module?: string;
+  /** Por defecto solo imágenes (JPEG/PNG/WebP). Pasar ALLOWED_HERO_MIME_TYPES para admitir GIF y video corto. */
+  acceptedMimeTypes?: readonly string[];
+  /** Por defecto 5 MB. Debe coincidir con el límite real del bucket en Supabase Storage. */
+  maxSizeBytes?: number;
+}
+
+/** El valor guardado es solo una URL — el formato se infiere de la extensión para decidir <video> vs <img>. */
+function isVideoUrl(url: string) {
+  return /\.(mp4|webm|mov)(\?|$)/i.test(url);
 }
 
 function sanitizeFilename(filename: string) {
@@ -43,6 +52,8 @@ export function ImageUploadField({
   defaultValue,
   hint,
   module: mediaModule,
+  acceptedMimeTypes = ALLOWED_IMAGE_MIME_TYPES,
+  maxSizeBytes = MAX_IMAGE_SIZE_BYTES,
 }: ImageUploadFieldProps) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [uploading, setUploading] = useState(false);
@@ -54,12 +65,12 @@ export function ImageUploadField({
     if (!file) return;
     setError(null);
 
-    if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number])) {
-      setError("Solo se aceptan imágenes JPEG, PNG o WebP.");
+    if (!acceptedMimeTypes.includes(file.type)) {
+      setError("Ese formato de archivo no está permitido.");
       return;
     }
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError("La imagen no puede superar 5 MB.");
+    if (file.size > maxSizeBytes) {
+      setError(`El archivo no puede superar ${Math.round(maxSizeBytes / 1024 / 1024)} MB.`);
       return;
     }
 
@@ -108,7 +119,11 @@ export function ImageUploadField({
           )}
         >
           {url ? (
-            <Image src={url} alt="" fill className="object-cover" sizes="96px" />
+            isVideoUrl(url) ? (
+              <video src={url} className="h-full w-full object-cover" muted playsInline />
+            ) : (
+              <Image src={url} alt="" fill className="object-cover" sizes="96px" />
+            )
           ) : (
             <span className="text-xs text-ink-faint">Sin imagen</span>
           )}
@@ -119,7 +134,7 @@ export function ImageUploadField({
           <input
             ref={inputRef}
             type="file"
-            accept={ALLOWED_IMAGE_MIME_TYPES.join(",")}
+            accept={acceptedMimeTypes.join(",")}
             onChange={handleFileChange}
             disabled={uploading}
             className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-md file:border file:border-border-strong file:bg-paper-raised file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-paper"

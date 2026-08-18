@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { deleteMedia } from "@/lib/actions/media";
 import { createClient } from "@/lib/supabase/server";
+import { ALLOWED_HERO_MIME_TYPES, MAX_HERO_MEDIA_SIZE_BYTES } from "@/lib/validations/media";
 
 function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -17,7 +18,7 @@ export default async function AdminMediaPage() {
   const supabase = await createClient();
   const { data: media } = await supabase
     .from("media")
-    .select("id, bucket, path, filename, size_bytes, module, created_at")
+    .select("id, bucket, path, filename, mime_type, size_bytes, module, created_at")
     .order("created_at", { ascending: false });
 
   const items = (media ?? []).map((item) => ({
@@ -62,7 +63,9 @@ export default async function AdminMediaPage() {
               bucket="site"
               module={heroSlotModule(slot)}
               defaultValue={heroSlotUrl(slot)}
-              hint="Mín. 1920×1080px, horizontal"
+              hint="Foto (JPG, PNG, WebP, GIF) o video corto (MP4, WebM, MOV) — máx. 40 MB"
+              acceptedMimeTypes={ALLOWED_HERO_MIME_TYPES}
+              maxSizeBytes={MAX_HERO_MEDIA_SIZE_BYTES}
             />
           ))}
         </div>
@@ -77,7 +80,11 @@ export default async function AdminMediaPage() {
           {items.map((item) => (
             <Card key={item.id} className="overflow-hidden">
               <div className="relative aspect-square bg-paper">
-                <Image src={item.url} alt="" fill className="object-cover" sizes="240px" />
+                {item.mime_type?.startsWith("video/") ? (
+                  <video src={item.url} className="h-full w-full object-cover" muted playsInline />
+                ) : (
+                  <Image src={item.url} alt="" fill className="object-cover" sizes="240px" />
+                )}
               </div>
               <div className="p-3">
                 <p className="truncate text-sm font-medium text-ink" title={item.filename}>
