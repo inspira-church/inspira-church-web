@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { HandHeart, MapPinned, Sparkles } from "lucide-react";
+import { BookOpen, Handshake, HandHeart, Sparkles, Sprout, Users } from "lucide-react";
 import Image from "next/image";
 import { Eyebrow, GoldButton, PosterHeading } from "@/components/public/cartel";
 import { WhatsAppButton } from "@/components/public/WhatsAppButton";
@@ -15,20 +15,50 @@ export const metadata: Metadata = {
     "¿Nos visitas por primera vez? Aquí encuentras todo lo que necesitas saber antes de tu visita a Inspira Church.",
 };
 
+const GROWTH_PATH = [
+  {
+    num: "01",
+    icon: Handshake,
+    color: "#508A8C",
+    title: "Conéctate",
+    description:
+      "Conoce personas, construye amistades y empieza a caminar en comunidad. No tienes que crecer solo.",
+  },
+  {
+    num: "02",
+    icon: Sprout,
+    color: "#D2431B",
+    title: "Crece",
+    description:
+      "Conoce más de Dios, fortalece tu fe y avanza en un proceso que afirmará tu identidad y tu propósito.",
+  },
+  {
+    num: "03",
+    icon: BookOpen,
+    color: "#266C62",
+    title: "Avanza",
+    description:
+      "En los grupos de crecimiento y en los cursos de formación encontrarás espacios que te ayudarán a profundizar en la Palabra y vivir tu fe con mayor convicción.",
+  },
+];
+
 const WHAT_TO_EXPECT = [
   {
+    num: "01",
     icon: Sparkles,
     title: "Ven como estás",
     description: "No hay un código de vestimenta — ven cómodo, tal como eres.",
   },
   {
+    num: "02",
     icon: HandHeart,
     title: "Un tiempo de adoración",
     description:
-      "Cantamos, oramos y escuchamos una enseñanza basada en la Biblia, práctica para la vida diaria.",
+      "Alabamos, oramos y escuchamos una enseñanza basada en la Biblia, práctica para la vida diaria.",
   },
   {
-    icon: MapPinned,
+    num: "03",
+    icon: Users,
     title: "Un ambiente familiar",
     description: "Alguien del equipo te recibirá en la entrada — no estarás solo.",
   },
@@ -79,33 +109,123 @@ export default async function FirstTimePage() {
         </Container>
       </section>
 
-      {/* Qué esperar */}
-      <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
+      {/* Tu camino con nosotros */}
+      <section className="border-b border-white/10 bg-black py-16 sm:py-24">
         <Container>
-          <Eyebrow color={CAMPAIGN_COLORS[1]}>Qué esperar</Eyebrow>
-          <PosterHeading>Así es una visita a Inspira</PosterHeading>
+          <Eyebrow color={CAMPAIGN_COLORS[0]}>Tu camino con nosotros</Eyebrow>
+          <p className={cn(hind.className, "mt-5 max-w-2xl text-base text-white/70")}>
+            Ya sea que nos visites por primera vez o que estés buscando una comunidad para
+            crecer, aquí encontrarás diferentes maneras de dar tus primeros pasos con nosotros.
+          </p>
 
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {WHAT_TO_EXPECT.map((item, i) => {
-              const c = CAMPAIGN_COLORS[(i + 1) % CAMPAIGN_COLORS.length];
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {GROWTH_PATH.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title}>
-                  <Icon className="h-5 w-5" style={{ color: c }} aria-hidden="true" />
-                  <h3
+                <div
+                  key={item.title}
+                  className="group relative overflow-hidden border border-white/10 bg-[#0d0d0d] p-7 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-white/25"
+                >
+                  <span
+                    aria-hidden="true"
                     className={cn(
                       anton.className,
-                      "mt-3 text-lg uppercase leading-tight text-white"
+                      "pointer-events-none absolute right-3 top-3 select-none text-5xl leading-none text-[#008080] opacity-[0.18] transition-opacity duration-300 ease-out group-hover:opacity-[0.28]"
                     )}
                   >
-                    {item.title}
-                  </h3>
-                  <p className={cn(hind.className, "mt-2 text-sm text-white/60")}>
-                    {item.description}
-                  </p>
+                    {item.num}
+                  </span>
+
+                  <div className="relative">
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    >
+                      <Icon className="h-5 w-5 text-black" aria-hidden="true" />
+                    </div>
+                    <h3
+                      className={cn(
+                        anton.className,
+                        "mt-6 text-xl uppercase leading-tight text-white"
+                      )}
+                    >
+                      {item.title}
+                    </h3>
+                    <p className={cn(hind.className, "mt-3 text-sm leading-relaxed text-white/60")}>
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
               );
             })}
+          </div>
+        </Container>
+      </section>
+
+      {/* Qué esperar — recorrido, no tarjetas */}
+      <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
+        <Container>
+          <Eyebrow color={CAMPAIGN_COLORS[1]}>Qué esperar</Eyebrow>
+          <PosterHeading>Lo que vivirás en Inspira</PosterHeading>
+
+          <div className="relative mt-20">
+            {/* conector horizontal — solo escritorio, donde los 3 puntos quedan en línea */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 top-[5px] hidden h-px bg-white/10 sm:block"
+            />
+
+            <div className="grid grid-cols-1 gap-16 sm:grid-cols-3 sm:gap-10">
+              {WHAT_TO_EXPECT.map((item, i) => {
+                const c = CAMPAIGN_COLORS[(i + 1) % CAMPAIGN_COLORS.length];
+                const Icon = item.icon;
+                const isLast = i === WHAT_TO_EXPECT.length - 1;
+                return (
+                  <div key={item.title} className="group relative flex flex-col items-center text-center">
+                    {/* conector vertical — solo móvil, limitado al espacio entre bloques (nunca cruza el texto) */}
+                    {!isLast && (
+                      <div
+                        aria-hidden="true"
+                        className="absolute -bottom-16 left-1/2 h-16 w-px -translate-x-1/2 bg-white/10 sm:hidden"
+                      />
+                    )}
+
+                    {/* punto de anclaje sobre el conector */}
+                    <span
+                      aria-hidden="true"
+                      className="relative z-10 h-[9px] w-[9px] shrink-0 rounded-full ring-4 ring-[#0d0d0d] transition-transform duration-300 ease-out group-hover:scale-125"
+                      style={{ backgroundColor: c }}
+                    />
+
+                    <span
+                      className={cn(anton.className, "mt-6 text-sm tracking-[0.25em]")}
+                      style={{ color: c }}
+                    >
+                      {item.num}
+                    </span>
+
+                    <Icon
+                      className="mt-4 h-9 w-9 transition-all duration-300 ease-out group-hover:-translate-y-1"
+                      style={{ color: c }}
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+
+                    <h3
+                      className={cn(
+                        anton.className,
+                        "mt-5 text-xl uppercase leading-tight text-white"
+                      )}
+                    >
+                      {item.title}
+                    </h3>
+                    <p className={cn(hind.className, "mx-auto mt-3 max-w-[15rem] text-sm leading-relaxed text-white/60")}>
+                      {item.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Container>
       </section>
