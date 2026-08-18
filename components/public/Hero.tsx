@@ -96,7 +96,7 @@ export function Hero({ slides, texts }: HeroProps) {
 
   return (
     <section
-      className="group relative h-[26rem] overflow-hidden border-b border-black/40 bg-black text-white sm:h-[30rem]"
+      className="group relative isolate h-[26rem] overflow-hidden border-b border-black/40 bg-black text-white sm:h-[30rem]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
