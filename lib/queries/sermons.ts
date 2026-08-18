@@ -1,4 +1,5 @@
 import { createPublicClient as createClient } from "@/lib/supabase/public";
+import { PRAYER_TOPIC } from "@/lib/constants";
 
 interface SermonFilters {
   preacherId?: string;
@@ -87,13 +88,20 @@ export async function getFeaturedSermon() {
   return data;
 }
 
-/** Temas únicos entre las prédicas publicadas — opciones del filtro. */
+/**
+ * Temas únicos entre las prédicas publicadas — opciones del filtro de
+ * /predicas. Excluye PRAYER_TOPIC: las grabaciones de oración tienen su
+ * propia página (/oraciones) y no deben listarse ni filtrarse desde aquí.
+ */
 export async function getPublishedTopics() {
   const supabase = await createClient();
   const { data } = await supabase.from("sermons").select("topics").eq("published", true);
+  const normalizedPrayerTopic = PRAYER_TOPIC.toLowerCase();
   const topics = new Set<string>();
   for (const row of data ?? []) {
-    for (const topic of row.topics ?? []) topics.add(topic);
+    for (const topic of row.topics ?? []) {
+      if (topic.trim().toLowerCase() !== normalizedPrayerTopic) topics.add(topic);
+    }
   }
   return Array.from(topics).sort();
 }

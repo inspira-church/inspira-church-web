@@ -4,6 +4,7 @@ import { SermonFilters } from "@/components/public/SermonFilters";
 import { SermonCard } from "@/components/public/SermonCard";
 import { Container } from "@/components/ui/Container";
 import { hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { PRAYER_TOPIC } from "@/lib/constants";
 import {
   getPreacherIdsWithPublishedSermons,
   getPublishedSermons,
@@ -30,12 +31,20 @@ export default async function SermonsPage({
 }) {
   const { predicador, serie, tema } = await searchParams;
 
-  const [sermons, seriesList, topics, preacherIds] = await Promise.all([
+  const [allSermons, seriesList, topics, preacherIds] = await Promise.all([
     getPublishedSermons({ preacherId: predicador, seriesId: serie, topic: tema }),
     getActiveSermonSeries(),
     getPublishedTopics(),
     getPreacherIdsWithPublishedSermons(),
   ]);
+
+  // Las grabaciones de oración tienen su propia página (/oraciones) — no se
+  // mezclan con las prédicas normales, aunque coincidan con otros filtros.
+  const normalizedPrayerTopic = PRAYER_TOPIC.toLowerCase();
+  const sermons = allSermons.filter(
+    (sermon) =>
+      !(sermon.topics ?? []).some((t: string) => t.trim().toLowerCase() === normalizedPrayerTopic)
+  );
 
   const preachers = await getTeamMembersByIds(preacherIds);
 
