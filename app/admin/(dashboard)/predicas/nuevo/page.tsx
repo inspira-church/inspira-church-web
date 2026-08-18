@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { SermonForm } from "@/components/admin/SermonForm";
 import { createSermon } from "@/lib/actions/sermons";
 import { createClient } from "@/lib/supabase/server";
@@ -11,6 +12,10 @@ export default async function NewSermonPage() {
 
   return (
     <div>
+      <Breadcrumbs
+        items={[{ label: "Prédicas", href: "/admin/predicas" }, { label: "Nueva prédica" }]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">Nueva prédica</h1>
       <div className="mt-8">
         <SermonForm

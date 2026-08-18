@@ -1,7 +1,7 @@
-import { CalendarDays, HandHeart, MapPin, Users, type LucideIcon } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Eyebrow, GoldButton, PosterButton, PosterHeading, TextLink, scheduleIcon } from "@/components/public/cartel";
 import { Hero } from "@/components/public/Hero";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Container } from "@/components/ui/Container";
@@ -20,48 +20,14 @@ import { cn } from "@/lib/utils";
 
 /**
  * Todo Inicio usa el lenguaje de cartel real de @inspira.church (negro,
- * Anton, script Caveat, color de campaña rotativo) — ver Hero.tsx. Las
- * demás páginas (Nosotros, Prédicas, Grupos, Eventos, Contacto) y el panel
- * admin siguen con el sistema de diseño original en globals.css, sin
- * cambios. Por eso este archivo no reutiliza SermonCard/EventCard/GroupCard
- * (esos siguen tal cual para sus páginas propias) sino que arma tarjetas
- * propias, solo para Inicio.
+ * Anton, script Caveat, color de campaña rotativo) — ver Hero.tsx y
+ * components/public/cartel.tsx (piezas compartidas con /primera-vez). Las
+ * demás páginas (Nosotros, Prédicas, Grupos, Eventos, Contacto, /oraciones)
+ * y el panel admin siguen con el sistema de diseño original en
+ * globals.css, sin cambios. Por eso este archivo no reutiliza
+ * SermonCard/EventCard/GroupCard (esos siguen tal cual para sus páginas
+ * propias) sino que arma tarjetas propias, solo para Inicio.
  */
-
-function Eyebrow({ children, color }: { children: ReactNode; color: string }) {
-  return (
-    <p
-      className="inline-block border px-3 py-1 text-xs font-bold uppercase tracking-widest"
-      style={{ borderColor: color, color }}
-    >
-      {children}
-    </p>
-  );
-}
-
-function PosterHeading({ children }: { children: ReactNode }) {
-  return (
-    <h2
-      className={cn(
-        anton.className,
-        "mt-4 max-w-2xl text-balance text-4xl uppercase leading-[0.92] text-white sm:text-5xl"
-      )}
-    >
-      {children}
-    </h2>
-  );
-}
-
-function TextLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="text-sm font-bold uppercase tracking-wide text-white/70 transition-colors hover:text-white"
-    >
-      {children} →
-    </Link>
-  );
-}
 
 /** "Oración Presencial." / "oración virtual" -> "Presencial" / "Virtual". Deja el nombre tal cual si no reconoce la modalidad. */
 function prayerModality(name: string) {
@@ -69,17 +35,6 @@ function prayerModality(name: string) {
   if (normalized.includes("presencial")) return "Presencial";
   if (normalized.includes("virtual")) return "Virtual";
   return name;
-}
-
-/** Ícono discreto según el nombre del horario — solo apoya la lectura, no reemplaza el texto. */
-function scheduleIcon(name: string): LucideIcon {
-  const normalized = name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
-  if (normalized.includes("oracion")) return HandHeart;
-  if (normalized.includes("joven")) return Users;
-  return CalendarDays;
 }
 
 /** Día y mes por separado para el bloque de fecha destacado de las tarjetas de evento. */
@@ -92,17 +47,6 @@ function eventDateParts(iso: string) {
       .replace(".", "")
       .toUpperCase(),
   };
-}
-
-function PosterButton({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center justify-center rounded-md border-2 border-white/70 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:border-white"
-    >
-      {children}
-    </Link>
-  );
 }
 
 export default async function HomePage() {
@@ -152,16 +96,11 @@ export default async function HomePage() {
                 Un lugar para encontrarte con Dios, crecer en comunidad y
                 caminar en propósito.
               </p>
-              <Link
-                href="/contacto"
-                className="group mt-7 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
-                style={{ backgroundColor: CAMPAIGN_COLORS[0] }}
-              >
-                Planea tu visita
-                <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1">
-                  →
-                </span>
-              </Link>
+              <div className="mt-7">
+                <GoldButton href="/contacto" color={CAMPAIGN_COLORS[0]}>
+                  Planea tu visita
+                </GoldButton>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-6 gap-y-8">

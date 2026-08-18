@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { scheduleSchema } from "@/lib/validations/schedule";
@@ -28,19 +29,31 @@ export async function createSchedule(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("schedules").insert({
-    type: parsed.data.type,
-    name: parsed.data.name,
-    day_of_week: parsed.data.dayOfWeek,
-    time_of_day: parsed.data.timeOfDay,
-    location: parsed.data.location,
-    order_index: parsed.data.orderIndex,
-    active: parsed.data.active,
-  });
+  const { data, error } = await supabase
+    .from("schedules")
+    .insert({
+      type: parsed.data.type,
+      name: parsed.data.name,
+      day_of_week: parsed.data.dayOfWeek,
+      time_of_day: parsed.data.timeOfDay,
+      location: parsed.data.location,
+      order_index: parsed.data.orderIndex,
+      active: parsed.data.active,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     return { error: "No se pudo crear. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "schedules",
+    action: "create",
+    entityType: "schedule",
+    entityId: data.id,
+    description: `Creó el horario "${parsed.data.name}".`,
+  });
 
   revalidatePath("/admin/horarios");
   revalidatePath("/");
@@ -75,6 +88,14 @@ export async function updateSchedule(
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await logAudit({
+    module: "schedules",
+    action: "update",
+    entityType: "schedule",
+    entityId: id,
+    description: `Actualizó el horario "${parsed.data.name}".`,
+  });
+
   revalidatePath("/admin/horarios");
   revalidatePath("/");
   redirect("/admin/horarios");
@@ -83,6 +104,13 @@ export async function updateSchedule(
 export async function toggleScheduleActive(id: string, nextActive: boolean) {
   const supabase = await createClient();
   await supabase.from("schedules").update({ active: nextActive }).eq("id", id);
+  await logAudit({
+    module: "schedules",
+    action: nextActive ? "activate" : "deactivate",
+    entityType: "schedule",
+    entityId: id,
+    description: `${nextActive ? "Activó" : "Desactivó"} un horario.`,
+  });
   revalidatePath("/admin/horarios");
   revalidatePath("/");
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { eventSchema } from "@/lib/validations/event";
@@ -58,7 +59,11 @@ export async function createEvent(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("events").insert(toRow(parsed.data));
+  const { data, error } = await supabase
+    .from("events")
+    .insert(toRow(parsed.data))
+    .select("id")
+    .single();
 
   if (error) {
     if (isDuplicateSlugError(error)) {
@@ -66,6 +71,14 @@ export async function createEvent(
     }
     return { error: "No se pudo crear. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "events",
+    action: "create",
+    entityType: "event",
+    entityId: data.id,
+    description: `Creó el evento "${parsed.data.name}".`,
+  });
 
   revalidatePath("/admin/eventos");
   revalidatePath("/eventos");
@@ -93,6 +106,14 @@ export async function updateEvent(
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await logAudit({
+    module: "events",
+    action: "update",
+    entityType: "event",
+    entityId: id,
+    description: `Actualizó el evento "${parsed.data.name}".`,
+  });
+
   revalidatePath("/admin/eventos");
   revalidatePath("/eventos");
   revalidatePath("/");
@@ -102,6 +123,13 @@ export async function updateEvent(
 export async function toggleEventPublished(id: string, nextPublished: boolean) {
   const supabase = await createClient();
   await supabase.from("events").update({ published: nextPublished }).eq("id", id);
+  await logAudit({
+    module: "events",
+    action: nextPublished ? "publish" : "unpublish",
+    entityType: "event",
+    entityId: id,
+    description: `${nextPublished ? "Publicó" : "Despublicó"} un evento.`,
+  });
   revalidatePath("/admin/eventos");
   revalidatePath("/eventos");
   revalidatePath("/");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMediaRecordSchema, MAX_IMAGE_SIZE_BYTES } from "@/lib/validations/media";
+import { createMediaRecordSchema, MAX_HERO_MEDIA_SIZE_BYTES } from "@/lib/validations/media";
 
 const valid = {
   bucket: "sermons",
@@ -28,9 +28,13 @@ describe("createMediaRecordSchema", () => {
     ).toBe(false);
   });
 
-  it("rechaza un archivo mayor a 5 MB", () => {
+  it("rechaza un archivo mayor al máximo permitido (40 MB, límite del hero)", () => {
+    // El techo del esquema es el más amplio (video del hero); el límite de
+    // 5 MB para fotos normales se aplica en el cliente vía el prop
+    // maxSizeBytes de ImageUploadField, no en este esquema compartido.
     expect(
-      createMediaRecordSchema.safeParse({ ...valid, sizeBytes: MAX_IMAGE_SIZE_BYTES + 1 }).success
+      createMediaRecordSchema.safeParse({ ...valid, sizeBytes: MAX_HERO_MEDIA_SIZE_BYTES + 1 })
+        .success
     ).toBe(false);
   });
 

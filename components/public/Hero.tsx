@@ -18,7 +18,7 @@ interface HeroProps {
    * "no configurado todavía" que lib/turnstile.ts y lib/youtube.ts.
    */
   slides?: HeroSlide[];
-  /** Editable desde /admin/configuracion (settings.heroText1/2). `**texto**` se muestra en negrita. */
+  /** Editable desde /admin/inicio (settings.heroText1/2). `**texto**` se muestra en negrita. */
   texts?: string[];
 }
 

@@ -31,3 +31,20 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
   }
   return slides;
 }
+
+const PRIMERA_VEZ_HERO_MODULE = "primera-vez-hero";
+
+/** Foto de portada de /primera-vez, subida desde /admin/medios. Null si no se ha cargado. */
+export async function getFirstTimeHeroImage(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("media")
+    .select("path")
+    .eq("module", PRIMERA_VEZ_HERO_MODULE)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return null;
+  return supabase.storage.from("site").getPublicUrl(data.path).data.publicUrl;
+}

@@ -1,6 +1,7 @@
 # Supabase — Inspira Church
 
-Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Doce migraciones en
+Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
+auditoría de la reorganización del panel admin). Dieciséis migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -18,6 +19,9 @@ Esquema definitivo de la Fase 2 (+ Storage de la Fase 8). Doce migraciones en
 | `011_storage_buckets.sql` | Buckets de Storage + políticas (ver más abajo, ya no es manual) |
 | `012_media_public_hero_read.sql` | Lectura pública acotada de `media` para el slide del hero de Inicio |
 | `013_site_bucket_hero_media_formats.sql` | Bucket "site": admite GIF y video corto (MP4/WebM/MOV), hasta 40 MB |
+| `014_media_public_primera_vez_hero_read.sql` | Lectura pública de la foto del hero de /primera-vez |
+| `015_permissions.sql` | Catálogo `permissions`/`role_permissions` por módulo.acción + `has_permission()` — preparado para permisos finos, sin cambiar el acceso actual |
+| `016_audit_logs_extend.sql` | `audit_logs`: columnas `module`, `user_role`, `user_name`, `previous_data`, `new_data` |
 
 ## Aplicar las migraciones
 

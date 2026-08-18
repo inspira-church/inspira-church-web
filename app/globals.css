@@ -28,6 +28,11 @@
 
   --danger: #b23b3b;
   --danger-soft: #f5e4e1;
+
+  /* Ámbar institucional (mismo tono que CAMPAIGN_COLORS[0] en lib/fonts.ts)
+   * reservado para "requiere atención" — nunca como acento de marca. */
+  --warning: #b8863a;
+  --warning-soft: #f6ecd7;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,7 +54,41 @@
 
     --danger: #e38a82;
     --danger-soft: #3a2320;
+
+    --warning: #d9a94a;
+    --warning-soft: #3a2f18;
   }
+}
+
+/*
+ * Tema fijo del panel admin — oscuro siempre, independiente del modo del
+ * sistema operativo (a diferencia del sitio público arriba). Se aplica con
+ * [data-admin-theme] en app/admin/layout.tsx envolviendo todo /admin,
+ * incluidas las páginas de login. Redefine los mismos nombres de token que
+ * ya usa Tailwind — ninguna clase utilitaria (bg-paper, text-ink-soft...)
+ * necesita cambiar, hereda la paleta automáticamente.
+ */
+[data-admin-theme] {
+  --paper: #121110;
+  --paper-raised: #1b1a17;
+
+  --ink: #f2efe8;
+  --ink-soft: #ada89b;
+  --ink-faint: #726d5f;
+
+  --accent: #4fbfa0;
+  --accent-strong: #6fd1b4;
+  --accent-ink: #0b211c;
+  --accent-soft: #16332c;
+
+  --border: #2a2822;
+  --border-strong: #3d392f;
+
+  --danger: #e38a82;
+  --danger-soft: #3a2320;
+
+  --warning: #d9a94a;
+  --warning-soft: #3a2f18;
 }
 
 @theme inline {
@@ -70,6 +109,9 @@
 
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
 
   --font-display: var(--font-petrona);
   --font-sans: var(--font-figtree);

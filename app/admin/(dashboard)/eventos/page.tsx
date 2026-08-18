@@ -1,5 +1,8 @@
 import Image from "next/image";
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/format";
@@ -21,21 +24,33 @@ export default async function EventsListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Eventos</h1>
-        <Button as={Link} href="/admin/eventos/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Eventos"
+        actions={
+          <Button as={Link} href="/admin/eventos/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!events || events.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay eventos creados.</p>
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title="Todavía no hay eventos creados."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/eventos/nuevo" size="sm">
+              Agregar evento
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {events.map((event) => (
-            <div key={event.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={event.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-paper">
                 {event.image_url && (
                   <Image

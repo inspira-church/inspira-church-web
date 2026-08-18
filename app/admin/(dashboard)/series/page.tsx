@@ -1,5 +1,8 @@
 import Image from "next/image";
+import { Layers } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { toggleSermonSeriesActive } from "@/lib/actions/sermon-series";
@@ -14,21 +17,33 @@ export default async function SermonSeriesListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Series</h1>
-        <Button as={Link} href="/admin/series/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Series"
+        actions={
+          <Button as={Link} href="/admin/series/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!series || series.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay series creadas.</p>
-        </div>
+        <EmptyState
+          icon={Layers}
+          title="Todavía no hay series creadas."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/series/nuevo" size="sm">
+              Agregar serie
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {series.map((item) => (
-            <div key={item.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={item.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-paper">
                 {item.cover_image_url && (
                   <Image

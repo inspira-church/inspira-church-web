@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/admin/FormError";
+import { FormSection } from "@/components/admin/FormSection";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { CheckboxField } from "@/components/ui/CheckboxField";
@@ -20,6 +21,10 @@ interface SermonFormProps {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   seriesOptions: Option[];
   preacherOptions: Option[];
+  /** Precarga el campo "Temas" en una prédica nueva (ej. "Oración" desde /admin/oraciones/nuevo). Ignorado si hay defaultValues. */
+  defaultTopics?: string;
+  /** A dónde vuelve "Cancelar" — /admin/predicas por defecto, /admin/oraciones desde ese módulo. */
+  cancelHref?: string;
   defaultValues?: {
     title: string;
     slug: string;
@@ -40,6 +45,8 @@ export function SermonForm({
   action,
   seriesOptions,
   preacherOptions,
+  defaultTopics,
+  cancelHref = "/admin/predicas",
   defaultValues,
 }: SermonFormProps) {
   const [state, formAction] = useActionState(action, initialState);
@@ -48,105 +55,111 @@ export function SermonForm({
   const [slugTouched, setSlugTouched] = useState(Boolean(defaultValues));
 
   return (
-    <form action={formAction} className="max-w-xl space-y-5">
+    <form action={formAction} className="max-w-xl space-y-6">
       <FormError message={state.error} />
 
-      <TextField
-        label="Título"
-        name="title"
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-          if (!slugTouched) setSlug(slugify(e.target.value));
-        }}
-        required
-      />
-      {state.fieldErrors?.title && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.title}</p>
-      )}
-
-      <TextField
-        label="Slug (URL)"
-        name="slug"
-        value={slug}
-        onChange={(e) => {
-          setSlug(e.target.value);
-          setSlugTouched(true);
-        }}
-        hint={`Se usará como /predicas/${slug || "..."}`}
-        required
-      />
-      {state.fieldErrors?.slug && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.slug}</p>
-      )}
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <SelectField
-          label="Serie"
-          name="seriesId"
-          placeholder="Sin serie"
-          options={seriesOptions}
-          defaultValue={defaultValues?.seriesId ?? ""}
+      <FormSection title="Detalles">
+        <TextField
+          label="Título"
+          name="title"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (!slugTouched) setSlug(slugify(e.target.value));
+          }}
+          required
         />
-        <SelectField
-          label="Predicador"
-          name="preacherId"
-          placeholder="Sin especificar"
-          options={preacherOptions}
-          defaultValue={defaultValues?.preacherId ?? ""}
+        {state.fieldErrors?.title && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.title}</p>
+        )}
+
+        <TextField
+          label="Slug (URL)"
+          name="slug"
+          value={slug}
+          onChange={(e) => {
+            setSlug(e.target.value);
+            setSlugTouched(true);
+          }}
+          hint={`Se usará como /predicas/${slug || "..."}`}
+          required
         />
-      </div>
+        {state.fieldErrors?.slug && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.slug}</p>
+        )}
 
-      <TextField
-        label="Fecha"
-        name="sermonDate"
-        type="date"
-        defaultValue={defaultValues?.sermonDate}
-        required
-      />
-      {state.fieldErrors?.sermonDate && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.sermonDate}</p>
-      )}
+        <div className="grid gap-5 sm:grid-cols-2">
+          <SelectField
+            label="Serie"
+            name="seriesId"
+            placeholder="Sin serie"
+            options={seriesOptions}
+            defaultValue={defaultValues?.seriesId ?? ""}
+          />
+          <SelectField
+            label="Predicador"
+            name="preacherId"
+            placeholder="Sin especificar"
+            options={preacherOptions}
+            defaultValue={defaultValues?.preacherId ?? ""}
+          />
+        </div>
 
-      <TextField
-        label="Enlace de YouTube"
-        name="youtubeUrl"
-        type="url"
-        placeholder="https://www.youtube.com/watch?v=..."
-        defaultValue={defaultValues?.youtubeUrl}
-        required
-      />
-      {state.fieldErrors?.youtubeUrl && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeUrl}</p>
-      )}
+        <TextField
+          label="Fecha"
+          name="sermonDate"
+          type="date"
+          defaultValue={defaultValues?.sermonDate}
+          required
+        />
+        {state.fieldErrors?.sermonDate && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.sermonDate}</p>
+        )}
+      </FormSection>
 
-      <TextAreaField
-        label="Descripción"
-        name="description"
-        defaultValue={defaultValues?.description ?? ""}
-      />
+      <FormSection title="Contenido">
+        <TextField
+          label="Enlace de YouTube"
+          name="youtubeUrl"
+          type="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          defaultValue={defaultValues?.youtubeUrl}
+          required
+        />
+        {state.fieldErrors?.youtubeUrl && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeUrl}</p>
+        )}
 
-      <TextField
-        label="Temas"
-        name="topics"
-        defaultValue={defaultValues?.topics.join(", ")}
-        hint="Separados por coma — ej: fe, familia, propósito"
-      />
+        <TextAreaField
+          label="Descripción"
+          name="description"
+          defaultValue={defaultValues?.description ?? ""}
+        />
 
-      <ImageUploadField
-        label="Miniatura"
-        name="thumbnailUrl"
-        bucket="sermons"
-        defaultValue={defaultValues?.thumbnailUrl}
-      />
+        <TextField
+          label="Temas"
+          name="topics"
+          defaultValue={defaultValues?.topics.join(", ") ?? defaultTopics}
+          hint="Separados por coma — ej: fe, familia, propósito"
+        />
 
-      <CheckboxField
-        name="published"
-        label="Publicada (visible en el sitio público)"
-        defaultChecked={defaultValues?.published ?? false}
-      />
+        <ImageUploadField
+          label="Miniatura"
+          name="thumbnailUrl"
+          bucket="sermons"
+          defaultValue={defaultValues?.thumbnailUrl}
+        />
+      </FormSection>
 
-      <SubmitButton>Guardar</SubmitButton>
+      <FormSection title="Publicación">
+        <CheckboxField
+          name="published"
+          label="Publicada (visible en el sitio público)"
+          defaultChecked={defaultValues?.published ?? false}
+        />
+      </FormSection>
+
+      <SubmitButton cancelHref={cancelHref}>Guardar</SubmitButton>
     </form>
   );
 }

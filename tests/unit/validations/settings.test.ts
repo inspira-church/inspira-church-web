@@ -10,6 +10,9 @@ const valid = {
   xUrl: "https://x.com/inspirachurch",
   youtubeUrl: "https://youtube.com/@inspirachurch",
   privacyPolicyUrl: "https://inspirachurch.com/privacidad",
+  heroText1: "Somos una iglesia donde el **amor de Dios** restaura vidas.",
+  heroText2: "Vivimos para **adorar a Dios** cada día.",
+  firstTimeHeroText: "Sin compromiso, solo para conocernos.",
 } as const;
 
 describe("siteSettingsSchema", () => {

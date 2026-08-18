@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSchema } from "@/lib/validations/sermon";
@@ -39,18 +40,22 @@ export async function createSermon(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("sermons").insert({
-    title: parsed.data.title,
-    slug: parsed.data.slug,
-    series_id: parsed.data.seriesId ?? null,
-    preacher_id: parsed.data.preacherId ?? null,
-    description: parsed.data.description,
-    youtube_url: parsed.data.youtubeUrl,
-    thumbnail_url: parsed.data.thumbnailUrl,
-    sermon_date: parsed.data.sermonDate,
-    topics: parsed.data.topics,
-    published: parsed.data.published,
-  });
+  const { data, error } = await supabase
+    .from("sermons")
+    .insert({
+      title: parsed.data.title,
+      slug: parsed.data.slug,
+      series_id: parsed.data.seriesId ?? null,
+      preacher_id: parsed.data.preacherId ?? null,
+      description: parsed.data.description,
+      youtube_url: parsed.data.youtubeUrl,
+      thumbnail_url: parsed.data.thumbnailUrl,
+      sermon_date: parsed.data.sermonDate,
+      topics: parsed.data.topics,
+      published: parsed.data.published,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     if (isDuplicateSlugError(error)) {
@@ -58,6 +63,14 @@ export async function createSermon(
     }
     return { error: "No se pudo crear. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "sermons",
+    action: "create",
+    entityType: "sermon",
+    entityId: data.id,
+    description: `Creó la prédica "${parsed.data.title}".`,
+  });
 
   revalidatePath("/admin/predicas");
   revalidatePath("/predicas");
@@ -98,6 +111,14 @@ export async function updateSermon(
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await logAudit({
+    module: "sermons",
+    action: "update",
+    entityType: "sermon",
+    entityId: id,
+    description: `Actualizó la prédica "${parsed.data.title}".`,
+  });
+
   revalidatePath("/admin/predicas");
   revalidatePath("/predicas");
   redirect("/admin/predicas");
@@ -106,6 +127,13 @@ export async function updateSermon(
 export async function toggleSermonPublished(id: string, nextPublished: boolean) {
   const supabase = await createClient();
   await supabase.from("sermons").update({ published: nextPublished }).eq("id", id);
+  await logAudit({
+    module: "sermons",
+    action: nextPublished ? "publish" : "unpublish",
+    entityType: "sermon",
+    entityId: id,
+    description: `${nextPublished ? "Publicó" : "Despublicó"} una prédica.`,
+  });
   revalidatePath("/admin/predicas");
   revalidatePath("/predicas");
 }

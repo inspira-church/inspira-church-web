@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { TeamMemberForm } from "@/components/admin/TeamMemberForm";
 import { updateTeamMember } from "@/lib/actions/team-members";
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +23,13 @@ export default async function EditTeamMemberPage({
 
   return (
     <div>
+      <Breadcrumbs
+        items={[
+          { label: "Pastores y líderes", href: "/admin/equipo" },
+          { label: "Editar miembro" },
+        ]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">
         Editar miembro del equipo
       </h1>

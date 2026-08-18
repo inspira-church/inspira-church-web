@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { SermonForm } from "@/components/admin/SermonForm";
 import { updateSermon } from "@/lib/actions/sermons";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +24,10 @@ export default async function EditSermonPage({
 
   return (
     <div>
+      <Breadcrumbs
+        items={[{ label: "Prédicas", href: "/admin/predicas" }, { label: "Editar prédica" }]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">Editar prédica</h1>
       <div className="mt-8">
         <SermonForm

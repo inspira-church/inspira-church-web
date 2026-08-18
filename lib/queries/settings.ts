@@ -16,6 +16,7 @@ export interface SiteSettings {
   youtubeChannelId: string;
   heroText1: string;
   heroText2: string;
+  firstTimeHeroText: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -35,6 +36,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
     "Somos una iglesia donde el **amor de Dios** restaura vidas y transforma **familias**.",
   heroText2:
     "Vivimos para **adorar a Dios**, conscientes de que **su presencia** nos acompaña cada día.",
+  firstTimeHeroText:
+    "Sin compromiso, solo para conocernos. Aquí tienes todo lo que necesitas para tu primera visita a Inspira Church.",
 };
 
 /** Toda la configuración vive en una sola fila (key='general') como jsonb. */

@@ -1,5 +1,8 @@
 import Image from "next/image";
+import { Mic } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/format";
@@ -15,21 +18,33 @@ export default async function SermonsListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Prédicas</h1>
-        <Button as={Link} href="/admin/predicas/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Prédicas"
+        actions={
+          <Button as={Link} href="/admin/predicas/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!sermons || sermons.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay prédicas creadas.</p>
-        </div>
+        <EmptyState
+          icon={Mic}
+          title="Todavía no hay prédicas creadas."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/predicas/nuevo" size="sm">
+              Agregar prédica
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {sermons.map((sermon) => (
-            <div key={sermon.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={sermon.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-paper">
                 {sermon.thumbnail_url && (
                   <Image

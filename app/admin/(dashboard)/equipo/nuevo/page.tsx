@@ -1,9 +1,17 @@
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { TeamMemberForm } from "@/components/admin/TeamMemberForm";
 import { createTeamMember } from "@/lib/actions/team-members";
 
 export default function NewTeamMemberPage() {
   return (
     <div>
+      <Breadcrumbs
+        items={[
+          { label: "Pastores y líderes", href: "/admin/equipo" },
+          { label: "Nuevo miembro" },
+        ]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">
         Nuevo miembro del equipo
       </h1>

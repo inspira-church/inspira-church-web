@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/admin/FormError";
+import { FormSection } from "@/components/admin/FormSection";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { CheckboxField } from "@/components/ui/CheckboxField";
@@ -45,139 +46,145 @@ export function EventForm({ action, defaultValues }: EventFormProps) {
   const [slugTouched, setSlugTouched] = useState(Boolean(defaultValues));
 
   return (
-    <form action={formAction} className="max-w-xl space-y-5">
+    <form action={formAction} className="max-w-xl space-y-6">
       <FormError message={state.error} />
 
-      <TextField
-        label="Nombre"
-        name="name"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-          if (!slugTouched) setSlug(slugify(e.target.value));
-        }}
-        required
-      />
-      {state.fieldErrors?.name && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.name}</p>
-      )}
-
-      <TextField
-        label="Slug (URL)"
-        name="slug"
-        value={slug}
-        onChange={(e) => {
-          setSlug(e.target.value);
-          setSlugTouched(true);
-        }}
-        hint={`Se usará como /eventos/${slug || "..."}`}
-        required
-      />
-      {state.fieldErrors?.slug && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.slug}</p>
-      )}
-
-      <TextAreaField
-        label="Descripción"
-        name="description"
-        defaultValue={defaultValues?.description ?? ""}
-      />
-
-      <ImageUploadField
-        label="Imagen"
-        name="imageUrl"
-        bucket="events"
-        defaultValue={defaultValues?.imageUrl}
-      />
-
-      <div className="grid gap-5 sm:grid-cols-2">
+      <FormSection title="Detalles">
         <TextField
-          label="Fecha"
-          name="eventDate"
-          type="date"
-          defaultValue={defaultValues?.eventDate}
+          label="Nombre"
+          name="name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (!slugTouched) setSlug(slugify(e.target.value));
+          }}
           required
         />
+        {state.fieldErrors?.name && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.name}</p>
+        )}
+
         <TextField
-          label="Hora"
-          name="eventTime"
-          type="time"
-          defaultValue={defaultValues?.eventTime ?? ""}
+          label="Slug (URL)"
+          name="slug"
+          value={slug}
+          onChange={(e) => {
+            setSlug(e.target.value);
+            setSlugTouched(true);
+          }}
+          hint={`Se usará como /eventos/${slug || "..."}`}
+          required
+        />
+        {state.fieldErrors?.slug && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.slug}</p>
+        )}
+
+        <TextAreaField
+          label="Descripción"
+          name="description"
+          defaultValue={defaultValues?.description ?? ""}
+        />
+
+        <ImageUploadField
+          label="Imagen"
+          name="imageUrl"
+          bucket="events"
+          defaultValue={defaultValues?.imageUrl}
+        />
+      </FormSection>
+
+      <FormSection title="Fecha y lugar">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField
+            label="Fecha"
+            name="eventDate"
+            type="date"
+            defaultValue={defaultValues?.eventDate}
+            required
+          />
+          <TextField
+            label="Hora"
+            name="eventTime"
+            type="time"
+            defaultValue={defaultValues?.eventTime ?? ""}
+            hint="Opcional"
+          />
+        </div>
+
+        <TextField
+          label="Lugar"
+          name="locationName"
+          defaultValue={defaultValues?.locationName ?? ""}
           hint="Opcional"
         />
-      </div>
-
-      <TextField
-        label="Lugar"
-        name="locationName"
-        defaultValue={defaultValues?.locationName ?? ""}
-        hint="Opcional"
-      />
-      <TextField
-        label="Dirección"
-        name="address"
-        defaultValue={defaultValues?.address ?? ""}
-        hint="Opcional — a diferencia de los grupos, la dirección del evento sí es pública."
-      />
-
-      <div className="grid gap-5 sm:grid-cols-2">
         <TextField
-          label="Latitud"
-          name="lat"
+          label="Dirección"
+          name="address"
+          defaultValue={defaultValues?.address ?? ""}
+          hint="Opcional — a diferencia de los grupos, la dirección del evento sí es pública."
+        />
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField
+            label="Latitud"
+            name="lat"
+            type="number"
+            step="any"
+            defaultValue={defaultValues?.lat ?? ""}
+            hint="Opcional"
+          />
+          <TextField
+            label="Longitud"
+            name="lng"
+            type="number"
+            step="any"
+            defaultValue={defaultValues?.lng ?? ""}
+            hint="Opcional"
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title="Inscripción y estado">
+        <TextField
+          label="Cupos"
+          name="capacity"
           type="number"
-          step="any"
-          defaultValue={defaultValues?.lat ?? ""}
-          hint="Opcional"
+          min={1}
+          defaultValue={defaultValues?.capacity ?? ""}
+          hint="Opcional — déjalo vacío si no hay límite"
         />
+        {state.fieldErrors?.capacity && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.capacity}</p>
+        )}
+
         <TextField
-          label="Longitud"
-          name="lng"
-          type="number"
-          step="any"
-          defaultValue={defaultValues?.lng ?? ""}
+          label="Enlace de inscripción"
+          name="registrationUrl"
+          type="url"
+          placeholder="https://…"
+          defaultValue={defaultValues?.registrationUrl ?? ""}
           hint="Opcional"
         />
-      </div>
+        {state.fieldErrors?.registrationUrl && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.registrationUrl}</p>
+        )}
 
-      <TextField
-        label="Cupos"
-        name="capacity"
-        type="number"
-        min={1}
-        defaultValue={defaultValues?.capacity ?? ""}
-        hint="Opcional — déjalo vacío si no hay límite"
-      />
-      {state.fieldErrors?.capacity && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.capacity}</p>
-      )}
+        <SelectField
+          label="Estado"
+          name="status"
+          options={statusOptions}
+          defaultValue={defaultValues?.status ?? "proximo"}
+          required
+        />
 
-      <TextField
-        label="Enlace de inscripción"
-        name="registrationUrl"
-        type="url"
-        placeholder="https://…"
-        defaultValue={defaultValues?.registrationUrl ?? ""}
-        hint="Opcional"
-      />
-      {state.fieldErrors?.registrationUrl && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.registrationUrl}</p>
-      )}
+        <CheckboxField
+          name="published"
+          label="Publicado (visible en el sitio público)"
+          defaultChecked={defaultValues?.published ?? false}
+        />
+      </FormSection>
 
-      <SelectField
-        label="Estado"
-        name="status"
-        options={statusOptions}
-        defaultValue={defaultValues?.status ?? "proximo"}
-        required
-      />
-
-      <CheckboxField
-        name="published"
-        label="Publicado (visible en el sitio público)"
-        defaultChecked={defaultValues?.published ?? false}
-      />
-
-      <SubmitButton>Guardar</SubmitButton>
+      <SubmitButton cancelHref="/admin/eventos">Guardar</SubmitButton>
     </form>
   );
 }

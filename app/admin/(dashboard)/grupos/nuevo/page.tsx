@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { GrowthGroupForm } from "@/components/admin/GrowthGroupForm";
 import { createGrowthGroup } from "@/lib/actions/growth-groups";
 import { createClient } from "@/lib/supabase/server";
@@ -11,6 +12,10 @@ export default async function NewGrowthGroupPage() {
 
   return (
     <div>
+      <Breadcrumbs
+        items={[{ label: "Grupos", href: "/admin/grupos" }, { label: "Nuevo grupo" }]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">Nuevo grupo</h1>
       <div className="mt-8">
         <GrowthGroupForm

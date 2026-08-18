@@ -6,5 +6,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <div data-admin-theme className="min-h-screen bg-paper text-ink">
+      {children}
+    </div>
+  );
 }

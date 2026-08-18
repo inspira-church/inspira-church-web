@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { logAuthEvent } from "@/lib/audit";
 import { firstFieldErrors } from "@/lib/form-errors";
 import { getSiteUrl } from "@/lib/get-site-url";
 import { createClient } from "@/lib/supabase/server";
@@ -42,15 +43,26 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     const message =
       error.code === "invalid_credentials"
         ? "Correo o contraseña incorrectos."
         : "No se pudo iniciar sesión. Intenta de nuevo.";
+    await logAuthEvent({
+      action: "login_failed",
+      userId: null,
+      description: `Intento de inicio de sesión fallido (${parsed.data.email}).`,
+    });
     return { error: message };
   }
+
+  await logAuthEvent({
+    action: "login",
+    userId: data.user.id,
+    description: "Inicio de sesión exitoso.",
+  });
 
   const next = String(formData.get("next") ?? "/admin");
   redirect(next.startsWith("/admin") ? next : "/admin");
@@ -59,6 +71,12 @@ export async function signIn(
 export async function signOut() {
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await logAuthEvent({ action: "logout", userId: user.id, description: "Cierre de sesión." });
+    }
     await supabase.auth.signOut();
   }
   redirect("/admin/login");

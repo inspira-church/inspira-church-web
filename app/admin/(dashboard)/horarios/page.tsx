@@ -1,4 +1,7 @@
+import { Clock } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { dayName, formatTime } from "@/lib/format";
@@ -21,21 +24,33 @@ export default async function SchedulesListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Horarios</h1>
-        <Button as={Link} href="/admin/horarios/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Horarios"
+        actions={
+          <Button as={Link} href="/admin/horarios/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!schedules || schedules.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay horarios creados.</p>
-        </div>
+        <EmptyState
+          icon={Clock}
+          title="Todavía no hay horarios creados."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/horarios/nuevo" size="sm">
+              Agregar horario
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {schedules.map((schedule) => (
-            <div key={schedule.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={schedule.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{schedule.name}</p>
                 <p className="truncate text-sm text-ink-faint">

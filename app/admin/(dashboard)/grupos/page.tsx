@@ -1,4 +1,7 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { dayName, formatTime } from "@/lib/format";
@@ -14,21 +17,33 @@ export default async function GrowthGroupsListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Grupos</h1>
-        <Button as={Link} href="/admin/grupos/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Grupos"
+        actions={
+          <Button as={Link} href="/admin/grupos/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!groups || groups.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay grupos creados.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="Todavía no hay grupos creados."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/grupos/nuevo" size="sm">
+              Agregar grupo
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {groups.map((group) => (
-            <div key={group.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={group.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{group.name}</p>
                 <p className="truncate text-sm text-ink-faint">

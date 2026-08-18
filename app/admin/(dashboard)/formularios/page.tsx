@@ -1,5 +1,8 @@
+import { Inbox, UserPlus } from "lucide-react";
 import { ContactRow } from "@/components/admin/ContactRow";
+import { EmptyState } from "@/components/admin/EmptyState";
 import { GroupJoinRequestRow } from "@/components/admin/GroupJoinRequestRow";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function FormsInboxPage() {
@@ -21,18 +24,16 @@ export default async function FormsInboxPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-ink">Formularios</h1>
-      <p className="mt-1 text-sm text-ink-faint">
-        Contactos y solicitudes para pertenecer a un grupo.
-      </p>
+      <PageHeader
+        title="Formularios"
+        description="Contactos y solicitudes para pertenecer a un grupo."
+      />
 
       <h2 className="mt-8 font-display text-lg font-semibold text-ink">
         Contactos ({contacts?.length ?? 0})
       </h2>
       {!contacts || contacts.length === 0 ? (
-        <div className="mt-4 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay contactos.</p>
-        </div>
+        <EmptyState icon={Inbox} title="Todavía no hay contactos." className="mt-4" />
       ) : (
         <div className="mt-4 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {contacts.map((contact) => (
@@ -45,9 +46,7 @@ export default async function FormsInboxPage() {
         Solicitudes de grupo ({groupRequests?.length ?? 0})
       </h2>
       {!groupRequests || groupRequests.length === 0 ? (
-        <div className="mt-4 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay solicitudes.</p>
-        </div>
+        <EmptyState icon={UserPlus} title="Todavía no hay solicitudes." className="mt-4" />
       ) : (
         <div className="mt-4 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {groupRequests.map((request) => (

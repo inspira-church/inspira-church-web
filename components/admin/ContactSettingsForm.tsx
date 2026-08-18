@@ -3,16 +3,27 @@
 import { useActionState } from "react";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
-import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
-import { updateSiteSettings } from "@/lib/actions/settings";
+import { updateContactSettings } from "@/lib/actions/settings";
 import type { ActionState } from "@/lib/form-errors";
 import type { SiteSettings } from "@/lib/queries/settings";
 
 const initialState: ActionState = {};
 
-export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings }) {
-  const [state, formAction] = useActionState(updateSiteSettings, initialState);
+type Values = Pick<
+  SiteSettings,
+  | "whatsappNumber"
+  | "whatsappMessage"
+  | "facebookUrl"
+  | "instagramUrl"
+  | "tiktokUrl"
+  | "xUrl"
+  | "youtubeUrl"
+  | "privacyPolicyUrl"
+>;
+
+export function ContactSettingsForm({ defaultValues }: { defaultValues: Values }) {
+  const [state, formAction] = useActionState(updateContactSettings, initialState);
 
   return (
     <form action={formAction} className="max-w-xl space-y-5">
@@ -43,6 +54,10 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
       {state.fieldErrors?.whatsappMessage && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.whatsappMessage}</p>
       )}
+
+      <div className="border-t border-border pt-5">
+        <p className="font-display text-lg font-semibold text-ink">Redes sociales</p>
+      </div>
 
       <TextField
         label="Facebook"
@@ -99,91 +114,19 @@ export function SettingsForm({ defaultValues }: { defaultValues: SiteSettings })
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeUrl}</p>
       )}
 
+      <div className="border-t border-border pt-5">
+        <p className="font-display text-lg font-semibold text-ink">Legal</p>
+      </div>
+
       <TextField
         label="URL de la política de privacidad"
         name="privacyPolicyUrl"
         type="url"
         defaultValue={defaultValues.privacyPolicyUrl}
-        hint="Opcional — si la defines, los formularios públicos enlazan aquí en el texto de consentimiento."
+        hint="Opcional — si la defines, los formularios públicos y el footer enlazan aquí."
       />
       {state.fieldErrors?.privacyPolicyUrl && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.privacyPolicyUrl}</p>
-      )}
-
-      <TextField
-        label="Dirección de la iglesia"
-        name="churchAddress"
-        defaultValue={defaultValues.churchAddress}
-        hint="Opcional — se muestra en la página Nosotros, junto al mapa."
-      />
-      {state.fieldErrors?.churchAddress && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.churchAddress}</p>
-      )}
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <TextField
-          label="Latitud"
-          name="churchLat"
-          type="number"
-          step="any"
-          defaultValue={defaultValues.churchLat ?? ""}
-          hint="Opcional — si defines lat. y long., el mapa aparece en Nosotros."
-        />
-        <TextField
-          label="Longitud"
-          name="churchLng"
-          type="number"
-          step="any"
-          defaultValue={defaultValues.churchLng ?? ""}
-        />
-      </div>
-      {(state.fieldErrors?.churchLat || state.fieldErrors?.churchLng) && (
-        <p className="-mt-3 text-xs text-danger">
-          {state.fieldErrors.churchLat ?? state.fieldErrors.churchLng}
-        </p>
-      )}
-
-      <TextField
-        label="YouTube Channel ID (para el aviso de En Vivo)"
-        name="youtubeChannelId"
-        defaultValue={defaultValues.youtubeChannelId}
-        hint="Opcional — YouTube Studio → Configuración → Canal → Avanzada. Empieza con 'UC'. Si lo defines, Inicio muestra una sección En Vivo automáticamente cuando el canal está transmitiendo."
-      />
-      {state.fieldErrors?.youtubeChannelId && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeChannelId}</p>
-      )}
-
-      <div className="border-t border-border pt-5">
-        <p className="font-display text-lg font-semibold text-ink">
-          Texto del hero de Inicio
-        </p>
-        <p className="mt-1 text-sm text-ink-faint">
-          Los dos textos que aparecen sobre el slide de fotos, alternando.
-          Encierra una palabra o frase entre <code>**dobles asteriscos**</code>{" "}
-          para que se muestre en negrita.
-        </p>
-      </div>
-
-      <TextAreaField
-        label="Texto 1 del hero"
-        name="heroText1"
-        defaultValue={defaultValues.heroText1}
-        rows={2}
-        required
-      />
-      {state.fieldErrors?.heroText1 && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.heroText1}</p>
-      )}
-
-      <TextAreaField
-        label="Texto 2 del hero"
-        name="heroText2"
-        defaultValue={defaultValues.heroText2}
-        rows={2}
-        required
-      />
-      {state.fieldErrors?.heroText2 && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.heroText2}</p>
       )}
 
       <SubmitButton>Guardar</SubmitButton>

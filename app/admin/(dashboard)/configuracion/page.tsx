@@ -1,15 +1,10 @@
-import { SettingsForm } from "@/components/admin/SettingsForm";
-import { getSiteSettings } from "@/lib/queries/settings";
+import { redirect } from "next/navigation";
 
-export default async function SettingsPage() {
-  const settings = await getSiteSettings();
-
-  return (
-    <div>
-      <h1 className="font-display text-2xl font-semibold text-ink">Configuración</h1>
-      <div className="mt-8">
-        <SettingsForm defaultValues={settings} />
-      </div>
-    </div>
-  );
+/**
+ * "Configuración" se repartió a las páginas que administran cada cosa:
+ * /admin/inicio, /admin/nosotros, /admin/primera-vez, /admin/contacto.
+ * Se mantiene esta redirección por si alguien tiene el link guardado.
+ */
+export default function SettingsPage() {
+  redirect("/admin/contacto");
 }

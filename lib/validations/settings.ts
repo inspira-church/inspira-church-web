@@ -23,6 +23,11 @@ export const siteSettingsSchema = z.object({
     .or(z.literal("")),
   heroText1: z.string().trim().min(1, "Ingresa el primer texto del hero.").max(200),
   heroText2: z.string().trim().min(1, "Ingresa el segundo texto del hero.").max(200),
+  firstTimeHeroText: z
+    .string()
+    .trim()
+    .min(1, "Ingresa el texto del hero de \"Primera vez\".")
+    .max(300),
 });
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;

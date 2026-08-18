@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { createClient } from "@/lib/supabase/server";
 import { createMediaRecordSchema } from "@/lib/validations/media";
 
@@ -61,6 +62,23 @@ export async function createMediaRecord(input: CreateMediaInput): Promise<Create
   revalidatePath("/admin/medios");
   if (parsed.data.module?.startsWith("hero-slide-")) {
     revalidatePath("/");
+    await logAudit({
+      module: "home",
+      action: "update",
+      entityType: "media",
+      entityId: data.id,
+      description: `Reemplazó una foto/video del hero de Inicio (${parsed.data.module}).`,
+    });
+  }
+  if (parsed.data.module === "primera-vez-hero") {
+    revalidatePath("/primera-vez");
+    await logAudit({
+      module: "first_time",
+      action: "update",
+      entityType: "media",
+      entityId: data.id,
+      description: 'Reemplazó la foto de portada de "Primera vez".',
+    });
   }
   return { data: { id: data.id, url: publicUrl } };
 }

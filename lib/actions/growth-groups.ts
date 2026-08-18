@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { growthGroupSchema } from "@/lib/validations/growth-group";
@@ -64,7 +65,11 @@ export async function createGrowthGroup(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("growth_groups").insert(toRow(parsed.data));
+  const { data, error } = await supabase
+    .from("growth_groups")
+    .insert(toRow(parsed.data))
+    .select("id")
+    .single();
 
   if (error) {
     if (isDuplicateSlugError(error)) {
@@ -72,6 +77,14 @@ export async function createGrowthGroup(
     }
     return { error: "No se pudo crear. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "groups",
+    action: "create",
+    entityType: "growth_group",
+    entityId: data.id,
+    description: `Creó el grupo "${parsed.data.name}".`,
+  });
 
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
@@ -101,6 +114,14 @@ export async function updateGrowthGroup(
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await logAudit({
+    module: "groups",
+    action: "update",
+    entityType: "growth_group",
+    entityId: id,
+    description: `Actualizó el grupo "${parsed.data.name}".`,
+  });
+
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
   redirect("/admin/grupos");
@@ -109,6 +130,13 @@ export async function updateGrowthGroup(
 export async function toggleGrowthGroupActive(id: string, nextActive: boolean) {
   const supabase = await createClient();
   await supabase.from("growth_groups").update({ active: nextActive }).eq("id", id);
+  await logAudit({
+    module: "groups",
+    action: nextActive ? "activate" : "deactivate",
+    entityType: "growth_group",
+    entityId: id,
+    description: `${nextActive ? "Activó" : "Desactivó"} un grupo.`,
+  });
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { aboutContentSchema } from "@/lib/validations/about";
@@ -56,6 +57,13 @@ export async function updateAboutContent(
   if (error) {
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "about",
+    action: "update",
+    entityType: "about_content",
+    description: "Actualizó el contenido de la página Nosotros.",
+  });
 
   revalidatePath("/admin/nosotros");
   revalidatePath("/nosotros");

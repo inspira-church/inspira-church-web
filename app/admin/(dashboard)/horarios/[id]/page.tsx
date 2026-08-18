@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { ScheduleForm } from "@/components/admin/ScheduleForm";
 import { updateSchedule } from "@/lib/actions/schedules";
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +23,10 @@ export default async function EditSchedulePage({
 
   return (
     <div>
+      <Breadcrumbs
+        items={[{ label: "Horarios", href: "/admin/horarios" }, { label: "Editar horario" }]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">Editar horario</h1>
       <div className="mt-8">
         <ScheduleForm

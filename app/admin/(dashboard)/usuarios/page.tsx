@@ -1,4 +1,7 @@
+import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { toggleStaffActive } from "@/lib/actions/users";
@@ -13,21 +16,33 @@ export default async function UsersListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">Usuarios</h1>
-        <Button as={Link} href="/admin/usuarios/nuevo" size="sm">
-          Invitar
-        </Button>
-      </div>
+      <PageHeader
+        title="Usuarios"
+        actions={
+          <Button as={Link} href="/admin/usuarios/nuevo" size="sm">
+            Invitar
+          </Button>
+        }
+      />
 
       {!users || users.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay cuentas de staff.</p>
-        </div>
+        <EmptyState
+          icon={ShieldCheck}
+          title="Todavía no hay cuentas de staff."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/usuarios/nuevo" size="sm">
+              Invitar usuario
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {users.map((staffUser) => (
-            <div key={staffUser.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={staffUser.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">
                   {staffUser.full_name || staffUser.email}

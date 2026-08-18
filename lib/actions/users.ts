@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { getSiteUrl } from "@/lib/get-site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -81,6 +82,14 @@ export async function inviteStaffUser(
     .update({ phone: parsed.data.phone, role: parsed.data.role })
     .eq("id", data.user.id);
 
+  await logAudit({
+    module: "users",
+    action: "create",
+    entityType: "profile",
+    entityId: data.user.id,
+    description: `Invitó a "${parsed.data.fullName}" (${parsed.data.role}) como staff.`,
+  });
+
   revalidatePath("/admin/usuarios");
   redirect("/admin/usuarios");
 }
@@ -120,6 +129,14 @@ export async function updateStaffUser(
     return { error: PRIMARY_ADMIN_ERROR };
   }
 
+  await logAudit({
+    module: "users",
+    action: "update",
+    entityType: "profile",
+    entityId: id,
+    description: `Actualizó al usuario "${parsed.data.fullName}" (rol: ${parsed.data.role}, activo: ${parsed.data.active}).`,
+  });
+
   revalidatePath("/admin/usuarios");
   redirect("/admin/usuarios");
 }
@@ -130,5 +147,12 @@ export async function toggleStaffActive(id: string, nextActive: boolean) {
 
   const supabase = await createClient();
   await supabase.from("profiles").update({ active: nextActive }).eq("id", id);
+  await logAudit({
+    module: "users",
+    action: nextActive ? "activate" : "deactivate",
+    entityType: "profile",
+    entityId: id,
+    description: `${nextActive ? "Activó" : "Desactivó"} a un usuario del staff.`,
+  });
   revalidatePath("/admin/usuarios");
 }

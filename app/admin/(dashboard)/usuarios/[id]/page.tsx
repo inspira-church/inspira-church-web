@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { EditUserForm } from "@/components/admin/EditUserForm";
 import { updateStaffUser } from "@/lib/actions/users";
 import { createClient } from "@/lib/supabase/server";
@@ -18,6 +19,10 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 
   return (
     <div>
+      <Breadcrumbs
+        items={[{ label: "Usuarios", href: "/admin/usuarios" }, { label: "Editar usuario" }]}
+        className="mb-3"
+      />
       <h1 className="font-display text-2xl font-semibold text-ink">Editar usuario</h1>
       <div className="mt-8">
         <EditUserForm

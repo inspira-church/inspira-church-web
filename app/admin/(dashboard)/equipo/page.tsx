@@ -1,5 +1,8 @@
 import Image from "next/image";
+import { UserRound } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { toggleTeamMemberActive } from "@/lib/actions/team-members";
@@ -14,23 +17,33 @@ export default async function TeamMembersListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-ink">
-          Pastores y líderes
-        </h1>
-        <Button as={Link} href="/admin/equipo/nuevo" size="sm">
-          Agregar
-        </Button>
-      </div>
+      <PageHeader
+        title="Pastores y líderes"
+        actions={
+          <Button as={Link} href="/admin/equipo/nuevo" size="sm">
+            Agregar
+          </Button>
+        }
+      />
 
       {!members || members.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border-strong p-10 text-center">
-          <p className="text-ink-soft">Todavía no hay nadie registrado.</p>
-        </div>
+        <EmptyState
+          icon={UserRound}
+          title="Todavía no hay nadie registrado."
+          className="mt-8"
+          action={
+            <Button as={Link} href="/admin/equipo/nuevo" size="sm">
+              Agregar persona
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {members.map((member) => (
-            <div key={member.id} className="flex flex-wrap items-center gap-4 p-4">
+            <div
+              key={member.id}
+              className="flex flex-wrap items-center gap-4 p-4 transition-colors duration-150 hover:bg-ink/5"
+            >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-paper">
                 {member.photo_url && (
                   <Image

@@ -31,6 +31,19 @@ export function dayName(dayOfWeek: number) {
   return DAY_NAMES[dayOfWeek] ?? "";
 }
 
+/** "hace 20 min" / "hace 1 h" — cae a fecha corta pasados 7 días. */
+export function formatRelativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMin = Math.round(diffMs / 60000);
+  if (diffMin < 1) return "justo ahora";
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  const diffHours = Math.round(diffMin / 60);
+  if (diffHours < 24) return `hace ${diffHours} h`;
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 7) return `hace ${diffDays} d`;
+  return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+}
+
 /** Acepta youtube.com/watch?v=, youtu.be/ y youtube.com/embed/. */
 export function getYouTubeId(url: string): string | null {
   try {
