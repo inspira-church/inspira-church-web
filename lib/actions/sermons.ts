@@ -142,6 +142,26 @@ export async function toggleSermonPublished(id: string, nextPublished: boolean) 
   revalidatePath("/predicas");
 }
 
+export async function deleteSermon(id: string, title: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("sermons").delete().eq("id", id);
+  if (error) return { error: "No se pudo eliminar. Intenta de nuevo." };
+
+  await logAudit({
+    module: "sermons",
+    action: "delete",
+    entityType: "sermon",
+    entityId: id,
+    description: `Eliminó la prédica "${title}".`,
+  });
+
+  revalidatePath("/admin/predicas");
+  revalidatePath("/admin/oraciones");
+  revalidatePath("/predicas");
+  revalidatePath("/oraciones");
+  revalidatePath("/");
+}
+
 /**
  * "Cargar más" en /predicas — se llama directo desde el cliente (SermonsList),
  * no desde un <form>. Es solo lectura pública, no necesita revalidar nada.

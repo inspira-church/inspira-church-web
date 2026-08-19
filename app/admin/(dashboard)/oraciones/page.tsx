@@ -1,13 +1,14 @@
 import Image from "next/image";
 import { HandHeart } from "lucide-react";
 import Link from "next/link";
+import { ConfirmForm } from "@/components/admin/ConfirmForm";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { PRAYER_TOPIC } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
-import { toggleSermonPublished } from "@/lib/actions/sermons";
+import { deleteSermon, toggleSermonPublished } from "@/lib/actions/sermons";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -91,6 +92,14 @@ export default async function PrayerRecordingsAdminPage() {
                   {sermon.published ? "Despublicar" : "Publicar"}
                 </button>
               </form>
+              <ConfirmForm
+                action={deleteSermon.bind(null, sermon.id, sermon.title)}
+                confirmMessage={`¿Eliminar "${sermon.title}"? Esta acción no se puede deshacer.`}
+              >
+                <button type="submit" className="text-sm text-danger hover:underline">
+                  Eliminar
+                </button>
+              </ConfirmForm>
             </div>
           ))}
         </div>
