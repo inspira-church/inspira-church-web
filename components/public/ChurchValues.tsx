@@ -4,6 +4,7 @@ import { Eyebrow, PosterHeading } from "@/components/public/cartel";
 import { useScrollReveal } from "@/components/public/useScrollReveal";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
+import type { AboutValue } from "@/lib/queries/about";
 import { cn } from "@/lib/utils";
 
 const VALUE_COLORS = [ABOUT_COLORS.teal, ABOUT_COLORS.coral, ABOUT_COLORS.cream, ABOUT_COLORS.tealLight];
@@ -11,7 +12,7 @@ const VALUE_COLORS = [ABOUT_COLORS.teal, ABOUT_COLORS.coral, ABOUT_COLORS.cream,
 interface ChurchValuesProps {
   eyebrow: string;
   title: string;
-  values: { title: string; description: string }[];
+  values: AboutValue[];
 }
 
 function ValueRow({
@@ -19,7 +20,7 @@ function ValueRow({
   color,
   align,
 }: {
-  value: { title: string; description: string };
+  value: AboutValue;
   color: string;
   align: "left" | "right";
 }) {
@@ -63,6 +64,9 @@ function ValueRow({
 }
 
 export function ChurchValues({ eyebrow, title, values }: ChurchValuesProps) {
+  const visibleValues = values.filter((v) => v.visible && v.title.trim() && v.description.trim());
+  if (visibleValues.length === 0) return null;
+
   return (
     <section className="border-b border-white/10 bg-black py-16 sm:py-24">
       <Container>
@@ -70,9 +74,9 @@ export function ChurchValues({ eyebrow, title, values }: ChurchValuesProps) {
         <PosterHeading>{title}</PosterHeading>
 
         <div className="mt-16 flex flex-col gap-12 sm:gap-16">
-          {values.map((value, i) => (
+          {visibleValues.map((value, i) => (
             <ValueRow
-              key={value.title}
+              key={`${value.title}-${i}`}
               value={value}
               color={VALUE_COLORS[i % VALUE_COLORS.length]}
               align={i % 2 === 0 ? "left" : "right"}

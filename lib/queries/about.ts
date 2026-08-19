@@ -7,6 +7,13 @@ export interface AboutBelief {
   visible: boolean;
 }
 
+export interface AboutValue {
+  title: string;
+  description: string;
+  /** Permite preparar un valor en el panel sin mostrarlo todavía en /nosotros. */
+  visible: boolean;
+}
+
 export interface AboutContent {
   historyEyebrow: string;
   historyTitle: string;
@@ -28,7 +35,7 @@ export interface AboutContent {
 
   valuesEyebrow: string;
   valuesTitle: string;
-  values: { title: string; description: string }[];
+  values: AboutValue[];
 
   beliefsEyebrow: string;
   beliefsTitle: string;
@@ -109,13 +116,26 @@ export const DEFAULT_ABOUT_CONTENT: AboutContent = {
   valuesEyebrow: "Lo que nos mueve",
   valuesTitle: "Nuestros valores",
   values: [
-    { title: "Cercanía", description: "Creemos en relaciones reales. Aquí nadie es un número." },
+    {
+      title: "Cercanía",
+      description: "Creemos en relaciones reales. Aquí nadie es un número.",
+      visible: true,
+    },
     {
       title: "Excelencia",
       description: "Hacemos las cosas con calidad, como una ofrenda a Dios.",
+      visible: true,
     },
-    { title: "Generosidad", description: "Damos libremente nuestro tiempo, recursos y nuestra casa." },
-    { title: "Crecimiento", description: "Nadie se queda igual. Siempre hay un siguiente paso." },
+    {
+      title: "Generosidad",
+      description: "Damos libremente nuestro tiempo, recursos y nuestra casa.",
+      visible: true,
+    },
+    {
+      title: "Crecimiento",
+      description: "Nadie se queda igual. Siempre hay un siguiente paso.",
+      visible: true,
+    },
   ],
 
   beliefsEyebrow: "Lo que creemos",
@@ -150,6 +170,21 @@ function normalizeBeliefs(raw: unknown): AboutBelief[] | null {
   return raw as AboutBelief[];
 }
 
+/**
+ * Antes de permitir agregar/quitar valores, `values` siempre tenía
+ * exactamente 4 filas sin `visible` (todas implícitamente visibles). Si la
+ * fila guardada tiene ese formato viejo, se completa `visible: true` en vez
+ * de perder los valores reales ya escritos por el admin.
+ */
+function normalizeValues(raw: unknown): AboutValue[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  return raw.map((v: Partial<AboutValue>) => ({
+    title: v.title ?? "",
+    description: v.description ?? "",
+    visible: v.visible ?? true,
+  }));
+}
+
 /** Igual que site_settings.general, pero en su propia fila (key='about') por ser un bloque de texto grande y aparte. */
 export async function getAboutContent(): Promise<AboutContent> {
   const supabase = await createClient();
@@ -164,7 +199,7 @@ export async function getAboutContent(): Promise<AboutContent> {
   return {
     ...DEFAULT_ABOUT_CONTENT,
     ...saved,
-    values: saved.values && saved.values.length > 0 ? saved.values : DEFAULT_ABOUT_CONTENT.values,
+    values: normalizeValues(saved.values) ?? DEFAULT_ABOUT_CONTENT.values,
     beliefs: normalizeBeliefs(saved.beliefs) ?? DEFAULT_ABOUT_CONTENT.beliefs,
   };
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 const valueItemSchema = z.object({
   title: z.string().trim().min(1, "Ingresa un título."),
   description: z.string().trim().min(1, "Ingresa una descripción."),
+  visible: z.boolean(),
 });
 
 const beliefItemSchema = z.object({
@@ -32,7 +33,7 @@ export const aboutContentSchema = z.object({
 
   valuesEyebrow: z.string().trim().min(1, "Ingresa el texto pequeño."),
   valuesTitle: z.string().trim().min(1, "Ingresa el título."),
-  values: z.array(valueItemSchema).length(4, "Se necesitan exactamente 4 valores."),
+  values: z.array(valueItemSchema).min(1, "Ingresa al menos un valor."),
 
   beliefsEyebrow: z.string().trim().min(1, "Ingresa el texto pequeño."),
   beliefsTitle: z.string().trim().min(1, "Ingresa el título."),

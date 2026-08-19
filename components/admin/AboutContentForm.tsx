@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { BeliefsEditor } from "@/components/admin/BeliefsEditor";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { ValuesEditor } from "@/components/admin/ValuesEditor";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
 import { updateAboutContent } from "@/lib/actions/about";
@@ -162,25 +163,11 @@ export function AboutContentForm({ defaultValues }: { defaultValues: AboutConten
             required
           />
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          {defaultValues.values.map((value, i) => (
-            <div key={i} className="space-y-3 rounded-lg border border-border p-4">
-              <TextField
-                label={`Valor ${i + 1} — título`}
-                name={`values.${i}.title`}
-                defaultValue={value.title}
-                required
-              />
-              <TextAreaField
-                label="Descripción"
-                name={`values.${i}.description`}
-                defaultValue={value.description}
-                rows={2}
-                required
-              />
-            </div>
-          ))}
-        </div>
+        <p className="text-sm text-ink-soft">
+          Los valores con descripción vacía, o marcados como no visibles, no aparecen en el
+          sitio público — quedan preparados para completarlos después.
+        </p>
+        <ValuesEditor defaultValues={defaultValues.values} />
       </section>
 
       <section className="space-y-5">

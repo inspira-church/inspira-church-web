@@ -7,9 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { aboutContentSchema } from "@/lib/validations/about";
 
 function parseForm(formData: FormData) {
-  const values = [0, 1, 2, 3].map((i) => ({
+  const valuesCount = Number(formData.get("valuesCount") ?? 0);
+  const values = Array.from({ length: valuesCount }, (_, i) => ({
     title: formData.get(`values.${i}.title`),
     description: formData.get(`values.${i}.description`),
+    visible: formData.get(`values.${i}.visible`) != null,
   }));
 
   const beliefsCount = Number(formData.get("beliefsCount") ?? 0);
