@@ -22,7 +22,7 @@ export function AboutCTA({ title, text }: AboutCTAProps) {
         </p>
         <p className={cn(hind.className, "mx-auto mt-5 max-w-md text-lg text-white/70")}>{text}</p>
         <div className="mt-10 flex justify-center">
-          <GoldButton href="/primera-vez" color={ABOUT_COLORS.coral}>
+          <GoldButton href="/contacto" color={ABOUT_COLORS.coral}>
             Quiero visitar Inspira
           </GoldButton>
         </div>

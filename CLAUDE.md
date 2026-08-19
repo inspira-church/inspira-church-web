@@ -203,10 +203,11 @@ contenido nuevo cabe en la arquitectura existente:
   `<dialog>`; `type='lider'` → `LeadershipMosaic`, mosaico sin biografía).
   `active`/`order_index` ya cubrían "visible en Nosotros"/"orden" — no hizo
   falta ningún campo nuevo tipo `show_on_about_page`.
-- Ubicación y CTA final: reutilizan `site_settings.churchAddress/Lat/Lng`
-  (mapa grande vía `SinglePointMap`/Leaflet, sin cambios) y la ruta
-  `/primera-vez` ya existente (mismo destino que "Da el siguiente paso" en
-  Inicio) — ninguna ruta nueva.
+- Ubicación: reutiliza `site_settings.churchAddress/Lat/Lng` (mapa grande
+  vía `SinglePointMap`/Leaflet, sin cambios). CTA final: botón "Quiero
+  visitar Inspira" apunta a `/contacto` (mismo destino que "Planea tu
+  visita" del header/Inicio) — decisión explícita del usuario, no
+  `/primera-vez` como en el primer borrador. Ninguna ruta nueva.
 
 **Creencias — accordion de 10 categorías + "La Iglesia".** `beliefs` pasó de
 `string[]` plano a `{ category, content, visible }[]`. `getAboutContent()`
