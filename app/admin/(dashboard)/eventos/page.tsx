@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
+import { ConfirmForm } from "@/components/admin/ConfirmForm";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { deriveEventStatus } from "@/lib/event-status";
 import { formatDate } from "@/lib/format";
-import { toggleEventPublished } from "@/lib/actions/events";
+import { deleteEvent, toggleEventPublished } from "@/lib/actions/events";
 import { createClient } from "@/lib/supabase/server";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -19,7 +21,7 @@ export default async function EventsListPage() {
   const supabase = await createClient();
   const { data: events } = await supabase
     .from("events")
-    .select("id, name, slug, image_url, event_date, status, published")
+    .select("id, name, category, slug, image_url, event_date, event_time, end_date, end_time, status, published")
     .order("event_date", { ascending: false });
 
   return (
@@ -64,9 +66,24 @@ export default async function EventsListPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{event.name}</p>
-                <p className="text-sm text-ink-faint">{formatDate(event.event_date)}</p>
+                <p className="text-sm text-ink-faint">
+                  {formatDate(event.event_date)}
+                  {event.category ? ` · ${event.category}` : ""}
+                </p>
               </div>
-              <Badge>{STATUS_LABEL[event.status] ?? event.status}</Badge>
+              <Badge>
+                {
+                  STATUS_LABEL[
+                    deriveEventStatus({
+                      status: event.status,
+                      eventDate: event.event_date,
+                      eventTime: event.event_time,
+                      endDate: event.end_date,
+                      endTime: event.end_time,
+                    })
+                  ]
+                }
+              </Badge>
               <Badge variant={event.published ? "accent" : "neutral"}>
                 {event.published ? "Publicado" : "Borrador"}
               </Badge>
@@ -81,6 +98,14 @@ export default async function EventsListPage() {
                   {event.published ? "Despublicar" : "Publicar"}
                 </button>
               </form>
+              <ConfirmForm
+                action={deleteEvent.bind(null, event.id, event.name)}
+                confirmMessage={`¿Eliminar "${event.name}"? Esta acción no se puede deshacer.`}
+              >
+                <button type="submit" className="text-sm text-danger hover:underline">
+                  Eliminar
+                </button>
+              </ConfirmForm>
             </div>
           ))}
         </div>

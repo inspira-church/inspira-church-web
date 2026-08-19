@@ -56,22 +56,44 @@ export interface GrowthGroup {
   coleaderFullName: string | null;
 }
 
+/** Tal como se guarda en Supabase — "cancelado" es la única bandera manual real. "proximo" vs "finalizado" se recalculan siempre por fecha, ver lib/event-status.ts. */
 export type EventStatus = "proximo" | "finalizado" | "cancelado";
+
+export type EventModality = "presencial" | "virtual" | "hibrido";
+
+export type EventRegistrationStatus = "abiertas" | "ultimos_cupos" | "cerradas" | "agotado";
+
+export interface EventPracticalInfoItem {
+  title: string;
+  content: string;
+}
 
 export interface ChurchEvent {
   id: string;
   name: string;
+  subtitle: string | null;
   slug: string;
   description: string;
   imageUrl: string;
   eventDate: string;
   eventTime: string | null;
+  endDate: string | null;
+  endTime: string | null;
   locationName: string | null;
   address: string | null;
   lat: number | null;
   lng: number | null;
+  locationPublic: boolean;
+  modality: EventModality;
+  category: string | null;
   capacity: number | null;
+  requiresRegistration: boolean;
   registrationUrl: string | null;
+  registrationStatus: EventRegistrationStatus | null;
+  showCountdown: boolean;
+  practicalInfo: EventPracticalInfoItem[];
+  cost: string | null;
+  ageRange: string | null;
   status: EventStatus;
   published: boolean;
 }

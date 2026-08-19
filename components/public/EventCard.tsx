@@ -1,24 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
+import { deriveEventStatus, registrationCtaLabel } from "@/lib/event-status";
 import { anton, hind } from "@/lib/fonts";
 import { formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { EventStatus } from "@/types/content";
+import type { ChurchEvent } from "@/types/content";
 
-interface EventCardProps {
-  slug: string;
-  name: string;
-  imageUrl?: string | null;
-  eventDate: string;
-  eventTime?: string | null;
-  locationName?: string | null;
-  description?: string | null;
-  registrationUrl?: string | null;
-  status: EventStatus;
+interface EventCardProps
+  extends Pick<
+    ChurchEvent,
+    | "slug"
+    | "name"
+    | "subtitle"
+    | "imageUrl"
+    | "eventDate"
+    | "eventTime"
+    | "endDate"
+    | "endTime"
+    | "locationName"
+    | "status"
+    | "requiresRegistration"
+    | "registrationUrl"
+    | "registrationStatus"
+  > {
   /** Color de acento rotativo (CAMPAIGN_COLORS) — mismo patrón que Inicio. */
   accentColor?: string;
-  /** Eventos pasados — misma tarjeta, atenuada. */
-  muted?: boolean;
 }
 
 function eventDateParts(iso: string) {
@@ -32,65 +38,88 @@ function eventDateParts(iso: string) {
   };
 }
 
-/** Misma receta que las tarjetas de "Próximos eventos" de Inicio — aquí como componente reutilizable para /eventos. */
+const OVERLAY_LABEL: Record<string, string> = {
+  finalizado: "Finalizado",
+  cancelado: "Cancelado",
+  agotado: "Agotado",
+};
+
+/** Tarjeta ligera de /eventos — imagen, fecha, título, subtítulo, hora·lugar, CTA. Sin caja negra pesada alrededor. */
 export function EventCard({
   slug,
   name,
+  subtitle,
   imageUrl,
   eventDate,
   eventTime,
+  endDate,
+  endTime,
   locationName,
-  description,
-  registrationUrl,
   status,
+  requiresRegistration,
+  registrationUrl,
+  registrationStatus,
   accentColor = "#ff8a3d",
-  muted = false,
 }: EventCardProps) {
+  const derived = deriveEventStatus({ status, eventDate, eventTime, endDate, endTime });
+  const muted = derived === "finalizado" || derived === "cancelado";
+  const overlay = derived !== "proximo" ? derived : registrationStatus === "agotado" ? "agotado" : null;
   const { day, month } = eventDateParts(eventDate);
+
+  const ctaLabel =
+    derived === "proximo" && requiresRegistration && registrationUrl
+      ? registrationCtaLabel(registrationUrl)
+      : "Ver más";
 
   return (
     <Link
       href={`/eventos/${slug}`}
       className={cn(
-        "group flex flex-col overflow-hidden border border-white/10 bg-black transition-all duration-300 ease-out hover:-translate-y-1 hover:brightness-110",
-        muted && "opacity-55 hover:opacity-80"
+        "group flex flex-col transition-opacity duration-300 ease-out motion-reduce:transition-none",
+        muted && "opacity-60 hover:opacity-90"
       )}
     >
-      {imageUrl && (
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-[#0d0d0d]">
+        {imageUrl && (
           <Image
             src={imageUrl}
             alt=""
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-105"
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
-        </div>
-      )}
-      <div className="flex flex-1 flex-col p-6">
+        )}
+        {overlay && (
+          <span
+            className={cn(
+              "absolute left-3 top-3 rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white",
+              overlay === "agotado" || overlay === "cancelado" ? "bg-[#87281B]" : "bg-black/70"
+            )}
+          >
+            {OVERLAY_LABEL[overlay]}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col pt-4">
         <div className="flex items-baseline gap-1.5" style={{ color: accentColor }}>
-          <span className={cn(anton.className, "text-4xl leading-none")}>{day}</span>
+          <span className={cn(anton.className, "text-3xl leading-none")}>{day}</span>
           <span className="text-xs font-bold uppercase tracking-widest">{month}</span>
         </div>
-        <h3 className={cn(anton.className, "mt-3 text-xl uppercase leading-tight text-white")}>
+        <h3 className={cn(anton.className, "mt-2 text-xl uppercase leading-tight text-white")}>
           {name}
         </h3>
-        {description && (
-          <p className={cn(hind.className, "mt-2 line-clamp-2 text-sm text-white/60")}>
-            {description}
-          </p>
-        )}
-        <p className="mt-4 text-sm text-white/50">
+        {subtitle && <p className={cn(hind.className, "mt-1 text-sm text-white/60")}>{subtitle}</p>}
+        <p className="mt-3 text-sm text-white/50">
           {eventTime ? formatTime(eventTime) : ""}
           {eventTime && locationName ? " · " : ""}
           {locationName}
         </p>
         <p
-          className="mt-auto pt-5 text-sm font-bold uppercase tracking-wide"
+          className="mt-auto pt-4 text-sm font-bold uppercase tracking-wide"
           style={{ color: accentColor }}
         >
-          {status === "proximo" ? (registrationUrl ? "Inscribirme" : "Ver más") : "Ver más"}{" "}
-          <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+          {ctaLabel}{" "}
+          <span className="inline-block transition-transform duration-200 motion-reduce:transition-none group-hover:translate-x-1">
             →
           </span>
         </p>

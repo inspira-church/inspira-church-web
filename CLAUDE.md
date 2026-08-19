@@ -143,12 +143,13 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-21 migraciones en `supabase/migrations/`, 001 a 021 (`018` agregó
+22 migraciones en `supabase/migrations/`, 001 a 022 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
-`sermons.featured`; `021` agregó `sermons.meeting_type` — ver secciones
-"Página Nosotros", "Página Grupos", "Página Prédicas" y "Página Oraciones"
-más abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese
+`sermons.featured`; `021` agregó `sermons.meeting_type`; `022` agregó 12
+columnas nuevas a `events` — ver secciones "Página Nosotros", "Página
+Grupos", "Página Prédicas", "Página Oraciones" y "Página Eventos" más
+abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese
 archivo para el detalle migración por migración, el bootstrap del primer
 admin, y la auditoría de RLS completa (Fase 12).
 Resumen de lo no cubierto ahí:
@@ -506,6 +507,119 @@ de la misma modalidad — sin motor de recomendación, igual de simple que
 título "ORACIONES" del Hero es ahora un `<h1>` explícito, igual que ya
 hacía `/predicas`.
 
+## Página Eventos — "esto es lo que viene" (arquitectura final)
+
+`/eventos` pasó de listado plano a experiencia editorial: Hero → `FeaturedEvent`
+("Próximo evento", el futuro publicado más cercano, nunca elegido a mano) →
+grid "Próximos eventos" (excluye explícitamente al destacado) → "Eventos
+pasados" (solo si hay contenido real) → `EventsClosingCTA` (teal, sin botón
+forzado — el brief permite cierre puramente visual cuando no hay volumen que
+justifique un CTA de "ver todo"). `/eventos/[slug]` se rediseñó completo:
+Hero visual → franja Fecha/Hora/Lugar/Capacidad → Descripción (si existe) →
+Información práctica (si hay ítems) → Cómo llegar (si aplica) → Inscripción o
+"evento finalizado" → hasta 3 relacionados.
+
+**"Próximo"/"Finalizado" ya no se guardan — se calculan siempre.** Antes,
+`events.status` (`proximo`/`finalizado`/`cancelado`) era 100% manual: un
+evento pasado seguía marcado "Próximo" si nadie lo actualizaba a mano — el
+bug exacto que el brief pedía evitar. `lib/event-status.ts` (nuevo) expone
+`deriveEventStatus()`: si `status === 'cancelado'` gana siempre (única
+bandera manual real); si no, compara `end_date/end_time` (o `event_date/
+event_time` si no hay fin) contra `Date.now()`. **La columna `status` no se
+migró** — sigue siendo el mismo enum de `001`, pero desde este rediseño el
+formulario de Admin solo escribe `'proximo'` o `'cancelado'` (su selector
+"Estado" ahora es binario: Activo/Cancelado — "Próximo/Finalizado se
+calculan solos por fecha" como dice el propio hint del campo). Todas las
+vistas (`EventCard`, `FeaturedEvent`, el detalle, y el filtro de "Próximos
+eventos" de Inicio) usan `deriveEventStatus()`/`isEventUpcoming()` en vez de
+leer `event.status` directamente — confirmado con tests unitarios nuevos en
+`tests/unit/lib/event-status.test.ts`.
+
+**Migración `022_events_redesign.sql` — 12 columnas nuevas, sin tocar las
+existentes.** `subtitle`, `end_date`, `end_time`, `modality` (enum
+`presencial`\|`virtual`\|`hibrido`, default `presencial`), `category` (texto
+libre, mismo patrón que `group_type`/`topics` — sin tabla de catálogo),
+`requires_registration`, `registration_status` (enum `abiertas`\|
+`ultimos_cupos`\|`cerradas`\|`agotado`, solo relevante si requiere
+inscripción), `show_countdown`, `practical_info` (JSONB `{title,content}[]`,
+mismo patrón que `about.beliefs` — `PracticalInfoEditor.tsx` es
+prácticamente un fork de `BeliefsEditor.tsx`), `cost` y `age_range` (texto
+libre — no existe configuración de moneda en el proyecto, así que no se
+inventó una; el admin escribe "Gratuito" o "$50.000 COP" tal cual) y
+`location_public` (mismo patrón que `growth_groups.location_public`, 019,
+pero resuelto en la capa de queries en vez de una vista nueva: `mapRow()` en
+`lib/queries/events.ts` pone `address`/`lat`/`lng` en `null` cuando es
+`false`, `location_name` en texto se sigue mostrando). **Aplicada en
+producción vía el SQL Editor de Supabase** (mismo procedimiento manual que
+`018`-`021` — el entorno no tiene el CLI de Supabase enlazado).
+
+**Bug real encontrado y corregido: los campos opcionales no se podían
+vaciar.** Al mover "Cara a Cara con Jesús" del campo Descripción (donde
+vivía por error) al nuevo Subtítulo, guardar con Descripción vacía no
+borraba el valor viejo. Causa: `toRow()` en `lib/actions/events.ts` pasaba
+campos opcionales como `data.campo` sin normalizar — cuando el campo queda
+`undefined`, `JSON.stringify` lo omite del payload que el cliente de
+Supabase envía, así que la columna nunca se sobrescribía (el `update` sí se
+ejecutaba, solo que sin esa clave). Se corrigió con `?? null` en todos los
+campos opcionales de `toRow()` — mismo patrón de bug que probablemente
+exista en otros `lib/actions/*.ts` con la misma forma (`campo: data.campo`
+sin coalescer), no auditado en esta sesión por estar fuera de alcance.
+Validado en vivo: subtítulo movido correctamente, "Sobre este evento" ahora
+desaparece del sitio público cuando la descripción está vacía.
+
+**Cuenta regresiva — opt-in, sin timers pesados, invisible a lectores de
+pantalla.** `sermons.show_countdown` (booleano, toggle en Admin) controla si
+`EventCountdown` se renderiza; el cálculo (`msUntilEventStart()`) vive en
+`lib/event-status.ts`. El componente se actualiza cada 30 s (no cada
+segundo) y retorna `null` sin mostrar valores negativos una vez que el
+evento ya empezó. Todo el bloque lleva `aria-hidden="true"` a propósito — la
+fecha completa ya existe como texto semántico en el resto de la página
+(franja Fecha/Hora/Lugar/Capacidad), así que ocultarlo del árbol de
+accesibilidad evita que un lector de pantalla anuncie el conteo
+constantemente sin perder información real. Validado en vivo activando el
+toggle para "Campamento de Jóvenes" (evento real, no de prueba — encaja
+exactamente en el caso de uso que el brief describe).
+
+**Inscripción: se reutiliza `registration_url`, sin campo "tipo" nuevo.**
+El brief pedía poder configurar "tipo y destino" de inscripción, pero ya
+existía `registration_url` (acepta cualquier URL: WhatsApp, Google Forms,
+formulario propio). En vez de agregar un campo `registration_type` redundante
+que el admin tendría que mantener sincronizado con la URL, `lib/event-
+status.ts` expone `registrationCtaLabel(url)`: detecta `wa.me`/
+`whatsapp.com` → "Escríbenos por WhatsApp", `forms.gle`/`docs.google.com/
+forms` → "Completar formulario", cualquier otra URL → "Inscribirme". El CTA
+se adapta solo al destino real, nunca puede desincronizarse. No existe
+todavía un sistema interno de inscripciones con datos de inscritos (§42 del
+brief) — la inscripción siempre sale del sitio hacia una URL externa, así
+que no aplica ninguna consideración de RLS/privacidad de inscritos nueva.
+
+**Ubicación — reutiliza `SinglePointMap`/`LocationPicker`/`googleMapsLink`/
+`wazeLink` tal cual**, sin una tercera implementación de mapas. `LocationPicker`
+(ya existía para Grupos) se reutiliza en `EventForm` para que el admin fije
+`lat`/`lng` con un clic en vez de escribir coordenadas a mano. La sección
+"Cómo llegar" del detalle solo se renderiza si `modality !== 'virtual'` **y**
+`location_public` **y** hay coordenadas — nunca mapa para un evento virtual
+ni para uno con ubicación marcada privada.
+
+**Relacionados: hasta 3, prioriza misma categoría, siempre próximos.**
+`getRelatedEvents()` filtra por `isEventUpcoming()` (nunca sugiere un evento
+ya finalizado) y antepone los de la misma `category` cuando el evento actual
+tiene una — sin motor de recomendación, mismo patrón simple que
+`getRelatedSermons`/`getRelatedPrayerSermons`.
+
+**`deleteEvent` — hueco cerrado.** El listado de Admin no tenía botón
+"Eliminar" (a diferencia de Prédicas/Oraciones, que sí). Se agregó
+`deleteEvent()` en `lib/actions/events.ts` + `ConfirmForm` en el listado,
+mismo patrón exacto que `deleteSermon` — usado en esta sesión para limpiar
+el evento de prueba creado durante la validación, auditado como cualquier
+otra eliminación.
+
+**Contenido real preservado.** El único evento real ("Campamento de
+Jóvenes", 10 de octubre de 2026, La Vega - Cundinamarca, 80 personas) nunca
+se eliminó ni se reemplazó — solo se editó dos veces desde el propio panel
+(mover subtítulo, activar cuenta regresiva), igual que cualquier edición
+normal de un admin, con su rastro completo en `audit_logs`.
+
 ## Botón flotante de contacto (`ContactFAB`)
 
 Reemplaza el botón fijo de WhatsApp que vivía en `app/(public)/layout.tsx`
@@ -562,9 +676,12 @@ diseño "cartel" a Nosotros/Prédicas/Oraciones/Grupos/Eventos/Contacto,
 cambio de acento dorado → coral (`#FF7F50`), separación de grabaciones de
 oración fuera de Prédicas hacia `/oraciones`, la ficha de conexión "Déjanos
 tus datos" de Primera vez (migración 017, tabla `first_time_connections`,
-bandeja en `/admin/formularios`), y el rediseño contemplativo de Oraciones
+bandeja en `/admin/formularios`), el rediseño contemplativo de Oraciones
 con página individual `/oraciones/[slug]` y `sermons.meeting_type`
-(migración 021 — ver sección "Página Oraciones" arriba).
+(migración 021 — ver sección "Página Oraciones" arriba), y el rediseño
+editorial de Eventos con estado calculado por fecha, cuenta regresiva,
+inscripción, información práctica y ubicación (migración 022 — ver sección
+"Página Eventos" arriba).
 
 **Pendiente / abierto, en orden de relevancia:**
 
@@ -591,3 +708,15 @@ con página individual `/oraciones/[slug]` y `sermons.meeting_type`
    horarios de oración automáticamente (fuente única, `getPrayerSchedules()`)
    en cuanto el equipo pastoral cree uno nuevo (ej. "Oración Virtual",
    viernes) desde `/admin/horarios` — no requiere ningún cambio de código.
+9. Solo existe una cuenta en `profiles` (Edwin Osman, Administrador) — nunca
+   se ha validado en vivo el comportamiento del rol Editor (permisos ocultos
+   en el nav, RLS aplicada de verdad) porque no hay con quién probarlo.
+   Verificado únicamente por lectura de código (`admin-nav.ts`, políticas
+   RLS) en las últimas sesiones. Crear una cuenta Editor de prueba desde
+   `/admin/usuarios` → "Invitar" para poder validarlo en vivo.
+10. El bug de `toRow()` corregido en `lib/actions/events.ts` (campos
+    opcionales en `undefined` que `JSON.stringify` omite del payload, así
+    que un `update` nunca los vacía aunque el admin borre el campo) tiene la
+    misma forma en varios otros `lib/actions/*.ts` no auditados en esta
+    sesión — vale la pena revisar `sermons.ts`, `growth-groups.ts`,
+    `team-members.ts`, `about.ts` y `sermon-series.ts` por el mismo patrón.

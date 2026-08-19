@@ -14,7 +14,7 @@ const valid = {
   lng: "-74.0721",
   capacity: "50",
   registrationUrl: "https://example.com/inscripcion",
-  status: "proximo",
+  adminStatus: "activo",
   published: true,
 } as const;
 
@@ -27,8 +27,8 @@ describe("eventSchema", () => {
     expect(eventSchema.safeParse({ ...valid, slug: "Retiro De Jovenes" }).success).toBe(false);
   });
 
-  it("rechaza un estado fuera del enum", () => {
-    expect(eventSchema.safeParse({ ...valid, status: "en-curso" }).success).toBe(false);
+  it("rechaza un estado administrativo fuera del enum", () => {
+    expect(eventSchema.safeParse({ ...valid, adminStatus: "en-curso" }).success).toBe(false);
   });
 
   it("rechaza latitud fuera de rango", () => {
@@ -41,5 +41,13 @@ describe("eventSchema", () => {
 
   it("rechaza capacidad no positiva", () => {
     expect(eventSchema.safeParse({ ...valid, capacity: "0" }).success).toBe(false);
+  });
+
+  it("rechaza una fecha de finalización anterior a la de inicio", () => {
+    expect(eventSchema.safeParse({ ...valid, endDate: "2026-03-10" }).success).toBe(false);
+  });
+
+  it("acepta una fecha de finalización igual o posterior a la de inicio", () => {
+    expect(eventSchema.safeParse({ ...valid, endDate: "2026-03-17" }).success).toBe(true);
   });
 });

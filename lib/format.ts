@@ -70,6 +70,28 @@ export function normalizeSearch(text: string) {
     .trim();
 }
 
+/**
+ * "10 de octubre de 2026" o, si `endIso` es una fecha distinta,
+ * "10–12 de octubre de 2026" (mismo mes) / "30 de sep. – 2 de oct. de 2026"
+ * (meses distintos). Nunca inventa una duración: sin `endIso` cae al
+ * formato de un solo día de siempre.
+ */
+export function formatDateRange(startIso: string, endIso?: string | null) {
+  if (!endIso || endIso === startIso) return formatDate(startIso);
+
+  const start = new Date(`${startIso}T00:00:00`);
+  const end = new Date(`${endIso}T00:00:00`);
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+
+  if (sameMonth) {
+    const day = start.toLocaleDateString("es-CO", { day: "numeric" });
+    return `${day}–${formatDate(endIso)}`;
+  }
+
+  const startShort = start.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+  return `${startShort} – ${formatDate(endIso)}`;
+}
+
 /** "hace 20 min" / "hace 1 h" — cae a fecha corta pasados 7 días. */
 export function formatRelativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();

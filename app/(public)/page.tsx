@@ -8,6 +8,7 @@ import { Container } from "@/components/ui/Container";
 import { dayName, formatDate, formatTime, prayerModality } from "@/lib/format";
 import { anton, caveat, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { PRAYER_TOPIC, SITE_CONFIG } from "@/lib/constants";
+import { isEventUpcoming } from "@/lib/event-status";
 import { googleMapsLink } from "@/lib/maps";
 import { getPublishedEvents } from "@/lib/queries/events";
 import { getHeroSlides } from "@/lib/queries/media";
@@ -55,7 +56,7 @@ export default async function HomePage() {
   const liveVideo = await getCurrentLiveVideo(settings.youtubeChannelId || null);
 
   const upcomingEvents = events
-    .filter((e) => e.status === "proximo")
+    .filter((e) => isEventUpcoming(e))
     .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
     .slice(0, 4);
 
