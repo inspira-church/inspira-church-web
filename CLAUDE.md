@@ -141,11 +141,12 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-17 migraciones en `supabase/migrations/`, 001 a 017, orden y contenido
-verificados contra disco y contra `supabase/README.md` (coinciden, sin
-huecos). Ver ese archivo para el detalle migración por migración, el
-bootstrap del primer admin, y la auditoría de RLS completa (Fase 12).
-Resumen de lo no cubierto ahí:
+18 migraciones en `supabase/migrations/`, 001 a 018 (`018` agregó
+`nosotros-hero`/`nosotros-essence` a la política de lectura pública de
+`media` — ver sección "Página Nosotros" más abajo, y la tabla de
+`supabase/README.md`, ya actualizada). Ver ese archivo para el detalle
+migración por migración, el bootstrap del primer admin, y la auditoría de
+RLS completa (Fase 12). Resumen de lo no cubierto ahí:
 
 - Patrón de RLS confirmado con spot-checks: tablas de contenido (`sermons`,
   `sermon_series`, `ministries`) → lectura pública solo si
@@ -173,8 +174,8 @@ componente en `components/public/`: `AboutHero`, `MissionVision`,
 negro) usando `ABOUT_COLORS` (`lib/fonts.ts`) — paleta de marca fija,
 **distinta** de `CAMPAIGN_COLORS` (esa sigue rotando libremente en Inicio).
 
-**Cero migraciones de Supabase nuevas.** Todo el contenido nuevo cabe en la
-arquitectura existente:
+**Una sola migración nueva (018), de política RLS — no de esquema.** Todo el
+contenido nuevo cabe en la arquitectura existente:
 - Texto: sigue en `site_settings` (key='about'), mismo patrón JSONB de
   siempre — `AboutContent` en `lib/queries/about.ts` creció mucho (historia,
   propósito, misión/visión con etiqueta+frase protagonista+texto, frase de
@@ -186,6 +187,17 @@ arquitectura existente:
   `getAboutHeroImage()`/`getAboutEssenceImage()`; si no hay foto cargada,
   cada sección degrada con su propio fallback (columna de texto centrada en
   el Hero, gradiente de marca en la transición) — nunca un roto ni un mock.
+  **Gotcha real que costó depurar**: `media` no tiene lectura pública
+  general — cada módulo de hero nuevo necesita su propia línea en la
+  política `media_select_public_hero` (ver `012`/`014`), si no, el cliente
+  `anon` del sitio público simplemente no ve la fila aunque exista (se ve
+  bien en `/admin` porque esa página usa el cliente con sesión, que sí pasa
+  `is_editor_or_admin()`). `018_media_public_nosotros_hero_read.sql` agrega
+  `nosotros-hero`/`nosotros-essence` a esa misma política — aplicada ya en
+  producción vía el SQL Editor de Supabase, y committeada en el repo. **Si
+  se agrega un futuro módulo de foto pública nuevo (otro hero, otra
+  transición), hay que repetir este paso** — es fácil olvidarlo porque el
+  bug es invisible en `/admin` y solo se nota en el sitio público.
 - Equipo pastoral y liderazgo: se reutiliza `team_members` sin cambios
   (`type='pastor'` → `PastoralTeam` con modal de biografía nativo
   `<dialog>`; `type='lider'` → `LeadershipMosaic`, mosaico sin biografía).
@@ -275,13 +287,9 @@ oración fuera de Prédicas hacia `/oraciones`, y la ficha de conexión
    oración privadas (`prayer_requests.is_private`).
 5. Revisión legal del texto de consentimiento de datos (Ley 1581 de 2012,
    Colombia) en los formularios públicos — pendiente desde la Fase 12.
-6. **Nosotros — fotos de marca sin cargar todavía**: `nosotros-hero` (junto
-   al título) y `nosotros-essence` (transición "Amamos a Dios...") no
-   tienen foto subida — cada sección ya degrada con un fallback de diseño
-   (no rompe nada), pero falta que alguien las suba desde `/admin/nosotros`
-   para ver la composición de dos columnas del Hero y la foto real en la
-   transición.
-7. **Nosotros — sin líderes activos hoy**: `team_members` no tiene ninguna
-   fila `type='lider', active=true`, así que `LeadershipMosaic` ("Lideramos
-   sirviendo") no se renderiza (oculto a propósito, no es un bug). Aparece
-   solo cuando se cargue al menos un líder desde `/admin/equipo`.
+6. ~~Nosotros — fotos de marca sin cargar~~ — resuelto: `nosotros-hero` y
+   `nosotros-essence` ya tienen foto real subida desde `/admin/nosotros`,
+   confirmado en vivo en `/nosotros` tras aplicar la migración `018`.
+7. ~~Nosotros — sin líderes activos~~ — resuelto: ya hay 3 filas
+   `type='lider', active=true` en `team_members`, `LeadershipMosaic`
+   ("Lideramos sirviendo") se renderiza correctamente en producción.

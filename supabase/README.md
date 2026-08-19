@@ -23,6 +23,7 @@ auditoría de la reorganización del panel admin). Diecisiete migraciones en
 | `015_permissions.sql` | Catálogo `permissions`/`role_permissions` por módulo.acción + `has_permission()` — preparado para permisos finos, sin cambiar el acceso actual |
 | `016_audit_logs_extend.sql` | `audit_logs`: columnas `module`, `user_role`, `user_name`, `previous_data`, `new_data` |
 | `017_first_time_connections.sql` | Ficha de conexión "Déjanos tus datos" de /primera-vez — tabla propia, distinta de `contacts` |
+| `018_media_public_nosotros_hero_read.sql` | Agrega `nosotros-hero`/`nosotros-essence` a la lectura pública de `media` (reemplaza la política de `014`) — fotos del rediseño de /nosotros |
 
 ## Aplicar las migraciones
 
