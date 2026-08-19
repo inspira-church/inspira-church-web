@@ -5,12 +5,14 @@ interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   placeholder?: string;
   options: { value: string; label: string }[];
+  hint?: string;
 }
 
 export function SelectField({
   label,
   placeholder,
   options,
+  hint,
   id,
   name,
   required,
@@ -41,6 +43,7 @@ export function SelectField({
           </option>
         ))}
       </select>
+      {hint && <p className="mt-1 text-xs text-ink-faint">{hint}</p>}
     </div>
   );
 }

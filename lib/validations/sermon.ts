@@ -23,6 +23,7 @@ export const sermonSchema = z.object({
   topics: z.array(z.string()).default([]),
   published: z.boolean().default(false),
   featured: z.boolean().default(false),
+  meetingType: z.enum(["presencial", "virtual"]).optional(),
 });
 
 export type SermonInput = z.infer<typeof sermonSchema>;

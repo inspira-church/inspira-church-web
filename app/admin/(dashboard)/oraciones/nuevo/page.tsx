@@ -33,6 +33,7 @@ export default async function NewPrayerRecordingPage() {
           seriesOptions={(series ?? []).map((s) => ({ value: s.id, label: s.name }))}
           preacherOptions={(preachers ?? []).map((p) => ({ value: p.id, label: p.full_name }))}
           defaultTopics={PRAYER_TOPIC}
+          showMeetingType
           cancelHref="/admin/oraciones"
         />
       </div>

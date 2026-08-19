@@ -2,7 +2,7 @@ import { createPublicClient as createClient } from "@/lib/supabase/public";
 import { PRAYER_TOPIC } from "@/lib/constants";
 
 const SERMON_FIELDS =
-  "id, title, slug, series_id, preacher_id, description, thumbnail_url, sermon_date, topics, featured";
+  "id, title, slug, series_id, preacher_id, description, thumbnail_url, sermon_date, topics, featured, meeting_type";
 
 interface SermonFilters {
   preacherId?: string;
@@ -65,6 +65,12 @@ export async function getPublishedSermons(filters: SermonFilters = {}) {
   return excludePrayerTopic(data ?? []);
 }
 
+/**
+ * Prédica publicada por slug — nunca una grabación de oración: esas tienen
+ * su propia página canónica en /oraciones/[slug] (ver getPrayerSermonBySlug)
+ * y no deben quedar accesibles también desde /predicas/[slug] (contenido
+ * duplicado, dos URLs para lo mismo).
+ */
 export async function getSermonBySlug(slug: string) {
   const supabase = await createClient();
   const { data } = await supabase
@@ -73,7 +79,8 @@ export async function getSermonBySlug(slug: string) {
     .eq("slug", slug)
     .eq("published", true)
     .maybeSingle();
-  return data;
+  if (!data) return data;
+  return excludePrayerTopic([data])[0] ?? null;
 }
 
 export async function getSermonsBySeriesId(seriesId: string) {
@@ -246,4 +253,97 @@ export async function getPreacherIdsWithPublishedSermons() {
     .eq("published", true)
     .not("preacher_id", "is", null);
   return Array.from(new Set((data ?? []).map((row) => row.preacher_id as string)));
+}
+
+// -----------------------------------------------------------------------------
+// Grabaciones de oración — misma tabla `sermons`, filtradas por PRAYER_TOPIC
+// (ver CLAUDE.md, sección "Página Oraciones"). Consultas propias porque el
+// filtro por tema no combina limpio con paginación por SQL usando las
+// funciones de arriba (esas paginan y luego excluyen oración en JS).
+
+/**
+ * Grabaciones de oración publicadas, paginadas — misma estrategia "limit + 1"
+ * que getPublishedSermonsPage. `excludeId` deja fuera la protagonista de
+ * "Último encuentro" para que el archivo no la repita de inmediato.
+ */
+export async function getPublishedPrayerSermonsPage({
+  offset = 0,
+  limit = 9,
+  excludeId,
+}: { offset?: number; limit?: number; excludeId?: string } = {}) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("sermons")
+    .select(SERMON_FIELDS)
+    .eq("published", true)
+    .contains("topics", [normalizedPrayerTopic]);
+
+  if (excludeId) query = query.neq("id", excludeId);
+
+  const { data } = await query
+    .order("sermon_date", { ascending: false })
+    .range(offset, offset + limit);
+
+  const rows = data ?? [];
+  const hasMore = rows.length > limit;
+  return { sermons: rows.slice(0, limit), hasMore };
+}
+
+/** Modalidades (`meeting_type`) realmente usadas entre grabaciones de oración publicadas — determina si el filtro Presencial/Virtual tiene sentido mostrarse. */
+export async function getPrayerMeetingTypesInUse(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("sermons")
+    .select("meeting_type")
+    .eq("published", true)
+    .contains("topics", [normalizedPrayerTopic])
+    .not("meeting_type", "is", null);
+  return Array.from(new Set((data ?? []).map((row) => row.meeting_type as string)));
+}
+
+/**
+ * Grabación de oración publicada por slug — página individual
+ * /oraciones/[slug]. Nunca una prédica normal (ver getSermonBySlug). Trae
+ * la fila completa (`*`), no SERMON_FIELDS, porque la página de detalle
+ * necesita `youtube_url` para el reproductor — a diferencia de las
+ * consultas de listado de arriba, que no lo necesitan.
+ */
+export async function getPrayerSermonBySlug(slug: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("sermons")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .contains("topics", [normalizedPrayerTopic])
+    .maybeSingle();
+  return data;
+}
+
+/**
+ * Hasta `limit` grabaciones de oración relacionadas: prioriza la misma
+ * modalidad (`meeting_type`) cuando está definida, luego completa por fecha
+ * — sin motor de recomendación, igual de simple que getRelatedSermons.
+ */
+export async function getRelatedPrayerSermons(
+  currentId: string,
+  meetingType: string | null,
+  limit = 3
+) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("sermons")
+    .select(SERMON_FIELDS)
+    .eq("published", true)
+    .contains("topics", [normalizedPrayerTopic])
+    .neq("id", currentId)
+    .order("sermon_date", { ascending: false })
+    .limit(limit + 10);
+
+  const rows = data ?? [];
+  if (!meetingType) return rows.slice(0, limit);
+
+  const sameType = rows.filter((r) => r.meeting_type === meetingType);
+  const rest = rows.filter((r) => r.meeting_type !== meetingType);
+  return [...sameType, ...rest].slice(0, limit);
 }

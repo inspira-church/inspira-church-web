@@ -26,7 +26,7 @@ Playwright (e2e).
 app/
 ├─ layout.tsx                 Shell raíz — fonts (Figtree/Petrona), metadata OG, sin auth
 ├─ (public)/layout.tsx        revalidate=60, Header+Footer+WhatsAppButton, sin auth
-├─ (public)/…                 14 páginas públicas
+├─ (public)/…                 15 páginas públicas (incluye /oraciones/[slug])
 ├─ auth/confirm/page.tsx      Callback de invitación de staff (token en fragmento #, no PKCE)
 └─ admin/
    ├─ layout.tsx              Solo aplica [data-admin-theme]; NO hace auth
@@ -36,7 +36,7 @@ app/
       └─ …                    33 páginas del CMS
 ```
 
-51 `page.tsx` en total (14 público, 1 callback de auth, 3 admin-auth, 33
+52 `page.tsx` en total (15 público, 1 callback de auth, 3 admin-auth, 33
 admin-dashboard). Inventario completo de rutas admin: `/admin` (dashboard),
 `inicio`, `nosotros`, `primera-vez`, `contacto` (config general — antes
 `configuracion`, que ahora solo redirige por compatibilidad), `predicas`,
@@ -45,7 +45,9 @@ admin-dashboard). Inventario completo de rutas admin: `/admin` (dashboard),
 filtrados por tag `PRAYER_TOPIC`, no es tabla propia), `medios`,
 `actividad` (bitácora), `formularios` (bandeja: contactos + solicitudes de
 grupo + fichas de "Primera vez"), cada módulo de contenido con `nuevo` y
-`[id]` cuando aplica.
+`[id]` cuando aplica. Público: `/oraciones` (archivo + "Último encuentro")
+gana hermana `/oraciones/[slug]` (página individual propia, no comparte
+ruta con `/predicas/[slug]` — ver sección "Página Oraciones").
 
 **Auth gate real** — vive en `app/admin/(dashboard)/layout.tsx`, no en
 `app/admin/layout.tsx`: pide `supabase.auth.getUser()`, si no hay user
@@ -141,13 +143,14 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-20 migraciones en `supabase/migrations/`, 001 a 020 (`018` agregó
+21 migraciones en `supabase/migrations/`, 001 a 021 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
-`sermons.featured` — ver secciones "Página Nosotros", "Página Grupos" y
-"Página Prédicas" más abajo, y la tabla de `supabase/README.md`, ya
-actualizada). Ver ese archivo para el detalle migración por migración, el
-bootstrap del primer admin, y la auditoría de RLS completa (Fase 12).
+`sermons.featured`; `021` agregó `sermons.meeting_type` — ver secciones
+"Página Nosotros", "Página Grupos", "Página Prédicas" y "Página Oraciones"
+más abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese
+archivo para el detalle migración por migración, el bootstrap del primer
+admin, y la auditoría de RLS completa (Fase 12).
 Resumen de lo no cubierto ahí:
 
 - Patrón de RLS confirmado con spot-checks: tablas de contenido (`sermons`,
@@ -395,6 +398,114 @@ pendiente desde la sesión de arquitectura inicial: `createSermonSeries`,
 autogenerado desde el título ya existían exactamente como pide el brief —
 no se tocó ese modelo, solo se le agregó `featured`.
 
+## Página Oraciones — rediseño contemplativo + página individual (arquitectura final)
+
+`/oraciones` pasó de "grid de grabaciones" a experiencia deliberadamente
+distinta de `/predicas` (comunión/pausa/acompañamiento, no catálogo
+audiovisual): Hero contemplativo (negro, sin decoración, horarios de
+oración discretos debajo del texto) → `LatestPrayerMoment` ("Último
+encuentro", derivado solo por publicada+fecha vía `getLatestSermonByTopic`,
+igual que ya hacía Inicio — nunca elegido a mano) → sección de pausa
+(fondo crema `ABOUT_COLORS.cream`, solo texto, sin cards/botones/iconos,
+mucho espacio negativo) → archivo (`PrayerArchive`, negro, grid +
+"Cargar más momentos" + filtro Presencial/Virtual opcional) →
+`PrayerRequestCTA` (teal, enlaza a `/oracion`, el formulario de petición
+que ya existía — no se creó un segundo). `/oraciones/[slug]` es nueva:
+página individual propia, más simple que una prédica (etiqueta + fecha
+grande + persona + video + horarios + hasta 3 relacionadas).
+
+**Sigue siendo la misma tabla `sermons`, sin tabla propia.** Una grabación
+de oración es una prédica con `PRAYER_TOPIC` ("Oración") en `topics` — eso
+no cambió. Lo nuevo es la migración `021_sermons_meeting_type.sql`: agrega
+el enum `sermon_meeting_type` ('presencial'|'virtual') y la columna
+nullable `sermons.meeting_type` — no existía ninguna forma de distinguir
+presencial/virtual por grabación antes de este rediseño (solo el *nombre*
+de un horario, ej. "Oración Presencial", lo insinuaba). Nullable a
+propósito: no se inventó el valor para la grabación real que ya existía
+("Oración // Miércoles 12 de agosto de 2026") — se dejó sin especificar y
+se fijó a mano en "Presencial" desde `/admin/predicas/[id]` durante la
+validación de esta sesión, exactamente como cualquier admin lo haría (mismo
+patrón que la corrección de `lng_approx` en la sesión de Grupos: editado
+desde el propio panel, no con SQL directo, así quedó en `audit_logs`).
+**Aplicada en producción vía el SQL Editor de Supabase durante esta misma
+sesión** (no vía `supabase db push` — el entorno no tiene el CLI de
+Supabase enlazado, mismo procedimiento manual que `018`/`019`/`020`).
+
+**Un solo formulario admin, selector condicional.** `SermonForm` (compartido
+por Prédicas y Oraciones) ganó `showMeetingType?: boolean` — un
+`SelectField` "Tipo de encuentro" (Presencial/Virtual, sin texto libre) que
+solo se renderiza cuando aplica. `/admin/oraciones/nuevo` lo pasa siempre
+en `true`; `/admin/predicas/[id]` (edición compartida por ambos módulos) lo
+calcula leyendo si `sermon.topics` ya contiene `PRAYER_TOPIC` — así una
+prédica normal nunca ve el campo, y una grabación de oración sí, sin
+necesitar una ruta de edición separada. El listado `/admin/oraciones`
+también muestra el tipo como badge cuando está definido.
+
+**Filtro Presencial/Virtual: solo aparece si los datos reales lo justifican.**
+`getPrayerMeetingTypesInUse()` cuenta modalidades distintas entre
+grabaciones publicadas; `PrayerArchive` (cliente) solo renderiza los
+botones "Todas/Presenciales/Virtuales" si hay 2 o más — con una sola
+modalidad en uso, el filtro simplemente no se muestra (nunca una opción sin
+sentido). El filtro actúa sobre lo ya cargado en cliente; "Cargar más
+momentos" sigue trayendo páginas reales del servidor
+(`getPublishedPrayerSermonsPage`, mismo patrón "trae `limit + 1`" que
+`getPublishedSermonsPage` de Prédicas) — combinación deliberada: no hay
+volumen aún para justificar un filtro 100% servidor, pero tampoco tiene
+sentido traer todo el catálogo al cliente como si fuera Grupos.
+
+**Horarios: una sola fuente, nunca hardcodeados.** `getPrayerSchedules()`
+(nueva, en `lib/queries/schedules.ts`) envuelve `getActiveSchedules()` y
+filtra por nombre que empieza con "oración" — exactamente la misma regla
+que Inicio ya aplicaba de forma local en su sección "Ora con nosotros".
+Esa lógica (y `prayerModality()`, que traduce "Oración Presencial" →
+"Presencial") se extrajo a `lib/format.ts` y ambas páginas (Inicio y
+`/oraciones`, y también `/oraciones/[slug]`) importan las mismas
+funciones — si un horario cambia desde `/admin/horarios`, las tres vistas
+se actualizan solas, nunca hay que tocar código. Con los datos reales de
+producción hoy solo existe un horario de oración ("Oración Presencial",
+miércoles 7:00 p. m.) — el Hero de `/oraciones` lo refleja tal cual, sin
+inventar un segundo horario "Viernes · Virtual" que no existe todavía en
+`schedules`.
+
+**Encabezados grandes derivados de la fecha, no del texto libre del
+título.** "MIÉRCOLES" / "12 DE AGOSTO DE 2026" (en `LatestPrayerMoment`,
+`PrayerCard` y el `<h1>` de `/oraciones/[slug]`) se calculan con
+`dayNameFromDate(sermon_date)` + `formatDate(sermon_date)` — nunca se
+parsea `sermon.title`. Decisión explícita (confirmada con el usuario): así
+el diseño no depende de que cada admin futuro escriba el título siguiendo
+un patrón exacto tipo "Oración // Miércoles ...". El título libre sigue
+existiendo (se usa para SEO/metadata y como identificador en Admin), pero
+no se muestra tal cual en las piezas grandes del sitio público.
+
+**Nunca la misma grabación en dos URLs.** `getSermonBySlug()` (usada por
+`/predicas/[slug]`) ahora excluye grabaciones con `PRAYER_TOPIC` (mismo
+filtro `excludePrayerTopic` que ya usaban las consultas de listado) — una
+grabación de oración deja de ser accesible por `/predicas/[slug]` una vez
+existe su URL canónica en `/oraciones/[slug]` (`getPrayerSermonBySlug`,
+exige el tema y trae la fila completa con `youtube_url` para el
+reproductor). El slug es único en toda la tabla `sermons`, así que nunca
+hay colisión entre ambas rutas. De paso, el enlace de "Ora con nosotros" en
+Inicio (que antes apuntaba a `/predicas/${slug}`) se corrigió a
+`/oraciones/${slug}`.
+
+**Video embebido — reutiliza `LazySermonVideo` tal cual**, sin componente
+nuevo: mismo patrón miniatura+Play hasta el clic, mismo `getYouTubeId()`.
+La página individual pasa un `title` propio ("oración del 12 de agosto de
+2026") para que el `aria-label` del botón Play sea el correcto sin tocar el
+componente. El listado (`PrayerArchive`, relacionadas) nunca monta un
+iframe — solo miniaturas, igual que Prédicas.
+
+**Relacionadas ("Otros momentos de oración"): hasta 3, prioriza misma
+modalidad.** `getRelatedPrayerSermons()` trae publicadas ordenadas por
+fecha, excluye la actual, y si `meeting_type` está definido antepone las
+de la misma modalidad — sin motor de recomendación, igual de simple que
+`getRelatedSermons` de Prédicas.
+
+**Un solo h1 real.** Antes del rediseño `/oraciones` no tenía ningún
+`<h1>` (usaba `PosterHeading`, que renderiza `<h2>`) — se corrigió: el
+título "ORACIONES" del Hero es ahora un `<h1>` explícito, igual que ya
+hacía `/predicas`.
+
 ## Botón flotante de contacto (`ContactFAB`)
 
 Reemplaza el botón fijo de WhatsApp que vivía en `app/(public)/layout.tsx`
@@ -449,9 +560,11 @@ reorganización y rediseño oscuro del panel admin con catálogo de permisos
 y extensión de auditoría (migraciones 015/016), rollout del sistema de
 diseño "cartel" a Nosotros/Prédicas/Oraciones/Grupos/Eventos/Contacto,
 cambio de acento dorado → coral (`#FF7F50`), separación de grabaciones de
-oración fuera de Prédicas hacia `/oraciones`, y la ficha de conexión
-"Déjanos tus datos" de Primera vez (migración 017, tabla
-`first_time_connections`, bandeja en `/admin/formularios`).
+oración fuera de Prédicas hacia `/oraciones`, la ficha de conexión "Déjanos
+tus datos" de Primera vez (migración 017, tabla `first_time_connections`,
+bandeja en `/admin/formularios`), y el rediseño contemplativo de Oraciones
+con página individual `/oraciones/[slug]` y `sermons.meeting_type`
+(migración 021 — ver sección "Página Oraciones" arriba).
 
 **Pendiente / abierto, en orden de relevancia:**
 
@@ -472,3 +585,9 @@ oración fuera de Prédicas hacia `/oraciones`, y la ficha de conexión
 7. ~~Nosotros — sin líderes activos~~ — resuelto: ya hay 3 filas
    `type='lider', active=true` en `team_members`, `LeadershipMosaic`
    ("Lideramos sirviendo") se renderiza correctamente en producción.
+8. Oraciones — solo existe un horario real en `schedules`
+   ("Oración Presencial", miércoles). El Hero de `/oraciones` y la sección
+   "Ora con nosotros" de Inicio ya están preparados para mostrar más
+   horarios de oración automáticamente (fuente única, `getPrayerSchedules()`)
+   en cuanto el equipo pastoral cree uno nuevo (ej. "Oración Virtual",
+   viernes) desde `/admin/horarios` — no requiere ningún cambio de código.

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
-import { getPublishedSermonsPage } from "@/lib/queries/sermons";
+import { getPublishedPrayerSermonsPage, getPublishedSermonsPage } from "@/lib/queries/sermons";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSchema } from "@/lib/validations/sermon";
 
@@ -25,6 +25,7 @@ function parseForm(formData: FormData) {
       .filter(Boolean),
     published: formData.get("published") === "on",
     featured: formData.get("featured") === "on",
+    meetingType: formData.get("meetingType") || undefined,
   };
 }
 
@@ -56,6 +57,7 @@ export async function createSermon(
       topics: parsed.data.topics,
       published: parsed.data.published,
       featured: parsed.data.featured,
+      meeting_type: parsed.data.meetingType ?? null,
     })
     .select("id")
     .single();
@@ -105,6 +107,7 @@ export async function updateSermon(
       topics: parsed.data.topics,
       published: parsed.data.published,
       featured: parsed.data.featured,
+      meeting_type: parsed.data.meetingType ?? null,
     })
     .eq("id", id);
 
@@ -171,4 +174,9 @@ export async function loadMoreSermons(
   offset: number
 ) {
   return getPublishedSermonsPage(filters, { offset });
+}
+
+/** "Cargar más momentos" en /oraciones — mismo patrón de solo lectura que loadMoreSermons. */
+export async function loadMorePrayerSermons(offset: number, excludeId?: string) {
+  return getPublishedPrayerSermonsPage({ offset, excludeId });
 }

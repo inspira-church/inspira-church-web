@@ -20,7 +20,7 @@ export default async function PrayerRecordingsAdminPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("sermons")
-    .select("id, title, slug, thumbnail_url, sermon_date, published, topics")
+    .select("id, title, slug, thumbnail_url, sermon_date, published, topics, meeting_type")
     .order("sermon_date", { ascending: false });
 
   // El campo "Temas" es texto libre y sermons.ts lo guarda en minúsculas —
@@ -81,6 +81,9 @@ export default async function PrayerRecordingsAdminPage() {
               <Badge variant={sermon.published ? "accent" : "neutral"}>
                 {sermon.published ? "Publicada" : "Borrador"}
               </Badge>
+              {sermon.meeting_type && (
+                <Badge>{sermon.meeting_type === "presencial" ? "Presencial" : "Virtual"}</Badge>
+              )}
               <Link
                 href={`/admin/predicas/${sermon.id}`}
                 className="text-sm font-medium text-accent hover:underline"

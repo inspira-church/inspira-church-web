@@ -26,6 +26,8 @@ interface SermonFormProps {
   defaultTopics?: string;
   /** A dónde vuelve "Cancelar" — /admin/predicas por defecto, /admin/oraciones desde ese módulo. */
   cancelHref?: string;
+  /** Muestra el selector "Tipo de encuentro" (Presencial/Virtual) — solo tiene sentido para grabaciones de oración, no para prédicas normales. */
+  showMeetingType?: boolean;
   defaultValues?: {
     title: string;
     slug: string;
@@ -38,10 +40,16 @@ interface SermonFormProps {
     topics: string[];
     published: boolean;
     featured: boolean;
+    meetingType?: string | null;
   };
 }
 
 const initialState: ActionState = {};
+
+const MEETING_TYPE_OPTIONS = [
+  { value: "presencial", label: "Presencial" },
+  { value: "virtual", label: "Virtual" },
+];
 
 export function SermonForm({
   action,
@@ -49,6 +57,7 @@ export function SermonForm({
   preacherOptions,
   defaultTopics,
   cancelHref = "/admin/predicas",
+  showMeetingType = false,
   defaultValues,
 }: SermonFormProps) {
   const [state, formAction] = useActionState(action, initialState);
@@ -118,6 +127,17 @@ export function SermonForm({
         />
         {state.fieldErrors?.sermonDate && (
           <p className="-mt-3 text-xs text-danger">{state.fieldErrors.sermonDate}</p>
+        )}
+
+        {showMeetingType && (
+          <SelectField
+            label="Tipo de encuentro"
+            name="meetingType"
+            placeholder="Sin especificar"
+            options={MEETING_TYPE_OPTIONS}
+            defaultValue={defaultValues?.meetingType ?? ""}
+            hint="Presencial o virtual — se muestra como etiqueta en /oraciones."
+          />
         )}
       </FormSection>
 

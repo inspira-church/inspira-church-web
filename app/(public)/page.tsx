@@ -5,13 +5,13 @@ import { Eyebrow, GoldButton, PosterButton, PosterHeading, TextLink, scheduleIco
 import { Hero } from "@/components/public/Hero";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Container } from "@/components/ui/Container";
-import { dayName, formatDate, formatTime } from "@/lib/format";
+import { dayName, formatDate, formatTime, prayerModality } from "@/lib/format";
 import { anton, caveat, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { PRAYER_TOPIC, SITE_CONFIG } from "@/lib/constants";
 import { googleMapsLink } from "@/lib/maps";
 import { getPublishedEvents } from "@/lib/queries/events";
 import { getHeroSlides } from "@/lib/queries/media";
-import { getActiveSchedules } from "@/lib/queries/schedules";
+import { getActiveSchedules, getPrayerSchedules } from "@/lib/queries/schedules";
 import { getLatestSermonByTopic } from "@/lib/queries/sermons";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMemberById } from "@/lib/queries/team-members";
@@ -29,14 +29,6 @@ import { cn } from "@/lib/utils";
  * propias) sino que arma tarjetas propias, solo para Inicio.
  */
 
-/** "Oración Presencial." / "oración virtual" -> "Presencial" / "Virtual". Deja el nombre tal cual si no reconoce la modalidad. */
-function prayerModality(name: string) {
-  const normalized = name.toLowerCase();
-  if (normalized.includes("presencial")) return "Presencial";
-  if (normalized.includes("virtual")) return "Virtual";
-  return name;
-}
-
 /** Día y mes por separado para el bloque de fecha destacado de las tarjetas de evento. */
 function eventDateParts(iso: string) {
   const date = new Date(`${iso}T00:00:00`);
@@ -51,10 +43,11 @@ function eventDateParts(iso: string) {
 
 export default async function HomePage() {
   const prayerRecording = await getLatestSermonByTopic(PRAYER_TOPIC);
-  const [prayerPreacher, schedules, events, settings, heroSlides] =
+  const [prayerPreacher, schedules, prayerSchedules, events, settings, heroSlides] =
     await Promise.all([
       getTeamMemberById(prayerRecording?.preacher_id ?? null),
       getActiveSchedules(),
+      getPrayerSchedules(),
       getPublishedEvents(),
       getSiteSettings(),
       getHeroSlides(),
@@ -65,10 +58,6 @@ export default async function HomePage() {
     .filter((e) => e.status === "proximo")
     .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
     .slice(0, 4);
-
-  const prayerSchedules = schedules.filter((s) =>
-    s.name.toLowerCase().startsWith("oración")
-  );
 
   return (
     <>
@@ -321,7 +310,7 @@ export default async function HomePage() {
 
           <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
             <Link
-              href={prayerRecording ? `/predicas/${prayerRecording.slug}` : "/predicas"}
+              href={prayerRecording ? `/oraciones/${prayerRecording.slug}` : "/oraciones"}
               className="group relative block aspect-video overflow-hidden border border-white/10 bg-[#0d0d0d]"
             >
               {prayerRecording?.thumbnail_url ? (

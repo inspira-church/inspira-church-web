@@ -40,6 +40,19 @@ export function dayName(dayOfWeek: number) {
   return DAY_NAMES[dayOfWeek] ?? "";
 }
 
+/** "2026-08-12" -> día de la semana real de esa fecha ("Miércoles"), sin depender del texto libre del título. */
+export function dayNameFromDate(iso: string) {
+  return dayName(new Date(`${iso}T00:00:00`).getDay());
+}
+
+/** "Oración Presencial." / "oración virtual" -> "Presencial" / "Virtual". Deja el nombre tal cual si no reconoce la modalidad. Usado por Inicio y /oraciones — misma fuente para no divergir. */
+export function prayerModality(name: string) {
+  const normalized = name.toLowerCase();
+  if (normalized.includes("presencial")) return "Presencial";
+  if (normalized.includes("virtual")) return "Virtual";
+  return name;
+}
+
 /** "suba" -> "Suba" — solo para mostrar; nunca cambia el valor real guardado (ver GroupsExplorer). */
 export function titleCase(text: string) {
   return text

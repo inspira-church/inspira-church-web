@@ -1,63 +1,154 @@
 import type { Metadata } from "next";
-import { Eyebrow, PosterHeading } from "@/components/public/cartel";
-import { SermonCard } from "@/components/public/SermonCard";
+import { LatestPrayerMoment } from "@/components/public/LatestPrayerMoment";
+import { PrayerArchive } from "@/components/public/PrayerArchive";
+import { PrayerRequestCTA } from "@/components/public/PrayerRequestCTA";
 import { Container } from "@/components/ui/Container";
-import { hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
+import { dayName, formatTime, prayerModality } from "@/lib/format";
+import { getPrayerSchedules } from "@/lib/queries/schedules";
+import {
+  getLatestSermonByTopic,
+  getPrayerMeetingTypesInUse,
+  getPublishedPrayerSermonsPage,
+} from "@/lib/queries/sermons";
+import { getTeamMemberById, getTeamMembersByIds } from "@/lib/queries/team-members";
 import { PRAYER_TOPIC } from "@/lib/constants";
-import { getPublishedSermonsByTopic } from "@/lib/queries/sermons";
-import { getTeamMembersByIds } from "@/lib/queries/team-members";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Oraciones | Inspira Church",
-  description: "Grabaciones de nuestras noches de oración presencial y virtual.",
+  description:
+    "Un espacio para buscar a Dios juntos, detenernos en Su presencia y hacer de la oración parte de nuestra vida. Revive nuestros encuentros de oración y comparte tu petición.",
 };
 
-/** Oraciones hereda el color que Inicio ya le asocia en su sección "Ora con nosotros". */
-const PAGE_COLOR = CAMPAIGN_COLORS[0];
+const PAGE_SIZE = 9;
 
 export default async function PrayerRecordingsPage() {
-  const sermons = await getPublishedSermonsByTopic(PRAYER_TOPIC);
+  const latest = await getLatestSermonByTopic(PRAYER_TOPIC);
+
+  const [latestPreacher, prayerSchedules, { sermons: archiveSermons, hasMore }, meetingTypesInUse] =
+    await Promise.all([
+      getTeamMemberById(latest?.preacher_id ?? null),
+      getPrayerSchedules(),
+      getPublishedPrayerSermonsPage({ limit: PAGE_SIZE, excludeId: latest?.id }),
+      getPrayerMeetingTypesInUse(),
+    ]);
+
   const preacherIds = Array.from(
-    new Set(sermons.map((s) => s.preacher_id).filter((id): id is string => Boolean(id)))
+    new Set(archiveSermons.map((s) => s.preacher_id).filter((id): id is string => Boolean(id)))
   );
   const preachers = await getTeamMembersByIds(preacherIds);
-  const preacherById = new Map(preachers.map((p) => [p.id, p]));
+  const preacherById = Object.fromEntries(preachers.map((p) => [p.id, p.full_name]));
+
+  const isEmpty = !latest && archiveSermons.length === 0;
 
   return (
     <>
-      <section className="border-b border-white/10 bg-black pb-10 pt-16 sm:pb-14 sm:pt-24">
+      {/* Hero — amplio, tranquilo, contemplativo */}
+      <section className="border-b border-white/10 bg-black pb-12 pt-16 sm:pb-16 sm:pt-24">
         <Container>
-          <Eyebrow color={PAGE_COLOR}>Comunión</Eyebrow>
-          <PosterHeading>Oraciones</PosterHeading>
-          <p className={cn(hind.className, "mt-4 max-w-xl text-white/70")}>
-            Revive las grabaciones de nuestras noches de oración, presenciales y virtuales.
+          <p
+            className="inline-block border px-3 py-1 text-xs font-bold uppercase tracking-widest"
+            style={{ borderColor: ABOUT_COLORS.teal, color: ABOUT_COLORS.teal }}
+          >
+            Comunión
           </p>
-        </Container>
-      </section>
+          <h1
+            className={cn(
+              anton.className,
+              "mt-5 text-balance text-4xl uppercase leading-[0.92] text-white sm:text-6xl"
+            )}
+          >
+            Oraciones
+          </h1>
+          <p className={cn(hind.className, "mt-5 max-w-xl text-lg text-white/70")}>
+            Un espacio para buscar a Dios juntos, detenernos en Su presencia y hacer de la oración
+            parte de nuestra vida.
+          </p>
 
-      <section className="bg-[#0d0d0d] py-16 sm:py-24">
-        <Container>
-          {sermons.length === 0 ? (
-            <div className="border border-dashed border-white/15 bg-black px-8 py-14 text-center">
-              <p className="text-white/50">Todavía no hay grabaciones de oración publicadas.</p>
-            </div>
-          ) : (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {sermons.map((sermon) => (
-                <SermonCard
-                  key={sermon.id}
-                  slug={sermon.slug}
-                  title={sermon.title}
-                  thumbnailUrl={sermon.thumbnail_url}
-                  sermonDate={sermon.sermon_date}
-                  preacherName={preacherById.get(sermon.preacher_id ?? "")?.full_name}
-                />
+          {prayerSchedules.length > 0 && (
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-2 border-t border-white/10 pt-6">
+              {prayerSchedules.map((s) => (
+                <p key={s.id} className="text-sm text-white/50">
+                  {dayName(s.day_of_week)} · {formatTime(s.time_of_day)} · {prayerModality(s.name)}
+                </p>
               ))}
             </div>
           )}
         </Container>
       </section>
+
+      {latest && (
+        <LatestPrayerMoment
+          slug={latest.slug}
+          thumbnailUrl={latest.thumbnail_url}
+          sermonDate={latest.sermon_date}
+          preacherName={latestPreacher?.full_name}
+          meetingType={latest.meeting_type}
+        />
+      )}
+
+      {isEmpty && (
+        <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
+          <Container>
+            <p className={cn(hind.className, "text-center text-lg text-white/60")}>
+              Pronto tendremos nuevos momentos para compartir.
+            </p>
+          </Container>
+        </section>
+      )}
+
+      {/* Pausa — sin cards, sin botones, solo espacio */}
+      <section className="px-6 py-24 text-center sm:px-8 sm:py-40" style={{ backgroundColor: ABOUT_COLORS.cream }}>
+        <p
+          className={cn(
+            anton.className,
+            "mx-auto max-w-2xl text-balance text-3xl uppercase leading-[1.1] text-black sm:text-5xl"
+          )}
+        >
+          Hay momentos en los que solo necesitamos orar.
+        </p>
+        <p className={cn(hind.className, "mx-auto mt-6 max-w-md text-lg text-black/70")}>
+          No tienes que tener todas las palabras. Solo un corazón dispuesto a acercarse a Dios.
+        </p>
+      </section>
+
+      {/* Archivo — no repite la protagonista de Último encuentro (excludeId) */}
+      {!isEmpty && (
+        <section className="bg-black py-16 sm:py-24">
+          <Container>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.coral }}>
+              Ora con nosotros
+            </p>
+            <h2
+              className={cn(
+                anton.className,
+                "mt-2 text-balance text-3xl uppercase leading-[0.95] text-white sm:text-4xl"
+              )}
+            >
+              Vuelve a estos momentos de oración.
+            </h2>
+
+            {archiveSermons.length === 0 ? (
+              <p className={cn(hind.className, "mt-10 text-white/50")}>
+                Todavía no hay más grabaciones — vuelve pronto.
+              </p>
+            ) : (
+              <div className="mt-10">
+                <PrayerArchive
+                  initialSermons={archiveSermons}
+                  initialHasMore={hasMore}
+                  excludeId={latest?.id}
+                  preacherById={preacherById}
+                  meetingTypesInUse={meetingTypesInUse}
+                />
+              </div>
+            )}
+          </Container>
+        </section>
+      )}
+
+      <PrayerRequestCTA />
     </>
   );
 }
