@@ -70,7 +70,7 @@ export default async function HomePage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <Eyebrow color={CAMPAIGN_COLORS[0]}>Bienvenido a Inspira Church</Eyebrow>
-              <h2
+              <h1
                 className={cn(
                   anton.className,
                   "mt-5 text-balance text-4xl uppercase leading-[1.05] text-white sm:text-5xl"
@@ -80,7 +80,7 @@ export default async function HomePage() {
                 <span className="block" style={{ color: CAMPAIGN_COLORS[0] }}>
                   te inspira a crecer
                 </span>
-              </h2>
+              </h1>
               <p className={cn(hind.className, "mt-5 max-w-sm text-white/70")}>
                 Un lugar para encontrarte con Dios, crecer en comunidad y
                 caminar en propósito.
