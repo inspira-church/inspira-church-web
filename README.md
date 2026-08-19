@@ -184,6 +184,18 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
 12.10. ✅ Sección "En vivo" en Inicio — aparece automáticamente cuando el canal de YouTube está transmitiendo
 13. ✅ SEO y rendimiento (sitemap, robots.txt, metadata/OG, ISR en el sitio público)
 14. ✅ Pruebas (unitarias con Vitest, end-to-end con Playwright)
+14.1. ✅ Reorganización y rediseño oscuro del panel admin, con catálogo de
+   permisos por módulo (`role_permissions`/`has_permission()`, preparado
+   para permisos finos sin cambiar el acceso actual) y extensión de
+   `audit_logs` (`module`, `user_role`, `user_name`, datos previos/nuevos)
+14.2. ✅ Identidad de cartel (negro, Anton, acento de color rotativo) extendida
+   a Nosotros, Prédicas, Oraciones, Grupos, Eventos y Contacto — antes solo
+   vivía en Inicio
+14.3. ✅ Acento del sitio cambiado de dorado a coral (`#FF7F50`)
+14.4. ✅ Grabaciones de oración separadas de Prédicas hacia su propia sección
+   `/oraciones` (mismos registros de `sermons`, filtrados por tag)
+14.5. ✅ Ficha de conexión "Déjanos tus datos" en Primera vez — tabla propia
+   `first_time_connections`, bandeja en `/admin/formularios`
 15. ⬜ Producción
 
 ## Despliegue
