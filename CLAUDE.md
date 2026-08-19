@@ -314,6 +314,21 @@ sistema base/claro) y `/predicas/[slug]` ganó "Sigue creciendo"
 (`getRelatedSermons`: misma serie → temas en común → mismo predicador, en
 ese orden, sin motor de recomendación).
 
+**Corrección post-entrega: el CTA final sí enlaza al canal de YouTube.**
+El brief original de este rediseño pedía explícitamente lo contrario
+("no enlazar el canal general de YouTube"), y así se implementó al
+principio — pero el usuario pidió el cambio después, mostrando el botón
+"Explorar todos los mensajes" y su URL real
+(`https://www.youtube.com/@InspiraChurch1`). `SermonsClosingCTA` ahora
+recibe `youtubeUrl` (de `settings.youtubeUrl`, el mismo campo que ya
+alimenta el ícono de YouTube del footer — no se creó un campo nuevo) y
+abre el canal en pestaña nueva (`target="_blank"`, `rel="noopener
+noreferrer"`); si `youtubeUrl` está vacío, cae de vuelta a `/predicas`
+para no dejar un enlace roto. De paso se corrigió el valor guardado de
+`settings.youtubeUrl`, que tenía una URL vieja
+(`https://youtube.com/inspirachurch`) distinta de la real que dio el
+usuario — ahora el footer y este CTA muestran el mismo canal.
+
 **EN VIVO de Inicio — cero cambios, verificado explícitamente.** `lib/youtube.ts`,
 `components/public/YouTubeEmbed.tsx` y el bloque "En vivo" de
 `app/(public)/page.tsx` no se tocaron (`git diff` vacío en los tres,

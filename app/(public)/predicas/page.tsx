@@ -15,6 +15,7 @@ import {
   getPublishedTopics,
 } from "@/lib/queries/sermons";
 import { getActiveSermonSeries } from "@/lib/queries/sermon-series";
+import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMembersByIds } from "@/lib/queries/team-members";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +37,7 @@ export default async function SermonsPage({
   const { predicador, serie, tema, q } = await searchParams;
   const filters = { preacherId: predicador, seriesId: serie, topic: tema, search: q };
 
-  const [latest, { sermons: initialSermons, hasMore }, seriesList, seriesCounts, topics, preacherIds] =
+  const [latest, { sermons: initialSermons, hasMore }, seriesList, seriesCounts, topics, preacherIds, settings] =
     await Promise.all([
       getLatestSermon(),
       getPublishedSermonsPage(filters, { limit: PAGE_SIZE }),
@@ -44,6 +45,7 @@ export default async function SermonsPage({
       getPublishedSermonCountsBySeriesId(),
       getPublishedTopics(),
       getPreacherIdsWithPublishedSermons(),
+      getSiteSettings(),
     ]);
 
   const preachers = await getTeamMembersByIds(preacherIds);
@@ -111,7 +113,7 @@ export default async function SermonsPage({
         series={seriesList.map((s) => ({ ...s, count: seriesCounts[s.id] ?? 0 }))}
       />
 
-      <SermonsClosingCTA />
+      <SermonsClosingCTA youtubeUrl={settings.youtubeUrl} />
     </>
   );
 }

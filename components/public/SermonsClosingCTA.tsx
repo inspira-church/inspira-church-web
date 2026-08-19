@@ -3,8 +3,16 @@ import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
-/** Cierre de /predicas — nunca enlaza al canal de YouTube, solo al catálogo dentro de Inspira. */
-export function SermonsClosingCTA() {
+interface SermonsClosingCTAProps {
+  /** Canal oficial de YouTube (settings.youtubeUrl, /admin/contacto) — si no está configurado, cae al catálogo interno. */
+  youtubeUrl?: string;
+}
+
+/** Cierre de /predicas — por pedido explícito del usuario, el CTA lleva al canal oficial de YouTube. */
+export function SermonsClosingCTA({ youtubeUrl }: SermonsClosingCTAProps) {
+  const href = youtubeUrl || "/predicas";
+  const isExternal = Boolean(youtubeUrl);
+
   return (
     <section className="py-16 text-center sm:py-24" style={{ backgroundColor: ABOUT_COLORS.teal }}>
       <Container>
@@ -21,7 +29,9 @@ export function SermonsClosingCTA() {
           día.
         </p>
         <Link
-          href="/predicas"
+          href={href}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
           className="mt-8 inline-flex items-center gap-2 rounded-md bg-black px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
         >
           Explorar todos los mensajes
