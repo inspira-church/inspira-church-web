@@ -100,6 +100,7 @@ export async function updateContactSettings(
     {
       whatsappNumber: formData.get("whatsappNumber"),
       whatsappMessage: formData.get("whatsappMessage"),
+      contactEmail: formData.get("contactEmail") || undefined,
       facebookUrl: formData.get("facebookUrl") || undefined,
       instagramUrl: formData.get("instagramUrl") || undefined,
       tiktokUrl: formData.get("tiktokUrl") || undefined,

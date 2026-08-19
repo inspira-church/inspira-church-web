@@ -14,6 +14,7 @@ type Values = Pick<
   SiteSettings,
   | "whatsappNumber"
   | "whatsappMessage"
+  | "contactEmail"
   | "facebookUrl"
   | "instagramUrl"
   | "tiktokUrl"
@@ -53,6 +54,17 @@ export function ContactSettingsForm({ defaultValues }: { defaultValues: Values }
       />
       {state.fieldErrors?.whatsappMessage && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.whatsappMessage}</p>
+      )}
+
+      <TextField
+        label="Correo de contacto"
+        name="contactEmail"
+        type="email"
+        defaultValue={defaultValues.contactEmail}
+        hint="Opcional — aparece como opción de correo en el botón flotante del sitio."
+      />
+      {state.fieldErrors?.contactEmail && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.contactEmail}</p>
       )}
 
       <div className="border-t border-border pt-5">

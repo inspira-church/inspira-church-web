@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import { ContactFAB } from "@/components/public/ContactFAB";
 import { Footer } from "@/components/public/Footer";
 import { Header } from "@/components/public/Header";
-import { WhatsAppButton } from "@/components/public/WhatsAppButton";
 import { getSiteSettings } from "@/lib/queries/settings";
 
 /**
@@ -31,7 +31,11 @@ export default async function PublicLayout({ children }: { children: ReactNode }
         churchLng={settings.churchLng}
         privacyPolicyUrl={settings.privacyPolicyUrl}
       />
-      <WhatsAppButton message={settings.whatsappMessage} number={settings.whatsappNumber} />
+      <ContactFAB
+        whatsappMessage={settings.whatsappMessage}
+        whatsappNumber={settings.whatsappNumber}
+        contactEmail={settings.contactEmail}
+      />
     </div>
   );
 }

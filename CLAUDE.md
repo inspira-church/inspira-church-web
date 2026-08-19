@@ -395,6 +395,25 @@ pendiente desde la sesión de arquitectura inicial: `createSermonSeries`,
 autogenerado desde el título ya existían exactamente como pide el brief —
 no se tocó ese modelo, solo se le agregó `featured`.
 
+## Botón flotante de contacto (`ContactFAB`)
+
+Reemplaza el botón fijo de WhatsApp que vivía en `app/(public)/layout.tsx`
+— ahora un solo botón circular (`#D2431B`, ícono de tres puntos vía
+`lucide-react` `MoreHorizontal`/`ellipsis`) se despliega en sub-botones
+apilados verticalmente al hacer clic: correo (`mailto:`, solo si
+`settings.contactEmail` está configurado) y WhatsApp (siempre, reutiliza
+`whatsappLink()` de `lib/constants.ts`, mismo SVG que el componente
+original). Cierra con Escape, clic afuera, o clic de nuevo en el botón
+principal. `components/public/WhatsAppButton.tsx` **no se tocó** — sigue
+usándose tal cual para el enlace "inline" dentro de `/contacto` (la línea
+"¿Prefieres algo más directo?"), que es un caso de uso distinto.
+
+`site_settings.contactEmail` es un campo nuevo (sin migración — vive en el
+mismo blob JSONB `general` que `whatsappNumber`/`facebookUrl`/etc., sin
+esquema propio) — administrable desde `/admin/contacto` junto al resto de
+la configuración de contacto. Vacío por defecto; si no se configura, el
+FAB simplemente no muestra la opción de correo (nunca un `mailto:` roto).
+
 ## Servicios externos
 
 | Servicio | Uso confirmado | Evidencia |

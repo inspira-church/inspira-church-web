@@ -4,6 +4,7 @@ import { createPublicClient as createClient } from "@/lib/supabase/public";
 export interface SiteSettings {
   whatsappNumber: string;
   whatsappMessage: string;
+  contactEmail: string;
   facebookUrl: string;
   instagramUrl: string;
   tiktokUrl: string;
@@ -22,6 +23,7 @@ export interface SiteSettings {
 const DEFAULT_SETTINGS: SiteSettings = {
   whatsappNumber: SITE_CONFIG.whatsappNumber,
   whatsappMessage: SITE_CONFIG.whatsappDefaultMessage,
+  contactEmail: "",
   facebookUrl: "",
   instagramUrl: "",
   tiktokUrl: "",

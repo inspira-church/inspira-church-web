@@ -18,6 +18,7 @@ export default async function AdminContactSettingsPage() {
           defaultValues={{
             whatsappNumber: settings.whatsappNumber,
             whatsappMessage: settings.whatsappMessage,
+            contactEmail: settings.contactEmail,
             facebookUrl: settings.facebookUrl,
             instagramUrl: settings.instagramUrl,
             tiktokUrl: settings.tiktokUrl,

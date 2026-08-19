@@ -6,6 +6,7 @@ export const siteSettingsSchema = z.object({
     .trim()
     .regex(/^\d{10,15}$/, "Ingresa el número en formato internacional, solo dígitos (ej: 573001234567)."),
   whatsappMessage: z.string().trim().min(1, "Ingresa un mensaje por defecto."),
+  contactEmail: z.string().trim().email("Ingresa un correo válido.").optional().or(z.literal("")),
   facebookUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   instagramUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   tiktokUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
