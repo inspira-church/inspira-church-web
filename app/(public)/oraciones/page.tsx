@@ -44,7 +44,7 @@ export default async function PrayerRecordingsPage() {
             </div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {sermons.map((sermon, i) => (
+              {sermons.map((sermon) => (
                 <SermonCard
                   key={sermon.id}
                   slug={sermon.slug}
@@ -52,7 +52,6 @@ export default async function PrayerRecordingsPage() {
                   thumbnailUrl={sermon.thumbnail_url}
                   sermonDate={sermon.sermon_date}
                   preacherName={preacherById.get(sermon.preacher_id ?? "")?.full_name}
-                  accentColor={CAMPAIGN_COLORS[i % CAMPAIGN_COLORS.length]}
                 />
               ))}
             </div>

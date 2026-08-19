@@ -141,13 +141,14 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-19 migraciones en `supabase/migrations/`, 001 a 019 (`018` agregó
+20 migraciones en `supabase/migrations/`, 001 a 020 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
-`media`; `019` agregó `growth_groups.location_public` — ver secciones
-"Página Nosotros" y "Página Grupos" más abajo, y la tabla de
-`supabase/README.md`, ya actualizada). Ver ese archivo para el detalle
-migración por migración, el bootstrap del primer admin, y la auditoría de
-RLS completa (Fase 12). Resumen de lo no cubierto ahí:
+`media`; `019` agregó `growth_groups.location_public`; `020` agregó
+`sermons.featured` — ver secciones "Página Nosotros", "Página Grupos" y
+"Página Prédicas" más abajo, y la tabla de `supabase/README.md`, ya
+actualizada). Ver ese archivo para el detalle migración por migración, el
+bootstrap del primer admin, y la auditoría de RLS completa (Fase 12).
+Resumen de lo no cubierto ahí:
 
 - Patrón de RLS confirmado con spot-checks: tablas de contenido (`sermons`,
   `sermon_series`, `ministries`) → lectura pública solo si
@@ -300,6 +301,85 @@ recomiéndenme uno" como opción de grupo. `/grupos/[slug]` sigue enlazando a
 `/grupos/unirme?grupo=<slug>` para preseleccionar. No se creó ningún
 formulario ni tabla nueva.
 
+## Página Prédicas — biblioteca audiovisual (arquitectura final)
+
+`/predicas` pasó de "catálogo" a experiencia editorial: Hero → `LatestSermon`
+("Último mensaje", 60/40, siempre la más reciente por fecha) →
+`SermonsExplore` (buscador con debounce + predicador/serie/tema) →
+`SermonsList` (grid + "Cargar más") → `SermonSeriesShowcase` ("Explora por
+series", solo series con al menos una prédica publicada) →
+`SermonsClosingCTA` (teal). `/predicas/[slug]` y `/series/[slug]` ya
+existían — se restilizaron al lenguaje cartel (el segundo usaba todavía el
+sistema base/claro) y `/predicas/[slug]` ganó "Sigue creciendo"
+(`getRelatedSermons`: misma serie → temas en común → mismo predicador, en
+ese orden, sin motor de recomendación).
+
+**EN VIVO de Inicio — cero cambios, verificado explícitamente.** `lib/youtube.ts`,
+`components/public/YouTubeEmbed.tsx` y el bloque "En vivo" de
+`app/(public)/page.tsx` no se tocaron (`git diff` vacío en los tres,
+confirmado antes de terminar la sesión). El reproductor nuevo de
+`/predicas/[slug]` es un componente aparte, `LazySermonVideo.tsx` — mismo
+patrón de `getYouTubeId()`, pero deliberadamente **no** comparte código con
+`YouTubeEmbed` para que nada en Prédicas pueda afectar el EN VIVO por
+accidente en un futuro cambio.
+
+**Búsqueda server-side con debounce, a propósito distinta de Grupos.**
+A diferencia de `/grupos` (que pasó a filtrar 100% en cliente por su
+volumen pequeño), aquí el buscador y los filtros de predicador/serie/tema
+siguen actualizando `searchParams` vía `router.push` — la biblioteca de
+prédicas puede crecer a cientos de registros y no tiene sentido traer todo
+el catálogo al cliente. El campo de texto sí es local (400ms de debounce)
+para no navegar en cada tecla; los `<select>` navegan de inmediato, igual
+que antes del rediseño. `/predicas` volvió a quedar `ƒ` (dinámico, por
+`searchParams`) — a diferencia de `/grupos`, que si pudo volverse estático.
+
+**Paginación real, no solo cosmética.** `getPublishedSermonsPage()` trae
+`limit + 1` filas para saber si mostrar "Cargar más" sin una query de
+conteo aparte. `SermonsList` (cliente) parte de la primera página ya
+resuelta en el servidor y acumula páginas siguientes llamando al Server
+Action de solo lectura `loadMoreSermons()`; se remonta por completo
+(`key={filterKey}` en el padre) cada vez que cambian filtros/búsqueda, así
+nunca mezcla resultados de un filtro viejo con uno nuevo. El filtro que
+excluye grabaciones de oración (`PRAYER_TOPIC`) se aplica en JS después de
+paginar en Postgres — con el volumen actual (unas pocas grabaciones de
+oración entre el resto) es una simplificación consciente frente a
+excluirlas desde SQL, que habría exigido una vista o función nueva solo
+para esto.
+
+**"Último mensaje" vs. "Destacada" — dos conceptos ya no confundidos.**
+Antes del rediseño existía `getFeaturedSermon()`, pero pese al nombre
+calculaba la más reciente por fecha (sin campo `featured` en el esquema).
+Se separó en dos: `getLatestSermon()` (lo que ya hacía, ahora bien
+nombrado) y un `getFeaturedSermon()` nuevo que sí lee
+`sermons.featured` (migración `020_sermons_featured.sql`, default
+`false`). Admin/Editor ya pueden marcar una prédica como Destacada desde
+`/admin/predicas`, pero **el rediseño no le agregó un bloque público
+propio** — el brief permitía explícitamente omitirlo si no aportaba al
+diseño, y con un catálogo real de 2 prédicas no había necesidad. La
+capacidad de dato queda lista para cuando se decida usarla.
+
+**Video con carga diferida — solo en Prédicas.** `LazySermonVideo` muestra
+la miniatura + botón Play (mismo `SermonPlayIndicator` que las tarjetas) y
+recién monta el `<iframe>` de YouTube al hacer clic — evita cargar el
+reproductor de YouTube en cada visita a una página de prédica. Encontrado
+en el camino: la miniatura interna que carga el reproductor de YouTube usa
+`i.ytimg.com` (dominio distinto de `img.youtube.com`, que sí ya estaba
+permitido) — la CSP de `next.config.ts` no lo tenía y bloqueaba esa
+imagen; se agregó. No afecta el EN VIVO (usa `YouTubeEmbed`, sin miniatura
+propia).
+
+**Auditoría de `sermon-series.ts` — hueco cerrado.** Documentado como
+pendiente desde la sesión de arquitectura inicial: `createSermonSeries`,
+`updateSermonSeries` y `toggleSermonSeriesActive` no llamaban a
+`logAudit()`, a diferencia de `sermons.ts`. Ahora sí, con
+`module: "sermons"` (no existe un módulo de permisos separado para
+"series" — comparte el mismo gate `is_editor_or_admin()` que prédicas).
+
+**Tipos de prédica sin cambios.** `sermons.published` (borrador/publicada),
+`sermons.topics` (texto libre, sin tabla de catálogo) y el slug
+autogenerado desde el título ya existían exactamente como pide el brief —
+no se tocó ese modelo, solo se le agregó `featured`.
+
 ## Servicios externos
 
 | Servicio | Uso confirmado | Evidencia |
@@ -343,8 +423,8 @@ oración fuera de Prédicas hacia `/oraciones`, y la ficha de conexión
 
 1. Fase 15 (Producción) — no iniciada. Falta confirmar si existe ya un
    proyecto Vercel conectado (no hay evidencia en el repo).
-2. Auditoría de `sermon-series.ts` sin cobertura de `logAudit` (ver
-   arriba) — inconsistente con `sermons.ts`.
+2. ~~Auditoría de `sermon-series.ts` sin cobertura de `logAudit`~~ — resuelto
+   durante el rediseño de Prédicas (ver sección "Página Prédicas" arriba).
 3. Sistema de permisos finos (`has_permission`, `015_permissions.sql`)
    sigue sin usarse en ninguna política RLS — decidir si se activa o se
    retira si no va a usarse.

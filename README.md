@@ -203,6 +203,10 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
    (sin recargar por cada filtro), Lista/Mapa sincronizados, control de
    privacidad de ubicación por grupo (`location_public`), selector de
    coordenadas en mapa para el admin
+14.8. ✅ Rediseño de Prédicas — "Último mensaje" editorial, buscador con
+   debounce contra servidor, paginación real ("Cargar más"), video con
+   carga diferida, prédicas relacionadas, campo "Destacada"
+   (`sermons.featured`), auditoría de series cerrada
 15. ⬜ Producción
 
 ## Despliegue

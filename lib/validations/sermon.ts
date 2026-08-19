@@ -22,6 +22,7 @@ export const sermonSchema = z.object({
   sermonDate: z.string().trim().min(1, "Ingresa la fecha."),
   topics: z.array(z.string()).default([]),
   published: z.boolean().default(false),
+  featured: z.boolean().default(false),
 });
 
 export type SermonInput = z.infer<typeof sermonSchema>;

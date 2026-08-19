@@ -18,7 +18,7 @@ const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   `script-src ${SCRIPT_SRC}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://*.supabase.co https://*.tile.openstreetmap.org https://img.youtube.com",
+  "img-src 'self' data: https://*.supabase.co https://*.tile.openstreetmap.org https://img.youtube.com https://i.ytimg.com",
   "font-src 'self'",
   "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com",
   "frame-src https://www.youtube.com https://challenges.cloudflare.com",
@@ -48,6 +48,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       // Supabase Storage (Fase 8 en adelante: prédicas, series, equipo, grupos, eventos).
       { protocol: "https", hostname: "*.supabase.co" },
+      // Fallback de miniatura para prédicas sin thumbnail_url propio (LazySermonVideo) — ya
+      // permitido en img-src de la CSP, solo faltaba aquí para poder usar next/image.
+      { protocol: "https", hostname: "img.youtube.com" },
     ],
   },
   async headers() {

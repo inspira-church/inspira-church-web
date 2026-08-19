@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { getPublishedSermonsPage } from "@/lib/queries/sermons";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSchema } from "@/lib/validations/sermon";
 
@@ -23,6 +24,7 @@ function parseForm(formData: FormData) {
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean),
     published: formData.get("published") === "on",
+    featured: formData.get("featured") === "on",
   };
 }
 
@@ -53,6 +55,7 @@ export async function createSermon(
       sermon_date: parsed.data.sermonDate,
       topics: parsed.data.topics,
       published: parsed.data.published,
+      featured: parsed.data.featured,
     })
     .select("id")
     .single();
@@ -101,6 +104,7 @@ export async function updateSermon(
       sermon_date: parsed.data.sermonDate,
       topics: parsed.data.topics,
       published: parsed.data.published,
+      featured: parsed.data.featured,
     })
     .eq("id", id);
 
@@ -136,4 +140,15 @@ export async function toggleSermonPublished(id: string, nextPublished: boolean) 
   });
   revalidatePath("/admin/predicas");
   revalidatePath("/predicas");
+}
+
+/**
+ * "Cargar más" en /predicas — se llama directo desde el cliente (SermonsList),
+ * no desde un <form>. Es solo lectura pública, no necesita revalidar nada.
+ */
+export async function loadMoreSermons(
+  filters: { preacherId?: string; seriesId?: string; topic?: string; search?: string },
+  offset: number
+) {
+  return getPublishedSermonsPage(filters, { offset });
 }

@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Diecinueve migraciones en
+auditoría de la reorganización del panel admin). Veinte migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -25,6 +25,7 @@ auditoría de la reorganización del panel admin). Diecinueve migraciones en
 | `017_first_time_connections.sql` | Ficha de conexión "Déjanos tus datos" de /primera-vez — tabla propia, distinta de `contacts` |
 | `018_media_public_nosotros_hero_read.sql` | Agrega `nosotros-hero`/`nosotros-essence` a la lectura pública de `media` (reemplaza la política de `014`) — fotos del rediseño de /nosotros |
 | `019_growth_groups_location_visibility.sql` | `growth_groups.location_public` (default `true`) — cuando es `false`, `public_growth_groups` oculta lat/lng por completo (sin pin en el mapa), aunque el sector/localidad en texto se sigue mostrando |
+| `020_sermons_featured.sql` | `sermons.featured` (default `false`) — "Destacada", independiente de "Último mensaje" (que sigue siendo la publicada más reciente por fecha) |
 
 ## Aplicar las migraciones
 

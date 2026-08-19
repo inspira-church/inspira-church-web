@@ -45,6 +45,7 @@ export default async function EditSermonPage({
             sermonDate: sermon.sermon_date,
             topics: sermon.topics ?? [],
             published: sermon.published,
+            featured: sermon.featured,
           }}
         />
       </div>

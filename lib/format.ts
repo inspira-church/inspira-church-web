@@ -15,6 +15,15 @@ export function formatDateShort(iso: string) {
   });
 }
 
+/** "2026-08-16" -> "16 AGO 2026" — convención compacta de fecha para Prédicas (tarjetas, último mensaje, detalle). */
+export function formatDateCompact(iso: string) {
+  const date = new Date(`${iso}T00:00:00`);
+  const day = date.toLocaleDateString("es-CO", { day: "numeric" });
+  const month = date.toLocaleDateString("es-CO", { month: "short" }).replace(".", "").toUpperCase();
+  const year = date.toLocaleDateString("es-CO", { year: "numeric" });
+  return `${day} ${month} ${year}`;
+}
+
 /** "19:00" -> "7:00 p. m." */
 export function formatTime(time: string) {
   const [hours, minutes] = time.split(":").map(Number);

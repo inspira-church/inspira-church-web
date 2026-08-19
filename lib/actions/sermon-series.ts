@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSeriesSchema } from "@/lib/validations/sermon-series";
@@ -31,13 +32,17 @@ export async function createSermonSeries(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("sermon_series").insert({
-    name: parsed.data.name,
-    slug: parsed.data.slug,
-    description: parsed.data.description,
-    cover_image_url: parsed.data.coverImageUrl,
-    active: parsed.data.active,
-  });
+  const { data, error } = await supabase
+    .from("sermon_series")
+    .insert({
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      description: parsed.data.description,
+      cover_image_url: parsed.data.coverImageUrl,
+      active: parsed.data.active,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     if (isDuplicateSlugError(error)) {
@@ -45,6 +50,14 @@ export async function createSermonSeries(
     }
     return { error: "No se pudo crear. Intenta de nuevo." };
   }
+
+  await logAudit({
+    module: "sermons",
+    action: "create",
+    entityType: "sermon_series",
+    entityId: data.id,
+    description: `Creó la serie "${parsed.data.name}".`,
+  });
 
   revalidatePath("/admin/series");
   redirect("/admin/series");
@@ -79,6 +92,14 @@ export async function updateSermonSeries(
     return { error: "No se pudo guardar. Intenta de nuevo." };
   }
 
+  await logAudit({
+    module: "sermons",
+    action: "update",
+    entityType: "sermon_series",
+    entityId: id,
+    description: `Actualizó la serie "${parsed.data.name}".`,
+  });
+
   revalidatePath("/admin/series");
   redirect("/admin/series");
 }
@@ -86,5 +107,12 @@ export async function updateSermonSeries(
 export async function toggleSermonSeriesActive(id: string, nextActive: boolean) {
   const supabase = await createClient();
   await supabase.from("sermon_series").update({ active: nextActive }).eq("id", id);
+  await logAudit({
+    module: "sermons",
+    action: nextActive ? "activate" : "deactivate",
+    entityType: "sermon_series",
+    entityId: id,
+    description: `${nextActive ? "Activó" : "Desactivó"} una serie.`,
+  });
   revalidatePath("/admin/series");
 }

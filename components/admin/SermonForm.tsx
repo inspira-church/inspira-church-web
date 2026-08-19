@@ -10,6 +10,7 @@ import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
 import type { ActionState } from "@/lib/form-errors";
+import { getYouTubeId } from "@/lib/format";
 import { slugify } from "@/lib/slugify";
 
 interface Option {
@@ -36,6 +37,7 @@ interface SermonFormProps {
     sermonDate: string;
     topics: string[];
     published: boolean;
+    featured: boolean;
   };
 }
 
@@ -53,6 +55,8 @@ export function SermonForm({
   const [title, setTitle] = useState(defaultValues?.title ?? "");
   const [slug, setSlug] = useState(defaultValues?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(defaultValues));
+  const [youtubeUrl, setYoutubeUrl] = useState(defaultValues?.youtubeUrl ?? "");
+  const youtubeId = getYouTubeId(youtubeUrl);
 
   return (
     <form action={formAction} className="max-w-xl space-y-6">
@@ -123,11 +127,20 @@ export function SermonForm({
           name="youtubeUrl"
           type="url"
           placeholder="https://www.youtube.com/watch?v=..."
-          defaultValue={defaultValues?.youtubeUrl}
+          value={youtubeUrl}
+          onChange={(e) => setYoutubeUrl(e.target.value)}
           required
         />
         {state.fieldErrors?.youtubeUrl && (
           <p className="-mt-3 text-xs text-danger">{state.fieldErrors.youtubeUrl}</p>
+        )}
+        {youtubeId && (
+          // eslint-disable-next-line @next/next/no-img-element -- solo preview en el panel, no next/image por dominio externo variable de YouTube.
+          <img
+            src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+            alt="Miniatura del video de YouTube"
+            className="h-32 w-auto rounded-md border border-border object-cover"
+          />
         )}
 
         <TextAreaField
@@ -156,6 +169,12 @@ export function SermonForm({
           name="published"
           label="Publicada (visible en el sitio público)"
           defaultChecked={defaultValues?.published ?? false}
+        />
+        <CheckboxField
+          name="featured"
+          label="Destacada"
+          defaultChecked={defaultValues?.featured ?? false}
+          hint="Independiente de la fecha — la iglesia quiere resaltar este mensaje en particular."
         />
       </FormSection>
 
