@@ -69,6 +69,27 @@ export async function updatePrayerRequest(id: string, formData: FormData) {
   revalidatePath("/admin/oracion");
 }
 
+export async function updateFirstTimeConnection(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const status = formData.get("status");
+  await supabase
+    .from("first_time_connections")
+    .update({
+      status,
+      internal_notes: formData.get("internalNotes") || null,
+      assigned_to: formData.get("assignedTo") || null,
+    })
+    .eq("id", id);
+  await logAudit({
+    module: "inbox",
+    action: "update",
+    entityType: "first_time_connection",
+    entityId: id,
+    description: `Actualizó una ficha de conexión de Primera vez (estado: ${status}).`,
+  });
+  revalidatePath("/admin/formularios");
+}
+
 /** Solo Admin puede borrar (ver política prayer_requests_delete_admin, Fase 2). */
 export async function deletePrayerRequest(id: string) {
   const supabase = await createClient();

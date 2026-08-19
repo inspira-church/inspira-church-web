@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Dieciséis migraciones en
+auditoría de la reorganización del panel admin). Diecisiete migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -22,6 +22,7 @@ auditoría de la reorganización del panel admin). Dieciséis migraciones en
 | `014_media_public_primera_vez_hero_read.sql` | Lectura pública de la foto del hero de /primera-vez |
 | `015_permissions.sql` | Catálogo `permissions`/`role_permissions` por módulo.acción + `has_permission()` — preparado para permisos finos, sin cambiar el acceso actual |
 | `016_audit_logs_extend.sql` | `audit_logs`: columnas `module`, `user_role`, `user_name`, `previous_data`, `new_data` |
+| `017_first_time_connections.sql` | Ficha de conexión "Déjanos tus datos" de /primera-vez — tabla propia, distinta de `contacts` |
 
 ## Aplicar las migraciones
 

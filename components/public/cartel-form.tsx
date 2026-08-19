@@ -144,6 +144,69 @@ export function CartelCheckbox({ label, id, name, required, ...rest }: CartelChe
   );
 }
 
+interface CartelRadioGroupProps {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  defaultValue?: string;
+  required?: boolean;
+}
+
+export function CartelRadioGroup({
+  label,
+  name,
+  options,
+  defaultValue,
+  required,
+}: CartelRadioGroupProps) {
+  return (
+    <fieldset>
+      <legend className="text-xs font-bold uppercase tracking-wide text-white/70">
+        {label}
+        {required && <span className="text-[#FF7F50]"> *</span>}
+      </legend>
+      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+        {options.map((option) => (
+          <label
+            key={option.value}
+            className={cn(hind.className, "flex items-center gap-2 text-sm text-white/80")}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              defaultChecked={option.value === defaultValue}
+              required={required}
+              className="h-4 w-4 border-white/25 bg-white/5 text-[#FF7F50] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50]"
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+/** Misma receta visual que PosterButton (cartel.tsx), pero como &lt;button&gt; real — CTA secundario dentro de un formulario (ej. "Cancelar"). */
+export function CartelGhostButton({
+  className,
+  children,
+  ...rest
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "inline-flex items-center justify-center rounded-md border-2 border-white/70 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:border-white",
+        className
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
+
 interface CartelSubmitButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   pending?: boolean;
   pendingText?: string;

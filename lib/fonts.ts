@@ -1,4 +1,4 @@
-import { Anton, Caveat, Hind } from "next/font/google";
+import { Anton, Caveat, Hind, Montserrat_Alternates } from "next/font/google";
 
 /**
  * Tipografía de cartel para la página de Inicio únicamente (ver
@@ -7,6 +7,12 @@ import { Anton, Caveat, Hind } from "next/font/google";
  */
 export const anton = Anton({ weight: "400", subsets: ["latin"] });
 export const caveat = Caveat({ weight: "700", subsets: ["latin"] });
+
+/** Frase destacada de la ficha de conexión en /primera-vez ("Déjanos tus datos"). */
+export const montserratAlternates = Montserrat_Alternates({
+  weight: ["600", "700"],
+  subsets: ["latin"],
+});
 
 /** Frases del hero sobre el slide — misma tipografía que usa g12.co para ese mismo tipo de texto. */
 export const hind = Hind({ weight: ["400", "600"], subsets: ["latin"] });

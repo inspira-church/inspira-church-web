@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { BookOpen, Handshake, HandHeart, Sparkles, Sprout, Users } from "lucide-react";
 import Image from "next/image";
-import { Eyebrow, GoldButton, PosterHeading } from "@/components/public/cartel";
-import { WhatsAppButton } from "@/components/public/WhatsAppButton";
+import { Eyebrow, PosterHeading } from "@/components/public/cartel";
+import { FirstTimeConnectionReveal } from "@/components/public/FirstTimeConnectionReveal";
 import { Container } from "@/components/ui/Container";
 import { anton, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { getFirstTimeHeroImage } from "@/lib/queries/media";
@@ -163,7 +163,7 @@ export default async function FirstTimePage() {
       </section>
 
       {/* Qué esperar — recorrido, no tarjetas */}
-      <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
+      <section className="bg-[#0d0d0d] pb-16 pt-16 sm:pb-20 sm:pt-24">
         <Container>
           <Eyebrow color={CAMPAIGN_COLORS[1]}>Qué esperar</Eyebrow>
           <PosterHeading>Lo que vivirás en Inspira</PosterHeading>
@@ -227,32 +227,8 @@ export default async function FirstTimePage() {
               })}
             </div>
           </div>
-        </Container>
-      </section>
 
-      {/* Preguntas / CTA */}
-      <section className="bg-black py-16 sm:py-24">
-        <Container>
-          <div className="max-w-xl">
-            <Eyebrow color={CAMPAIGN_COLORS[4]}>¿Tienes preguntas?</Eyebrow>
-            <PosterHeading>Escríbenos antes de venir</PosterHeading>
-            <p className={cn(hind.className, "mt-5 text-white/70")}>
-              Con gusto resolvemos cualquier duda antes de tu visita.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              <GoldButton href="/contacto" color={CAMPAIGN_COLORS[4]}>
-                Ir a contacto
-              </GoldButton>
-              <div className="flex items-center gap-3 text-sm text-white/60">
-                <span>o escríbenos directo</span>
-                <WhatsAppButton
-                  variant="inline"
-                  message={settings.whatsappMessage}
-                  number={settings.whatsappNumber}
-                />
-              </div>
-            </div>
-          </div>
+          <FirstTimeConnectionReveal privacyPolicyUrl={settings.privacyPolicyUrl} />
         </Container>
       </section>
     </>
