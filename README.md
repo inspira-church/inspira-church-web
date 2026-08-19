@@ -196,6 +196,13 @@ Desarrollo por fases (ver documento de arquitectura). Completadas:
    `/oraciones` (mismos registros de `sermons`, filtrados por tag)
 14.5. ✅ Ficha de conexión "Déjanos tus datos" en Primera vez — tabla propia
    `first_time_connections`, bandeja en `/admin/formularios`
+14.6. ✅ Rediseño de la página Nosotros — historia, propósito, misión/visión,
+   creencias en acordeón, equipo pastoral con biografía en modal, mosaico
+   de liderazgo, ubicación y CTA final, todo editable desde `/admin/nosotros`
+14.7. ✅ Rediseño de Grupos de crecimiento — búsqueda y filtros 100% cliente
+   (sin recargar por cada filtro), Lista/Mapa sincronizados, control de
+   privacidad de ubicación por grupo (`location_public`), selector de
+   coordenadas en mapa para el admin
 15. ⬜ Producción
 
 ## Despliegue

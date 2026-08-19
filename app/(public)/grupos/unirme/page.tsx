@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Eyebrow, PosterHeading } from "@/components/public/cartel";
+import { Eyebrow } from "@/components/public/cartel";
 import { GroupJoinForm } from "@/components/public/GroupJoinForm";
 import { Container } from "@/components/ui/Container";
-import { hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { getPublicGroups } from "@/lib/queries/growth-groups";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { cn } from "@/lib/utils";
@@ -25,8 +25,15 @@ export default async function GroupJoinPage() {
     <section className="bg-black pb-16 pt-16 sm:pb-24 sm:pt-24">
       <Container>
         <div className="mx-auto max-w-xl">
-          <Eyebrow color={CAMPAIGN_COLORS[3]}>Grupos de crecimiento</Eyebrow>
-          <PosterHeading>Quiero pertenecer a un grupo</PosterHeading>
+          <Eyebrow color={ABOUT_COLORS.coral}>Grupos de crecimiento</Eyebrow>
+          <h1
+            className={cn(
+              anton.className,
+              "mt-4 text-balance text-4xl uppercase leading-[0.92] text-white sm:text-5xl"
+            )}
+          >
+            Quiero pertenecer a un grupo
+          </h1>
           <p className={cn(hind.className, "mt-4 text-white/70")}>
             Completa tus datos y el líder del grupo se pondrá en contacto contigo.
           </p>

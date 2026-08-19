@@ -42,6 +42,7 @@ export default async function EditGrowthGroupPage({
             sector: group.sector,
             latApprox: group.lat_approx,
             lngApprox: group.lng_approx,
+            locationPublic: group.location_public,
             dayOfWeek: group.day_of_week,
             timeOfDay: group.time_of_day,
             leaderId: group.leader_id,

@@ -31,6 +31,23 @@ export function dayName(dayOfWeek: number) {
   return DAY_NAMES[dayOfWeek] ?? "";
 }
 
+/** "suba" -> "Suba" — solo para mostrar; nunca cambia el valor real guardado (ver GroupsExplorer). */
+export function titleCase(text: string) {
+  return text
+    .split(" ")
+    .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word))
+    .join(" ");
+}
+
+/** Quita tildes/diacríticos para comparar texto sin distinguir acentos (ej. "bogota" encuentra "Bogotá"). */
+export function normalizeSearch(text: string) {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 /** "hace 20 min" / "hace 1 h" — cae a fecha corta pasados 7 días. */
 export function formatRelativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();

@@ -141,9 +141,10 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-18 migraciones en `supabase/migrations/`, 001 a 018 (`018` agregó
+19 migraciones en `supabase/migrations/`, 001 a 019 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
-`media` — ver sección "Página Nosotros" más abajo, y la tabla de
+`media`; `019` agregó `growth_groups.location_public` — ver secciones
+"Página Nosotros" y "Página Grupos" más abajo, y la tabla de
 `supabase/README.md`, ya actualizada). Ver ese archivo para el detalle
 migración por migración, el bootstrap del primer admin, y la auditoría de
 RLS completa (Fase 12). Resumen de lo no cubierto ahí:
@@ -235,6 +236,69 @@ fotos y visibilidad, igual que el resto del CMS.
 compartido (`IntersectionObserver`, dispara una sola vez). Las clases
 `motion-reduce:transition-none` en cada consumidor respetan
 `prefers-reduced-motion` sin bifurcar la lógica del hook.
+
+## Página Grupos — rediseño "encuentra tu comunidad" (arquitectura final)
+
+`/grupos` pasó de "directorio" a experiencia narrativa: Hero (negro) →
+`GroupsIntro` (crema, "Más que una reunión") → búsqueda+filtros+resultados
+(`GroupsExplorer`) → `GroupsHelpCTA` (teal, siempre visible, con o sin
+resultados). `/grupos/[slug]` (detalle) y `/grupos/unirme` (interés/contacto)
+ya existían de fases anteriores — se restilizaron pero **no se dupli­caron**.
+
+**Filtrado 100% cliente, sin round-trip al servidor por tecleo.** Antes,
+`GroupFilters` actualizaba `searchParams` vía `router.push` (recarga RSC por
+cada cambio); ahora `GroupsExplorer` recibe la lista completa ya resuelta
+server-side (`getPublicGroups()`, sin filtrar) y hace búsqueda+localidad+
+día+tipo con `useMemo` en el cliente — sin debounce porque no hay query de
+servidor que evitar. Efecto colateral bueno: `/grupos` volvió a ser
+**estático con ISR** (`○`, antes `ƒ` por depender de `searchParams`).
+Lista y Mapa comparten exactamente el mismo array `filtered` — nunca pueden
+desincronizarse. Búsqueda ignora tildes (`normalizeSearch`, NFD) para que
+"suba"/"Suba" o "bogota"/"Bogotá" coincidan igual. `titleCase()` normaliza
+solo la **etiqueta visible** de localidad en el filtro (`suba` → `Suba`) sin
+tocar el valor real guardado — el dato en Supabase no se migró.
+
+**Privacidad de ubicación — capa nueva sobre una que ya era segura.**
+`growth_groups` (006) ya nunca exponía `exact_address`/`leader_phone_private`
+al público — el sitio siempre lee `public_growth_groups`, una vista que ni
+siquiera tiene esas columnas. Lo que faltaba: una forma de que un admin
+suprima *incluso el pin aproximado* para un grupo que se reúne en vivienda
+particular. Migración `019_growth_groups_location_visibility.sql` agrega
+`growth_groups.location_public boolean default true` y la vista ahora hace
+`case when location_public then lat_approx else null end` — si es `false`,
+`lat_approx`/`lng_approx` llegan `null` al público (sin pin en mapa/tarjeta/
+detalle) pero `sector`/`locality` en texto se siguen mostrando. Validado en
+vivo: se desactivó para "Grupo - 1" (sector real "Conjunto residencial -
+colina"), se confirmó que el pin desaparece de tarjeta+mapa general+detalle
+sin tocar el texto, y se reactivó al terminar la prueba. Admin gana
+`components/admin/LocationPicker.tsx` — mapa Leaflet clicable que fija
+`latApprox`/`lngApprox` sin que el admin necesite conocer coordenadas (los
+inputs numéricos siguen ahí, sincronizados, para ajuste fino).
+
+**Bug de datos real encontrado y corregido**: los dos grupos existentes
+tenían `lng_approx` guardado en **positivo** (~74.05–74.06) cuando Bogotá es
+~-74 — los pines renderizaban ~245 000 px fuera del contenedor del mapa
+(verificado por `getBoundingClientRect`), es decir la vista Mapa llevaba
+rota todo este tiempo para datos reales. Corregido con el usuario en
+sesión (confirmó "sí" explícitamente) editando ambos grupos desde el propio
+panel admin — no con SQL directo — así quedó auditado igual que cualquier
+edición normal (`audit_logs`, módulo `groups`).
+
+**Colores por tipo, no por índice rotativo.** `lib/group-types.ts` mapea
+`group_type` (texto libre administrado desde el CMS, sin tabla de
+catálogo — ver comentario en `006_growth_groups.sql`) a un color de
+`ABOUT_COLORS` por coincidencia de patrón ("crecimiento"→teal claro,
+"joven"→coral, "famil"→crema, etc.), con un color por defecto para
+cualquier tipo nuevo que se cree sin tocar código. Mismo helper en
+`GroupCard`, `GroupsMap` (popup) y `/grupos/[slug]`.
+
+**Contacto reutilizado, no duplicado.** El CTA "Quiero que me contacten" del
+estado sin-resultados y de `GroupsHelpCTA` apunta a `/grupos/unirme` (sin
+`?grupo=`) — el mismo formulario ya existente (`GroupJoinForm`,
+`group_join_requests`, Turnstile + rate limit) ya soporta "No estoy seguro —
+recomiéndenme uno" como opción de grupo. `/grupos/[slug]` sigue enlazando a
+`/grupos/unirme?grupo=<slug>` para preseleccionar. No se creó ningún
+formulario ni tabla nueva.
 
 ## Servicios externos
 

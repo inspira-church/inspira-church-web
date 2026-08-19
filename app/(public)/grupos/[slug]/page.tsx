@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { GoldButton } from "@/components/public/cartel";
 import { SinglePointMap } from "@/components/public/SinglePointMap";
 import { Container } from "@/components/ui/Container";
-import { anton, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { anton, hind } from "@/lib/fonts";
 import { dayName, formatTime } from "@/lib/format";
+import { getGroupTypeColor } from "@/lib/group-types";
 import { getPublicGroupBySlug } from "@/lib/queries/growth-groups";
 import { cn } from "@/lib/utils";
 
@@ -16,9 +17,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const group = await getPublicGroupBySlug(slug);
   if (!group) return {};
+  const place = [group.sector, group.locality].filter(Boolean).join(" · ");
   return {
-    title: `${group.name} | Grupos de crecimiento | Inspira Church`,
-    description: group.description,
+    title: `${group.name} | ${group.groupType} | Inspira Church`,
+    description:
+      group.description ||
+      `${group.groupType} · ${dayName(group.dayOfWeek)} ${formatTime(group.timeOfDay)}${place ? ` · ${place}` : ""}.`,
   };
 }
 
@@ -27,8 +31,8 @@ export default async function GroupPage({ params }: PageProps) {
   const group = await getPublicGroupBySlug(slug);
   if (!group) notFound();
 
-  const place = [group.sector, group.locality].filter(Boolean).join(", ");
-  const color = CAMPAIGN_COLORS[3];
+  const place = [group.sector, group.locality].filter(Boolean).join(" · ");
+  const color = getGroupTypeColor(group.groupType);
 
   return (
     <section className="bg-black pb-16 pt-16 sm:pb-24 sm:pt-24">
@@ -44,7 +48,9 @@ export default async function GroupPage({ params }: PageProps) {
             <h1 className={cn(anton.className, "mt-3 text-balance text-4xl uppercase leading-[0.95] text-white sm:text-5xl")}>
               {group.name}
             </h1>
-            <p className={cn(hind.className, "mt-4 text-lg text-white/70")}>{group.description}</p>
+            {group.description && (
+              <p className={cn(hind.className, "mt-4 text-lg text-white/70")}>{group.description}</p>
+            )}
 
             <dl className="mt-8 grid gap-4 sm:grid-cols-2">
               <div>
@@ -86,19 +92,24 @@ export default async function GroupPage({ params }: PageProps) {
 
             <div className="mt-8">
               <GoldButton href={`/grupos/unirme?grupo=${group.slug}`} color={color}>
-                Quiero pertenecer a este grupo
+                Quiero conectarme con este grupo
               </GoldButton>
             </div>
           </div>
 
           {group.latApprox !== null && group.lngApprox !== null && (
-            <div className="h-64 overflow-hidden border border-white/10 lg:h-full">
-              <SinglePointMap
-                lat={group.latApprox}
-                lng={group.lngApprox}
-                label={group.name}
-                sublabel={group.sector}
-              />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/45 lg:hidden">
+                Mapa
+              </p>
+              <div className="mt-2 h-64 overflow-hidden border border-white/10 lg:mt-0 lg:h-full">
+                <SinglePointMap
+                  lat={group.latApprox}
+                  lng={group.lngApprox}
+                  label={group.name}
+                  sublabel={group.sector}
+                />
+              </div>
             </div>
           )}
         </div>

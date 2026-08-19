@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/admin/FormError";
+import { LocationPicker } from "@/components/admin/LocationPicker";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
@@ -37,6 +38,7 @@ interface GrowthGroupFormProps {
     leaderPhonePrivate: string | null;
     internalNotes: string | null;
     active: boolean;
+    locationPublic: boolean;
   };
 }
 
@@ -48,6 +50,8 @@ export function GrowthGroupForm({ action, teamMemberOptions, defaultValues }: Gr
   const [name, setName] = useState(defaultValues?.name ?? "");
   const [slug, setSlug] = useState(defaultValues?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(defaultValues));
+  const [lat, setLat] = useState<number | null>(defaultValues?.latApprox ?? null);
+  const [lng, setLng] = useState<number | null>(defaultValues?.lngApprox ?? null);
 
   return (
     <form action={formAction} className="max-w-xl space-y-5">
@@ -107,23 +111,41 @@ export function GrowthGroupForm({ action, teamMemberOptions, defaultValues }: Gr
         <TextField label="Sector / barrio" name="sector" defaultValue={defaultValues?.sector ?? ""} />
       </div>
 
+      <LocationPicker
+        lat={lat}
+        lng={lng}
+        onChange={(newLat, newLng) => {
+          setLat(newLat);
+          setLng(newLng);
+        }}
+      />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField
           label="Latitud aproximada"
           name="latApprox"
           type="number"
           step="any"
-          defaultValue={defaultValues?.latApprox ?? ""}
-          hint="Del sector, no de la vivienda"
+          value={lat ?? ""}
+          onChange={(e) => setLat(e.target.value === "" ? null : Number(e.target.value))}
+          hint="Del sector, no de la vivienda — o haz clic en el mapa arriba"
         />
         <TextField
           label="Longitud aproximada"
           name="lngApprox"
           type="number"
           step="any"
-          defaultValue={defaultValues?.lngApprox ?? ""}
+          value={lng ?? ""}
+          onChange={(e) => setLng(e.target.value === "" ? null : Number(e.target.value))}
         />
       </div>
+
+      <CheckboxField
+        name="locationPublic"
+        label="Mostrar ubicación exacta públicamente"
+        defaultChecked={defaultValues?.locationPublic ?? true}
+        hint="Desactiva esta opción para grupos que se reúnen en una vivienda particular. En ese caso, el sitio mostrará únicamente el sector o barrio, sin pin en el mapa."
+      />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <SelectField

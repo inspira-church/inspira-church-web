@@ -18,6 +18,7 @@ export const growthGroupSchema = z.object({
   sector: z.string().trim().optional(),
   latApprox: z.coerce.number().min(-90).max(90).optional(),
   lngApprox: z.coerce.number().min(-180).max(180).optional(),
+  locationPublic: z.boolean().default(true),
   dayOfWeek: z.coerce.number().int().min(0).max(6),
   timeOfDay: z.string().trim().min(1, "Ingresa la hora."),
 

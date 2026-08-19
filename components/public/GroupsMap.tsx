@@ -4,6 +4,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { dayName, formatTime } from "@/lib/format";
+import { getGroupTypeColor } from "@/lib/group-types";
 
 export interface MapGroup {
   slug: string;
@@ -11,6 +13,10 @@ export interface MapGroup {
   lat: number;
   lng: number;
   sector?: string | null;
+  locality?: string | null;
+  groupType?: string;
+  dayOfWeek?: number;
+  timeOfDay?: string;
 }
 
 const pinIcon = L.divIcon({
@@ -39,17 +45,34 @@ export function GroupsMap({ groups, center }: GroupsMapProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {groups.map((group) => (
-        <Marker key={group.slug} position={[group.lat, group.lng]} icon={pinIcon}>
-          <Popup>
-            <p className="font-semibold">{group.name}</p>
-            {group.sector && <p>{group.sector}</p>}
-            <Link href={`/grupos/${group.slug}`} className="text-[#c1502e]">
-              Ver grupo →
-            </Link>
-          </Popup>
-        </Marker>
-      ))}
+      {groups.map((group) => {
+        const place = [group.sector, group.locality].filter(Boolean).join(" · ");
+        const color = group.groupType ? getGroupTypeColor(group.groupType) : "#FF7F50";
+        return (
+          <Marker key={group.slug} position={[group.lat, group.lng]} icon={pinIcon}>
+            <Popup minWidth={180}>
+              {group.groupType && (
+                <p
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color }}
+                >
+                  {group.groupType}
+                </p>
+              )}
+              <p className="mt-0.5 font-semibold">{group.name}</p>
+              {group.dayOfWeek !== undefined && group.timeOfDay && (
+                <p className="mt-1 text-sm">
+                  {dayName(group.dayOfWeek)} · {formatTime(group.timeOfDay)}
+                </p>
+              )}
+              {place && <p className="text-sm text-neutral-600">{place}</p>}
+              <Link href={`/grupos/${group.slug}`} className="mt-1 inline-block font-semibold text-[#c1502e]">
+                Ver grupo →
+              </Link>
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }
