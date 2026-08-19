@@ -40,7 +40,7 @@ test.describe("Validación de formularios públicos (sin enviar datos reales)", 
 
     // Sin marcar el consentimiento, el navegador sigue bloqueando el envío.
     await expect(page).toHaveURL(/\/contacto$/);
-    const consent = page.getByRole("checkbox", { name: /autorizo el tratamiento/i });
+    const consent = page.getByRole("checkbox", { name: /autorizo a inspira church/i });
     await expect(consent).toHaveJSProperty("validity.valid", false);
   });
 });

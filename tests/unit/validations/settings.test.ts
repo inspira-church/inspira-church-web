@@ -13,6 +13,7 @@ const valid = {
   heroText1: "Somos una iglesia donde el **amor de Dios** restaura vidas.",
   heroText2: "Vivimos para **adorar a Dios** cada día.",
   firstTimeHeroText: "Sin compromiso, solo para conocernos.",
+  contactHeroText: "Queremos escucharte.",
 } as const;
 
 describe("siteSettingsSchema", () => {

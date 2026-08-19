@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Veintidós migraciones en
+auditoría de la reorganización del panel admin). Veintitrés migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -28,6 +28,7 @@ auditoría de la reorganización del panel admin). Veintidós migraciones en
 | `020_sermons_featured.sql` | `sermons.featured` (default `false`) — "Destacada", independiente de "Último mensaje" (que sigue siendo la publicada más reciente por fecha) |
 | `021_sermons_meeting_type.sql` | Enum `sermon_meeting_type` ('presencial'\|'virtual') + `sermons.meeting_type` (nullable, sin default) — rediseño de /oraciones, ver CLAUDE.md sección "Página Oraciones" |
 | `022_events_redesign.sql` | 12 columnas nuevas en `events` (subtitle, end_date/end_time, modality, category, requires_registration, registration_status, show_countdown, practical_info, cost, age_range, location_public) + enums `event_modality`/`event_registration_status` — rediseño de /eventos, ver CLAUDE.md sección "Página Eventos" |
+| `023_contacts_redesign.sql` | `contacts`: elimina `whatsapp` (redundante con `phone`, tabla verificada vacía antes de borrar), agrega `preferred_channel` (enum `contact_preferred_channel`), `event_id` (FK a `events`, `on delete set null`), `consent_at`, `privacy_policy_version`; agrega `'evento'` al enum `contact_reason` — rediseño de /contacto, ver CLAUDE.md sección "Página Contacto" |
 
 ## Aplicar las migraciones
 

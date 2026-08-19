@@ -18,6 +18,7 @@ export interface SiteSettings {
   heroText1: string;
   heroText2: string;
   firstTimeHeroText: string;
+  contactHeroText: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -40,6 +41,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
     "Vivimos para **adorar a Dios**, conscientes de que **su presencia** nos acompaña cada día.",
   firstTimeHeroText:
     "Sin compromiso, solo para conocernos. Aquí tienes todo lo que necesitas para tu primera visita a Inspira Church.",
+  contactHeroText:
+    "Queremos escucharte. Si deseas visitarnos, unirte a un grupo, pedir oración o simplemente saludarnos, estamos aquí para ti.",
 };
 
 /** Toda la configuración vive en una sola fila (key='general') como jsonb. */

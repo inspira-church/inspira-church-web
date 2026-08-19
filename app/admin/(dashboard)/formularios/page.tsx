@@ -15,6 +15,7 @@ export default async function FormsInboxPage() {
     { data: firstTimeConnections },
     { data: staff },
     { data: groups },
+    { data: events },
   ] = await Promise.all([
     supabase.from("contacts").select("*").order("created_at", { ascending: false }),
     supabase
@@ -27,10 +28,12 @@ export default async function FormsInboxPage() {
       .order("created_at", { ascending: false }),
     supabase.from("profiles").select("id, full_name").eq("active", true),
     supabase.from("growth_groups").select("id, name"),
+    supabase.from("events").select("id, name"),
   ]);
 
   const staffOptions = (staff ?? []).map((s) => ({ value: s.id, label: s.full_name }));
   const groupNameById = new Map((groups ?? []).map((g) => [g.id, g.name]));
+  const eventNameById = new Map((events ?? []).map((e) => [e.id, e.name]));
 
   return (
     <div>
@@ -47,7 +50,12 @@ export default async function FormsInboxPage() {
       ) : (
         <div className="mt-4 divide-y divide-border rounded-lg border border-border bg-paper-raised">
           {contacts.map((contact) => (
-            <ContactRow key={contact.id} contact={contact} staffOptions={staffOptions} />
+            <ContactRow
+              key={contact.id}
+              contact={contact}
+              staffOptions={staffOptions}
+              eventName={contact.event_id ? (eventNameById.get(contact.event_id) ?? null) : null}
+            />
           ))}
         </div>
       )}

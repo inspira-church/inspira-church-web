@@ -150,6 +150,8 @@ interface CartelRadioGroupProps {
   options: { value: string; label: string }[];
   defaultValue?: string;
   required?: boolean;
+  onChange?: (value: string) => void;
+  "aria-describedby"?: string;
 }
 
 export function CartelRadioGroup({
@@ -158,9 +160,11 @@ export function CartelRadioGroup({
   options,
   defaultValue,
   required,
+  onChange,
+  "aria-describedby": ariaDescribedBy,
 }: CartelRadioGroupProps) {
   return (
-    <fieldset>
+    <fieldset aria-describedby={ariaDescribedBy}>
       <legend className="text-xs font-bold uppercase tracking-wide text-white/70">
         {label}
         {required && <span className="text-[#FF7F50]"> *</span>}
@@ -177,6 +181,7 @@ export function CartelRadioGroup({
               value={option.value}
               defaultChecked={option.value === defaultValue}
               required={required}
+              onChange={onChange ? () => onChange(option.value) : undefined}
               className="h-4 w-4 border-white/25 bg-white/5 text-[#FF7F50] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7F50]"
             />
             {option.label}

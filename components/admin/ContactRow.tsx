@@ -3,7 +3,7 @@ import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
 import { updateContact } from "@/lib/actions/inbox";
-import { CONTACT_REASON_LABEL, FORM_STATUS_OPTIONS } from "@/lib/constants-admin";
+import { CONTACT_REASON_LABEL, FORM_STATUS_OPTIONS, PREFERRED_CHANNEL_LABEL } from "@/lib/constants-admin";
 import { formatDate } from "@/lib/format";
 
 interface ContactRowProps {
@@ -11,20 +11,24 @@ interface ContactRowProps {
     id: string;
     name: string;
     phone: string | null;
-    whatsapp: string | null;
     email: string | null;
+    preferred_channel: string;
     reason: string;
     message: string | null;
     status: string;
     assigned_to: string | null;
     internal_notes: string | null;
     follow_up_date: string | null;
+    consent: boolean;
+    consent_at: string;
     created_at: string;
   };
   staffOptions: { value: string; label: string }[];
+  /** Nombre del evento de origen, si la solicitud llegó desde /contacto?evento=<slug> — nunca se muestra el UUID. */
+  eventName?: string | null;
 }
 
-export function ContactRow({ contact, staffOptions }: ContactRowProps) {
+export function ContactRow({ contact, staffOptions, eventName }: ContactRowProps) {
   const updateWithId = updateContact.bind(null, contact.id);
 
   return (
@@ -46,14 +50,8 @@ export function ContactRow({ contact, staffOptions }: ContactRowProps) {
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           {contact.phone && (
             <div>
-              <dt className="text-xs text-ink-faint">Teléfono</dt>
+              <dt className="text-xs text-ink-faint">Teléfono / WhatsApp</dt>
               <dd className="text-ink">{contact.phone}</dd>
-            </div>
-          )}
-          {contact.whatsapp && (
-            <div>
-              <dt className="text-xs text-ink-faint">WhatsApp</dt>
-              <dd className="text-ink">{contact.whatsapp}</dd>
             </div>
           )}
           {contact.email && (
@@ -62,6 +60,25 @@ export function ContactRow({ contact, staffOptions }: ContactRowProps) {
               <dd className="text-ink">{contact.email}</dd>
             </div>
           )}
+          <div>
+            <dt className="text-xs text-ink-faint">Canal preferido</dt>
+            <dd className="text-ink">
+              {PREFERRED_CHANNEL_LABEL[contact.preferred_channel] ?? contact.preferred_channel}
+            </dd>
+          </div>
+          {eventName && (
+            <div>
+              <dt className="text-xs text-ink-faint">Evento de origen</dt>
+              <dd className="text-ink">{eventName}</dd>
+            </div>
+          )}
+          <div>
+            <dt className="text-xs text-ink-faint">Consentimiento</dt>
+            <dd className="text-ink">
+              {contact.consent ? "Autorizado" : "No autorizado"} ·{" "}
+              {formatDate(contact.consent_at.slice(0, 10))}
+            </dd>
+          </div>
         </dl>
         {contact.message && (
           <div>

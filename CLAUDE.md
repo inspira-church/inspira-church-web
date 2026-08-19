@@ -143,14 +143,15 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-22 migraciones en `supabase/migrations/`, 001 a 022 (`018` agregó
+23 migraciones en `supabase/migrations/`, 001 a 023 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
 `sermons.featured`; `021` agregó `sermons.meeting_type`; `022` agregó 12
-columnas nuevas a `events` — ver secciones "Página Nosotros", "Página
-Grupos", "Página Prédicas", "Página Oraciones" y "Página Eventos" más
-abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese
-archivo para el detalle migración por migración, el bootstrap del primer
+columnas nuevas a `events`; `023` rediseñó `contacts` (canal preferido,
+evento de origen, consentimiento con timestamp) — ver secciones "Página
+Nosotros", "Página Grupos", "Página Prédicas", "Página Oraciones", "Página
+Eventos" y "Página Contacto" más abajo, y la tabla de `supabase/README.md`,
+ya actualizada). Ver ese archivo para el detalle migración por migración, el bootstrap del primer
 admin, y la auditoría de RLS completa (Fase 12).
 Resumen de lo no cubierto ahí:
 
@@ -620,6 +621,119 @@ se eliminó ni se reemplazó — solo se editó dos veces desde el propio panel
 (mover subtítulo, activar cuenta regresiva), igual que cualquier edición
 normal de un admin, con su rastro completo en `audit_logs`.
 
+## Página Contacto — "queremos escucharte" (arquitectura final)
+
+`/contacto` pasó de "formulario administrativo" a experiencia editorial:
+Hero (con CTA de texto a WhatsApp, no solo un ícono) → "Dos caminos"
+(Quiero escribirles / Quiero hablar ahora, columnas editoriales sin
+tarjetas) → formulario → "También puedes encontrarnos aquí" (dirección +
+Cómo llegar, sin mapa — ver más abajo) → cierre en crema. Sigue siendo
+`ƒ` (dinámico) desde este rediseño porque ahora lee `searchParams.evento`
+(antes era `○` estático, sin dependencias por request).
+
+**`contacts.phone`/`contacts.whatsapp` eran redundantes — verificado antes
+de tocar nada.** La tabla tenía **0 filas reales en producción** (contacto
+nunca se había usado todavía), así que la migración
+`023_contacts_redesign.sql` pudo **eliminar `whatsapp` sin ningún riesgo de
+pérdida de datos** — verificación explícita antes de una operación
+destructiva, no un default. El campo único `phone` ("Teléfono / WhatsApp")
+cubre el número; "cómo prefiere que lo contactemos" ahora es un concepto
+real y propio: `preferred_channel` (enum `whatsapp`\|`llamada`\|`correo`).
+La misma migración agrega `'evento'` al enum `contact_reason` (con
+`ALTER TYPE ... ADD VALUE ... BEFORE 'otro'`, no destructivo), y dos
+columnas de trazabilidad de consentimiento: `consent_at` (timestamptz,
+default `now()`) y `privacy_policy_version` (texto — guarda el
+`privacyPolicyUrl` vigente en el momento del envío; no existe un sistema
+de versiones real, así que no se inventó uno, solo se dejó registro de
+cuál URL estaba activa).
+
+**Formulario dinámico según motivo — evita duplicar sistemas ya
+existentes.** `ContactForm` (cliente) reacciona al `<select>` de Motivo:
+- **"Necesito oración"**: oculta el resto del formulario y muestra un
+  aviso ("Para cuidar tu privacidad, las peticiones de oración se reciben
+  en un espacio separado.") + CTA a `/oracion` (el formulario de petición
+  que ya existía, `prayer_requests`, con su propio RLS más estricto). La
+  petición **nunca se duplica** en `contacts`.
+- **"Quiero unirme a un grupo de crecimiento"**: mismo patrón, redirige a
+  `/grupos/unirme` (`GroupJoinForm`, `group_join_requests`), que ya captura
+  zona/localidad/grupo específico — campos que `contacts` no tiene y no se
+  le agregaron, para no duplicar el modelo de datos de Grupos.
+- **"Información sobre un evento"**: si se llega desde
+  `/contacto?evento=<slug>` (nuevo — ver `/eventos/[slug]`, que ahora tiene
+  un enlace discreto "¿Tienes preguntas sobre este evento? Contáctanos →"),
+  el motivo se preselecciona solo y se muestra "Nos escribes sobre: {evento}"
+  en vez de volver a preguntar. El slug viaja en un input oculto;
+  `lib/actions/contact.ts` **resuelve el id real en el servidor** contra
+  `events` (`published = true`) — nunca confía en un id enviado desde el
+  cliente. El resto de motivos (visitar, información general, servir,
+  otro) usan el formulario completo sin cambios.
+
+**Canal preferido exige coherencia con el dato de contacto.**
+`preferredChannel === "correo"` solo es válido si hay `email` (validado con
+`.refine()` en `contactSchema`, servidor — nunca solo en el navegador).
+WhatsApp/Llamada solo necesitan `phone`, que ya es obligatorio siempre. El
+`<input type="email">` se marca `required` en el cliente dinámicamente
+cuando el radio "Correo" está seleccionado (mismo patrón reactivo que el
+motivo), pero la validación real y definitiva vive en el servidor.
+
+**Accesibilidad de errores — no solo color.** Cada campo del formulario
+lleva `aria-describedby`/`aria-invalid` apuntando al `<p id="...-error">`
+correspondiente cuando existe un error de ese campo — antes los errores
+eran visualmente adyacentes pero sin relación programática. Se extendió
+`CartelRadioGroup` (`components/public/cartel-form.tsx`) con `onChange` y
+`aria-describedby`, que no existían.
+
+**Anti-spam y rate limiting — ya existían, no se reconstruyeron.**
+Turnstile (`verifyTurnstile()`, deja pasar si no hay claves configuradas
+todavía) y rate limiting en memoria (`checkRateLimit`, 5 envíos / 10 min
+por IP) ya cubrían Contacto desde la Fase 12 — se conservan tal cual.
+`privacyPolicyUrl` configurado hoy (`https://inspirachurch.com/privacidad-prueba`)
+**es un valor de prueba**, no la política real — pendiente documentado
+abajo, no se inventó una política nueva ni se cambió el mecanismo (sigue
+siendo el mismo campo `site_settings.privacyPolicyUrl` que ya usan
+Oración y Grupos).
+
+**Estados de solicitud — se conserva el modelo de 4 estados existente, a
+propósito.** El brief de esta sesión sugería simplificar a
+Nuevo/En gestión/Atendido, pero `form_status` (`nueva`/`contactada`/
+`en_seguimiento`/`finalizada`) es un enum **compartido** con
+`group_join_requests` y `prayer_requests` — cambiarlo habría afectado
+esos dos módulos, fuera de alcance de esta sesión sobre Contacto. El
+modelo de 4 estados ya es simple y funcional; se documenta la decisión de
+no tocarlo en vez de forzar un cambio no solicitado en otros módulos.
+
+**Bandeja de Admin — ya existía (`/admin/formularios`), se actualizó para
+el nuevo esquema.** `ContactRow.tsx` ahora muestra "Canal preferido",
+consentimiento con fecha, y el nombre del evento de origen cuando
+`event_id` no es null (resuelto contra una lista de eventos cargada en la
+página, igual que ya se hacía con `groupNameById` para
+`group_join_requests` — nunca se muestra el UUID). El indicador de
+solicitudes nuevas en el Dashboard (`StatCard` "Contactos nuevos") **ya
+existía** desde antes de esta sesión.
+
+**Permisos — verificados, sin cambios.** `/admin/formularios` (módulo de
+permisos `inbox`) es accesible para Editor; `/admin/contacto` (módulo
+`contact_settings`, configuración de WhatsApp/redes/política/texto del
+hero) es `adminOnly`. Esto ya separaba correctamente "gestionar
+solicitudes" de "editar contenido público" antes de esta sesión — el
+Editor puede leer contactos (dato personal) sin poder cambiar la
+configuración del sitio, y viceversa no aplica. `prayer_requests` sigue
+siendo un módulo de permisos aparte con su propio RLS (privadas solo para
+admin) — Contacto y Oración nunca comparten tabla ni permisos.
+
+**Texto del hero, administrable — mismo patrón que Inicio/Primera vez.**
+`site_settings.contactHeroText` (nuevo campo en el blob JSONB `general`,
+sin migración de esquema) sigue exactamente el patrón de
+`heroText1`/`heroText2`/`firstTimeHeroText` — editable desde
+`/admin/contacto` → "Página Contacto". El mensaje de WhatsApp por defecto
+(`whatsappMessage`) ya era editable desde antes; no se duplicó.
+
+**Sin mapa en Contacto, a propósito.** El brief permite omitirlo si ya
+existe en Nosotros y sobrecarga la página — Contacto solo muestra
+dirección en texto + enlace "Cómo llegar" a Google Maps
+(`googleMapsLink()`, reutilizado, mismo helper que Inicio/Nosotros/Eventos).
+No se creó una tercera implementación de mapas.
+
 ## Botón flotante de contacto (`ContactFAB`)
 
 Reemplaza el botón fijo de WhatsApp que vivía en `app/(public)/layout.tsx`
@@ -678,10 +792,13 @@ oración fuera de Prédicas hacia `/oraciones`, la ficha de conexión "Déjanos
 tus datos" de Primera vez (migración 017, tabla `first_time_connections`,
 bandeja en `/admin/formularios`), el rediseño contemplativo de Oraciones
 con página individual `/oraciones/[slug]` y `sermons.meeting_type`
-(migración 021 — ver sección "Página Oraciones" arriba), y el rediseño
+(migración 021 — ver sección "Página Oraciones" arriba), el rediseño
 editorial de Eventos con estado calculado por fecha, cuenta regresiva,
 inscripción, información práctica y ubicación (migración 022 — ver sección
-"Página Eventos" arriba).
+"Página Eventos" arriba), y el rediseño de Contacto con canal preferido,
+formulario dinámico según motivo (redirige a Oración/Grupos en vez de
+duplicar) y contexto de evento de origen (migración 023 — ver sección
+"Página Contacto" arriba).
 
 **Pendiente / abierto, en orden de relevancia:**
 
@@ -696,6 +813,11 @@ inscripción, información práctica y ubicación (migración 022 — ver secci�
    oración privadas (`prayer_requests.is_private`).
 5. Revisión legal del texto de consentimiento de datos (Ley 1581 de 2012,
    Colombia) en los formularios públicos — pendiente desde la Fase 12.
+   Confirmado en esta sesión: `site_settings.privacyPolicyUrl` hoy apunta a
+   `https://inspirachurch.com/privacidad-prueba` — un valor de prueba, no
+   la política real. Actualizarlo desde `/admin/contacto` en cuanto exista
+   la URL definitiva (los tres formularios públicos — Contacto, Oración,
+   Grupos — y el footer la toman automáticamente de ese mismo campo).
 6. ~~Nosotros — fotos de marca sin cargar~~ — resuelto: `nosotros-hero` y
    `nosotros-essence` ya tienen foto real subida desde `/admin/nosotros`,
    confirmado en vivo en `/nosotros` tras aplicar la migración `018`.

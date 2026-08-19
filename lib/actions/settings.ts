@@ -107,6 +107,7 @@ export async function updateContactSettings(
       xUrl: formData.get("xUrl") || undefined,
       youtubeUrl: formData.get("youtubeUrl") || undefined,
       privacyPolicyUrl: formData.get("privacyPolicyUrl") || undefined,
+      contactHeroText: formData.get("contactHeroText"),
     },
     "contact_settings",
     "Actualizó la configuración de contacto.",

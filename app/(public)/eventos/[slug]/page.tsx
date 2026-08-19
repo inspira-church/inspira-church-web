@@ -279,6 +279,22 @@ export default async function EventPage({ params }: PageProps) {
         )
       )}
 
+      {/* Preguntas — conserva el evento de origen, no se le pide repetirlo en Contacto */}
+      <section className="border-b border-white/10 bg-black py-10 text-center">
+        <Container>
+          <p className={cn(hind.className, "text-sm text-white/50")}>
+            ¿Tienes preguntas sobre este evento?{" "}
+            <Link
+              href={`/contacto?evento=${event.slug}`}
+              className="font-bold uppercase tracking-wide transition-colors hover:brightness-110"
+              style={{ color: ABOUT_COLORS.coral }}
+            >
+              Contáctanos →
+            </Link>
+          </p>
+        </Container>
+      </section>
+
       {/* Relacionados */}
       {related.length > 0 && (
         <section className="bg-black py-16 sm:py-24">

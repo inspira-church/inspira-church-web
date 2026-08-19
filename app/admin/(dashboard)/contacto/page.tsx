@@ -25,6 +25,7 @@ export default async function AdminContactSettingsPage() {
             xUrl: settings.xUrl,
             youtubeUrl: settings.youtubeUrl,
             privacyPolicyUrl: settings.privacyPolicyUrl,
+            contactHeroText: settings.contactHeroText,
           }}
         />
       </div>

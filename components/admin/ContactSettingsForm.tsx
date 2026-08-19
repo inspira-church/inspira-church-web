@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
 import { updateContactSettings } from "@/lib/actions/settings";
 import type { ActionState } from "@/lib/form-errors";
@@ -21,6 +22,7 @@ type Values = Pick<
   | "xUrl"
   | "youtubeUrl"
   | "privacyPolicyUrl"
+  | "contactHeroText"
 >;
 
 export function ContactSettingsForm({ defaultValues }: { defaultValues: Values }) {
@@ -65,6 +67,20 @@ export function ContactSettingsForm({ defaultValues }: { defaultValues: Values }
       />
       {state.fieldErrors?.contactEmail && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.contactEmail}</p>
+      )}
+
+      <div className="border-t border-border pt-5">
+        <p className="font-display text-lg font-semibold text-ink">Página Contacto</p>
+      </div>
+
+      <TextAreaField
+        label="Texto del hero"
+        name="contactHeroText"
+        defaultValue={defaultValues.contactHeroText}
+        hint="El párrafo debajo de 'Contáctanos' en /contacto."
+      />
+      {state.fieldErrors?.contactHeroText && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.contactHeroText}</p>
       )}
 
       <div className="border-t border-border pt-5">
