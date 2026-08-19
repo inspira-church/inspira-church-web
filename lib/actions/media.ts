@@ -80,6 +80,19 @@ export async function createMediaRecord(input: CreateMediaInput): Promise<Create
       description: 'Reemplazó la foto de portada de "Primera vez".',
     });
   }
+  if (parsed.data.module === "nosotros-hero" || parsed.data.module === "nosotros-essence") {
+    revalidatePath("/nosotros");
+    await logAudit({
+      module: "about",
+      action: "update",
+      entityType: "media",
+      entityId: data.id,
+      description:
+        parsed.data.module === "nosotros-hero"
+          ? 'Reemplazó la foto principal de "Nosotros".'
+          : 'Reemplazó la foto de la sección "Amamos a Dios. Amamos a las personas." en Nosotros.',
+    });
+  }
   return { data: { id: data.id, url: publicUrl } };
 }
 

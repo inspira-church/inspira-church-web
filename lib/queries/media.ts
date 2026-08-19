@@ -48,3 +48,30 @@ export async function getFirstTimeHeroImage(): Promise<string | null> {
   if (!data) return null;
   return supabase.storage.from("site").getPublicUrl(data.path).data.publicUrl;
 }
+
+const NOSOTROS_HERO_MODULE = "nosotros-hero";
+const NOSOTROS_ESSENCE_MODULE = "nosotros-essence";
+
+async function getLatestSiteMediaUrl(module: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("media")
+    .select("path")
+    .eq("module", module)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return null;
+  return supabase.storage.from("site").getPublicUrl(data.path).data.publicUrl;
+}
+
+/** Foto principal del Hero de /nosotros, subida desde /admin/nosotros. Null si no se ha cargado. */
+export async function getAboutHeroImage(): Promise<string | null> {
+  return getLatestSiteMediaUrl(NOSOTROS_HERO_MODULE);
+}
+
+/** Foto a todo el ancho de la sección "Amamos a Dios. Amamos a las personas." en /nosotros. */
+export async function getAboutEssenceImage(): Promise<string | null> {
+  return getLatestSiteMediaUrl(NOSOTROS_ESSENCE_MODULE);
+}

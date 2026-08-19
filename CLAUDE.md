@@ -163,6 +163,66 @@ Resumen de lo no cubierto ahí:
   `anon`; una Server Action en `lib/actions/media.ts` guarda los metadatos
   en `media` después.
 
+## Página Nosotros — rediseño editorial (arquitectura final)
+
+`/nosotros` se reconstruyó como 9 secciones narrativas, cada una su propio
+componente en `components/public/`: `AboutHero`, `MissionVision`,
+`EssenceStatement`, `ChurchValues`, `BeliefsAccordion`, `PastoralTeam`,
+`LeadershipMosaic`, `VisitUs`, `AboutCTA`. Ritmo cromático fijo por sección
+(negro → crema → foto → negro → verde `#266C62` → negro → negro → coral →
+negro) usando `ABOUT_COLORS` (`lib/fonts.ts`) — paleta de marca fija,
+**distinta** de `CAMPAIGN_COLORS` (esa sigue rotando libremente en Inicio).
+
+**Cero migraciones de Supabase nuevas.** Todo el contenido nuevo cabe en la
+arquitectura existente:
+- Texto: sigue en `site_settings` (key='about'), mismo patrón JSONB de
+  siempre — `AboutContent` en `lib/queries/about.ts` creció mucho (historia,
+  propósito, misión/visión con etiqueta+frase protagonista+texto, frase de
+  identidad, valores, creencias, visita, CTA final) pero es un solo blob,
+  sin nueva tabla ni columna.
+- Fotos: dos módulos nuevos en la tabla `media` existente (bucket `site`,
+  igual que el hero de Inicio y de Primera vez) — `nosotros-hero` y
+  `nosotros-essence`. `lib/queries/media.ts` expone
+  `getAboutHeroImage()`/`getAboutEssenceImage()`; si no hay foto cargada,
+  cada sección degrada con su propio fallback (columna de texto centrada en
+  el Hero, gradiente de marca en la transición) — nunca un roto ni un mock.
+- Equipo pastoral y liderazgo: se reutiliza `team_members` sin cambios
+  (`type='pastor'` → `PastoralTeam` con modal de biografía nativo
+  `<dialog>`; `type='lider'` → `LeadershipMosaic`, mosaico sin biografía).
+  `active`/`order_index` ya cubrían "visible en Nosotros"/"orden" — no hizo
+  falta ningún campo nuevo tipo `show_on_about_page`.
+- Ubicación y CTA final: reutilizan `site_settings.churchAddress/Lat/Lng`
+  (mapa grande vía `SinglePointMap`/Leaflet, sin cambios) y la ruta
+  `/primera-vez` ya existente (mismo destino que "Da el siguiente paso" en
+  Inicio) — ninguna ruta nueva.
+
+**Creencias — accordion de 10 categorías + "La Iglesia".** `beliefs` pasó de
+`string[]` plano a `{ category, content, visible }[]`. `getAboutContent()`
+migra en lectura cualquier fila vieja en formato `string[]` (nunca se pierde
+contenido doctrinal real por el cambio de forma). Las 12 creencias reales
+que ya existían en producción se recategorizaron una sola vez (script
+puntual, ya no vive en el repo) dentro de las 10 categorías del brief — hoy
+las 10 tienen contenido real y visible; no quedó ninguna vacía. `visible`
+permite preparar una categoría sin publicarla; `BeliefsAccordion` filtra
+`visible && content` antes de renderizar, así que una categoría vacía u
+oculta simplemente no aparece (nunca un placeholder visible). El acordion
+es accesible: botones reales, `aria-expanded`/`aria-controls`, animación vía
+`grid-rows-[0fr/1fr]` (mismo truco que `FirstTimeConnectionReveal`).
+
+**Editable desde el panel, no desde código.** `/admin/nosotros` (ya
+`adminOnly` en el nav — sin cambios de permisos) ganó dos `ImageUploadField`
+(mismo patrón que `/admin/primera-vez`) y `AboutContentForm` creció con
+todos los campos nuevos, incluida `BeliefsEditor` — lista dinámica
+cliente-side (agregar/quitar/reordenar categoría, con `beliefsCount` oculto
+para que el Server Action sepa cuántas filas leer de `FormData`). Diseño,
+layout, animaciones y paleta siguen en código — el panel solo edita texto,
+fotos y visibilidad, igual que el resto del CMS.
+
+**Reveal en scroll** — `components/public/useScrollReveal.ts`, hook
+compartido (`IntersectionObserver`, dispara una sola vez). Las clases
+`motion-reduce:transition-none` en cada consumidor respetan
+`prefers-reduced-motion` sin bifurcar la lógica del hook.
+
 ## Servicios externos
 
 | Servicio | Uso confirmado | Evidencia |
@@ -215,6 +275,13 @@ oración fuera de Prédicas hacia `/oraciones`, y la ficha de conexión
    oración privadas (`prayer_requests.is_private`).
 5. Revisión legal del texto de consentimiento de datos (Ley 1581 de 2012,
    Colombia) en los formularios públicos — pendiente desde la Fase 12.
-6. `README.md` → "Estado del proyecto" no refleja el trabajo posterior a
-   la Fase 14 listado arriba; vale la pena actualizar sus fases numeradas
-   la próxima vez que se toque ese archivo.
+6. **Nosotros — fotos de marca sin cargar todavía**: `nosotros-hero` (junto
+   al título) y `nosotros-essence` (transición "Amamos a Dios...") no
+   tienen foto subida — cada sección ya degrada con un fallback de diseño
+   (no rompe nada), pero falta que alguien las suba desde `/admin/nosotros`
+   para ver la composición de dos columnas del Hero y la foto real en la
+   transición.
+7. **Nosotros — sin líderes activos hoy**: `team_members` no tiene ninguna
+   fila `type='lider', active=true`, así que `LeadershipMosaic` ("Lideramos
+   sirviendo") no se renderiza (oculto a propósito, no es un bug). Aparece
+   solo cuando se cargue al menos un líder desde `/admin/equipo`.

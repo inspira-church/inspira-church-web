@@ -12,25 +12,46 @@ function parseForm(formData: FormData) {
     description: formData.get(`values.${i}.description`),
   }));
 
-  const beliefs = String(formData.get("beliefs") ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const beliefsCount = Number(formData.get("beliefsCount") ?? 0);
+  const beliefs = Array.from({ length: beliefsCount }, (_, i) => ({
+    category: formData.get(`beliefs.${i}.category`),
+    content: formData.get(`beliefs.${i}.content`),
+    visible: formData.get(`beliefs.${i}.visible`) != null,
+  }));
 
   return {
     historyEyebrow: formData.get("historyEyebrow"),
     historyTitle: formData.get("historyTitle"),
     historyText: formData.get("historyText"),
+    historyImageAlt: formData.get("historyImageAlt") || "",
+
+    purposeEyebrow: formData.get("purposeEyebrow"),
+    purposeTitle: formData.get("purposeTitle"),
     missionTitle: formData.get("missionTitle"),
+    missionHeadline: formData.get("missionHeadline"),
     missionText: formData.get("missionText"),
     visionTitle: formData.get("visionTitle"),
+    visionHeadline: formData.get("visionHeadline"),
     visionText: formData.get("visionText"),
+
+    essenceTitle: formData.get("essenceTitle"),
+    essenceText: formData.get("essenceText"),
+    essenceImageAlt: formData.get("essenceImageAlt") || "",
+
     valuesEyebrow: formData.get("valuesEyebrow"),
     valuesTitle: formData.get("valuesTitle"),
     values,
+
     beliefsEyebrow: formData.get("beliefsEyebrow"),
     beliefsTitle: formData.get("beliefsTitle"),
+    beliefsIntro: formData.get("beliefsIntro"),
     beliefs,
+
+    visitEyebrow: formData.get("visitEyebrow"),
+    visitTitle: formData.get("visitTitle"),
+
+    ctaTitle: formData.get("ctaTitle"),
+    ctaText: formData.get("ctaText"),
   };
 }
 

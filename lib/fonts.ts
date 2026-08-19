@@ -19,3 +19,18 @@ export const hind = Hind({ weight: ["400", "600"], subsets: ["latin"] });
 
 /** Color de campaña que rota por tarjeta — el mismo patrón real de @inspira.church en Instagram. */
 export const CAMPAIGN_COLORS = ["#FF7F50", "#23d3d9", "#ff8a3d", "#3e6fa8", "#87281B"] as const;
+
+/**
+ * Paleta oficial de marca (distinta de CAMPAIGN_COLORS, que rota libremente
+ * por tarjeta) — usada con intención cromática fija en /nosotros: cada
+ * sección tiene un color propio, nunca varios a la vez.
+ */
+export const ABOUT_COLORS = {
+  coral: "#FF7F50",
+  teal: "#008080",
+  tealLight: "#508A8C",
+  green: "#266C62",
+  cream: "#D4C78F",
+  orange: "#D2431B",
+  red: "#87281B",
+} as const;
