@@ -1,5 +1,6 @@
 "use client";
 
+import { Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,7 +8,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { NAV_LINKS } from "@/lib/constants";
-import { anton } from "@/lib/fonts";
+import { ABOUT_COLORS, anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
 /** Coral cálido de la identidad de cartel (mismo tono que Inicio y el footer). */
@@ -92,14 +93,16 @@ export function Header() {
         <div className="hidden md:block">
           <Button
             as={Link}
-            href="/contacto"
+            href="/generaciones"
             size="sm"
             className={cn(
-              "bg-[#FF7F50] text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#ff9670]",
+              "gap-1.5 text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110",
               GOLD_CLASSES
             )}
+            style={{ backgroundColor: ABOUT_COLORS.tealLight }}
           >
-            Planea tu visita
+            <Users className="h-4 w-4" aria-hidden="true" />
+            Generaciones
           </Button>
         </div>
 
@@ -161,14 +164,16 @@ export function Header() {
             })}
             <Button
               as={Link}
-              href="/contacto"
+              href="/generaciones"
               className={cn(
-                "mt-2 justify-center bg-[#FF7F50] text-black transition-all duration-200 ease-out hover:bg-[#ff9670]",
+                "mt-2 justify-center gap-1.5 text-white transition-all duration-200 ease-out hover:brightness-110",
                 GOLD_CLASSES
               )}
+              style={{ backgroundColor: ABOUT_COLORS.tealLight }}
               onClick={() => setOpen(false)}
             >
-              Planea tu visita
+              <Users className="h-4 w-4" aria-hidden="true" />
+              Generaciones
             </Button>
           </Container>
         </nav>
