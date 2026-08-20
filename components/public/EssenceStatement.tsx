@@ -37,7 +37,7 @@ export function EssenceStatement({ title, text, photoUrl, photoAlt }: EssenceSta
         <p
           className={cn(
             anton.className,
-            "text-balance text-3xl uppercase leading-[1.05] text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.6)] sm:text-5xl"
+            "text-balance text-3xl uppercase leading-[1.05] text-white [text-shadow:-1.5px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_1.5px_0_#000,1.5px_1.5px_0_#000,0_2px_28px_rgba(0,0,0,0.85)] sm:text-5xl"
           )}
         >
           {title}
@@ -45,7 +45,7 @@ export function EssenceStatement({ title, text, photoUrl, photoAlt }: EssenceSta
         <p
           className={cn(
             hind.className,
-            "mx-auto mt-5 max-w-xl text-balance text-base text-white/85 [text-shadow:0_2px_12px_rgba(0,0,0,0.6)] sm:text-lg"
+            "mx-auto mt-5 max-w-xl text-balance text-base text-white/85 [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000,0_2px_16px_rgba(0,0,0,0.85)] sm:text-lg"
           )}
         >
           {text}
