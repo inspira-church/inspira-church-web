@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { dayName, formatTime } from "@/lib/format";
+import { formatTime, scheduleDayLabel } from "@/lib/format";
 import { toggleScheduleActive } from "@/lib/actions/schedules";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,7 +19,7 @@ export default async function SchedulesListPage() {
   const supabase = await createClient();
   const { data: schedules } = await supabase
     .from("schedules")
-    .select("id, type, name, day_of_week, time_of_day, location, active")
+    .select("id, type, name, day_of_week, time_of_day, location, active, recurrence, monthly_week")
     .order("order_index");
 
   return (
@@ -54,7 +54,8 @@ export default async function SchedulesListPage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{schedule.name}</p>
                 <p className="truncate text-sm text-ink-faint">
-                  {dayName(schedule.day_of_week)} · {formatTime(schedule.time_of_day)}
+                  {scheduleDayLabel(schedule.day_of_week, schedule.recurrence, schedule.monthly_week)} ·{" "}
+                  {formatTime(schedule.time_of_day)}
                   {schedule.location ? ` · ${schedule.location}` : ""}
                 </p>
               </div>

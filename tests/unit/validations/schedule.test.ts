@@ -39,4 +39,45 @@ describe("scheduleSchema", () => {
   it("rechaza nombre vacío", () => {
     expect(scheduleSchema.safeParse({ ...valid, name: "" }).success).toBe(false);
   });
+
+  it("recurrence por defecto es 'weekly' y monthlyWeek queda null", () => {
+    const result = scheduleSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurrence).toBe("weekly");
+      expect(result.data.monthlyWeek).toBeNull();
+    }
+  });
+
+  it("acepta recurrence 'monthly' con monthlyWeek válido (-1 = última semana)", () => {
+    const result = scheduleSchema.safeParse({
+      ...valid,
+      recurrence: "monthly",
+      monthlyWeek: "-1",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.monthlyWeek).toBe(-1);
+  });
+
+  it("rechaza recurrence 'monthly' sin monthlyWeek", () => {
+    expect(
+      scheduleSchema.safeParse({ ...valid, recurrence: "monthly" }).success
+    ).toBe(false);
+  });
+
+  it("rechaza monthlyWeek fuera de {1,2,3,4,-1}", () => {
+    expect(
+      scheduleSchema.safeParse({ ...valid, recurrence: "monthly", monthlyWeek: "5" }).success
+    ).toBe(false);
+  });
+
+  it("ignora monthlyWeek si recurrence es 'weekly' (fuerza null)", () => {
+    const result = scheduleSchema.safeParse({
+      ...valid,
+      recurrence: "weekly",
+      monthlyWeek: "2",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.monthlyWeek).toBeNull();
+  });
 });

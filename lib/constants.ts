@@ -31,6 +31,15 @@ export const DAY_NAMES = [
   "Sábado",
 ] as const;
 
+/** Ordinal (forma apocopada, ej. "Primer" no "Primero") usado junto al día para horarios con recurrencia mensual — "Último domingo de cada mes". -1 = última semana del mes, sin importar si el mes tiene 4 o 5. */
+export const MONTHLY_WEEK_OPTIONS = [
+  { value: 1, label: "Primer" },
+  { value: 2, label: "Segundo" },
+  { value: 3, label: "Tercer" },
+  { value: 4, label: "Cuarto" },
+  { value: -1, label: "Último" },
+] as const;
+
 /** Tag en `sermons.topics` que marca una grabación como oración (no prédica). */
 export const PRAYER_TOPIC = "Oración";
 

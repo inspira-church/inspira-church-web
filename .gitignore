@@ -47,3 +47,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase CLI — caché local de versión, no forma parte del proyecto
+supabase/.temp/

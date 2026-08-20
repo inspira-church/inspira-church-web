@@ -4,7 +4,7 @@ import { LazySermonVideo } from "@/components/public/LazySermonVideo";
 import { PrayerCard } from "@/components/public/PrayerCard";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
-import { dayName, dayNameFromDate, formatDate, formatTime, prayerModality } from "@/lib/format";
+import { dayNameFromDate, formatDate, formatTime, prayerModality, scheduleDayLabel } from "@/lib/format";
 import { getPrayerSchedules } from "@/lib/queries/schedules";
 import { getPrayerSermonBySlug, getRelatedPrayerSermons } from "@/lib/queries/sermons";
 import { getSiteUrl } from "@/lib/get-site-url";
@@ -113,7 +113,8 @@ export default async function PrayerRecordingPage({ params }: PageProps) {
                 <div className="mt-3 flex flex-col gap-1.5">
                   {prayerSchedules.map((s) => (
                     <p key={s.id} className="text-lg text-white/85">
-                      {dayName(s.day_of_week)} · {formatTime(s.time_of_day)} · {prayerModality(s.name)}
+                      {scheduleDayLabel(s.day_of_week, s.recurrence, s.monthly_week)} ·{" "}
+                      {formatTime(s.time_of_day)} · {prayerModality(s.name)}
                     </p>
                   ))}
                 </div>

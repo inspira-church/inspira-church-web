@@ -4,7 +4,7 @@ import { PrayerArchive } from "@/components/public/PrayerArchive";
 import { PrayerRequestCTA } from "@/components/public/PrayerRequestCTA";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
-import { dayName, formatTime, prayerModality } from "@/lib/format";
+import { formatTime, prayerModality, scheduleDayLabel } from "@/lib/format";
 import { getPrayerSchedules } from "@/lib/queries/schedules";
 import {
   getLatestSermonByTopic,
@@ -70,7 +70,8 @@ export default async function PrayerRecordingsPage() {
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-2 border-t border-white/10 pt-6">
               {prayerSchedules.map((s) => (
                 <p key={s.id} className="text-sm text-white/50">
-                  {dayName(s.day_of_week)} · {formatTime(s.time_of_day)} · {prayerModality(s.name)}
+                  {scheduleDayLabel(s.day_of_week, s.recurrence, s.monthly_week)} ·{" "}
+                  {formatTime(s.time_of_day)} · {prayerModality(s.name)}
                 </p>
               ))}
             </div>

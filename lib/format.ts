@@ -1,4 +1,4 @@
-import { DAY_NAMES } from "./constants";
+import { DAY_NAMES, MONTHLY_WEEK_OPTIONS } from "./constants";
 
 export function formatDate(iso: string) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("es-CO", {
@@ -43,6 +43,20 @@ export function dayName(dayOfWeek: number) {
 /** "2026-08-12" -> día de la semana real de esa fecha ("Miércoles"), sin depender del texto libre del título. */
 export function dayNameFromDate(iso: string) {
   return dayName(new Date(`${iso}T00:00:00`).getDay());
+}
+
+/** "Domingo" (recurrence "weekly") o "Último domingo de cada mes" (recurrence "monthly" + monthlyWeek) — usado por las tarjetas de horario en Inicio, /oraciones y el listado de Admin en vez de `dayName` a secas. */
+export function scheduleDayLabel(
+  dayOfWeek: number,
+  recurrence: string,
+  monthlyWeek: number | null
+) {
+  const day = dayName(dayOfWeek);
+  if (recurrence === "monthly" && monthlyWeek != null) {
+    const ordinal = MONTHLY_WEEK_OPTIONS.find((o) => o.value === monthlyWeek)?.label;
+    if (ordinal) return `${ordinal} ${day.toLowerCase()} de cada mes`;
+  }
+  return day;
 }
 
 /** "Oración Presencial." / "oración virtual" -> "Presencial" / "Virtual". Deja el nombre tal cual si no reconoce la modalidad. Usado por Inicio y /oraciones — misma fuente para no divergir. */

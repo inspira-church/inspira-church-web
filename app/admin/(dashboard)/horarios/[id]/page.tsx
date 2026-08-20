@@ -39,6 +39,8 @@ export default async function EditSchedulePage({
             location: schedule.location,
             orderIndex: schedule.order_index,
             active: schedule.active,
+            recurrence: schedule.recurrence,
+            monthlyWeek: schedule.monthly_week,
           }}
         />
       </div>

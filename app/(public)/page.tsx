@@ -5,7 +5,7 @@ import { Eyebrow, GoldButton, PosterButton, PosterHeading, TextLink, scheduleIco
 import { Hero } from "@/components/public/Hero";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Container } from "@/components/ui/Container";
-import { dayName, formatDate, formatTime, prayerModality } from "@/lib/format";
+import { formatDate, formatTime, prayerModality, scheduleDayLabel } from "@/lib/format";
 import { ABOUT_COLORS, anton, gistesy, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { PRAYER_TOPIC, SITE_CONFIG } from "@/lib/constants";
 import { isEventUpcoming } from "@/lib/event-status";
@@ -105,7 +105,7 @@ export default async function HomePage() {
                       </p>
                     </div>
                     <p className="mt-2 text-sm text-white/60">
-                      {dayName(s.day_of_week)}
+                      {scheduleDayLabel(s.day_of_week, s.recurrence, s.monthly_week)}
                     </p>
                     <p className={cn(anton.className, "mt-0.5 text-2xl text-white")}>
                       {formatTime(s.time_of_day)}
@@ -372,7 +372,8 @@ export default async function HomePage() {
                   {prayerSchedules.length > 0 ? (
                     prayerSchedules.map((s) => (
                       <p key={s.id} className="text-lg text-white/85">
-                        {dayName(s.day_of_week)} · {formatTime(s.time_of_day)} ·{" "}
+                        {scheduleDayLabel(s.day_of_week, s.recurrence, s.monthly_week)} ·{" "}
+                        {formatTime(s.time_of_day)} ·{" "}
                         {prayerModality(s.name)}
                       </p>
                     ))

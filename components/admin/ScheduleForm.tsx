@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextField } from "@/components/ui/TextField";
-import { DAY_NAMES } from "@/lib/constants";
+import { DAY_NAMES, MONTHLY_WEEK_OPTIONS } from "@/lib/constants";
 import type { ActionState } from "@/lib/form-errors";
 
 interface ScheduleFormProps {
@@ -19,6 +19,8 @@ interface ScheduleFormProps {
     location: string | null;
     orderIndex: number;
     active: boolean;
+    recurrence: "weekly" | "monthly";
+    monthlyWeek: number | null;
   };
 }
 
@@ -30,9 +32,18 @@ const typeOptions = [
   { value: "grupo", label: "Grupo" },
   { value: "actividad", label: "Actividad especial" },
 ];
+const recurrenceOptions = [
+  { value: "weekly", label: "Cada semana" },
+  { value: "monthly", label: "Una vez al mes" },
+];
+const monthlyWeekOptions = MONTHLY_WEEK_OPTIONS.map((o) => ({
+  value: String(o.value),
+  label: o.label,
+}));
 
 export function ScheduleForm({ action, defaultValues }: ScheduleFormProps) {
   const [state, formAction] = useActionState(action, initialState);
+  const [recurrence, setRecurrence] = useState(defaultValues?.recurrence ?? "weekly");
 
   return (
     <form action={formAction} className="max-w-xl space-y-5">
@@ -73,6 +84,31 @@ export function ScheduleForm({ action, defaultValues }: ScheduleFormProps) {
           required
         />
       </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <SelectField
+          label="Recurrencia"
+          name="recurrence"
+          options={recurrenceOptions}
+          value={recurrence}
+          onChange={(e) => setRecurrence(e.target.value as "weekly" | "monthly")}
+          required
+        />
+        {recurrence === "monthly" && (
+          <SelectField
+            label="¿Qué semana del mes?"
+            name="monthlyWeek"
+            options={monthlyWeekOptions}
+            defaultValue={
+              defaultValues?.monthlyWeek != null ? String(defaultValues.monthlyWeek) : "-1"
+            }
+            required
+          />
+        )}
+      </div>
+      {state.fieldErrors?.monthlyWeek && (
+        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.monthlyWeek}</p>
+      )}
 
       <TextField
         label="Lugar"

@@ -16,6 +16,8 @@ function parseForm(formData: FormData) {
     location: formData.get("location") || undefined,
     orderIndex: formData.get("orderIndex") || 0,
     active: formData.get("active") === "on",
+    recurrence: formData.get("recurrence") || "weekly",
+    monthlyWeek: formData.get("monthlyWeek") || null,
   };
 }
 
@@ -39,6 +41,8 @@ export async function createSchedule(
       location: parsed.data.location,
       order_index: parsed.data.orderIndex,
       active: parsed.data.active,
+      recurrence: parsed.data.recurrence,
+      monthly_week: parsed.data.monthlyWeek,
     })
     .select("id")
     .single();
@@ -81,6 +85,8 @@ export async function updateSchedule(
       location: parsed.data.location,
       order_index: parsed.data.orderIndex,
       active: parsed.data.active,
+      recurrence: parsed.data.recurrence,
+      monthly_week: parsed.data.monthlyWeek,
     })
     .eq("id", id);
 
