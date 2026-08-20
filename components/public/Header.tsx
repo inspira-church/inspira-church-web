@@ -58,7 +58,10 @@ export function Header() {
             )}
             priority
           />
-          <span className={cn(anton.className, "text-lg text-white sm:text-xl")}>
+          <span
+            className={cn(anton.className, "text-lg sm:text-xl")}
+            style={{ color: ABOUT_COLORS.tealLight }}
+          >
             Inspira Church
           </span>
         </Link>

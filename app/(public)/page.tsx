@@ -70,7 +70,7 @@ export default async function HomePage() {
         <Container>
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <Eyebrow color={CAMPAIGN_COLORS[0]}>Bienvenido a Inspira Church</Eyebrow>
+              <Eyebrow color="#508A8C">Bienvenido a Inspira Church</Eyebrow>
               <h1
                 className={cn(
                   anton.className,
@@ -78,7 +78,7 @@ export default async function HomePage() {
                 )}
               >
                 Una comunidad que
-                <span className="block" style={{ color: CAMPAIGN_COLORS[0] }}>
+                <span className="block" style={{ color: "#508A8C" }}>
                   te inspira a crecer
                 </span>
               </h1>
