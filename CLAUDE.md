@@ -753,6 +753,44 @@ esquema propio) — administrable desde `/admin/contacto` junto al resto de
 la configuración de contacto. Vacío por defecto; si no se configura, el
 FAB simplemente no muestra la opción de correo (nunca un `mailto:` roto).
 
+## Ajustes puntuales en Inicio (post-Contacto)
+
+Sesión corta de retoques visuales sobre `app/(public)/page.tsx`, sin cambios
+de esquema ni de datos — documentada aquí porque tocó una tipografía nueva
+que vale la pena conocer antes de seguir editando esa página:
+
+- **Fuente local nueva, solo para una frase.** `lib/fonts.ts` agrega
+  `gistesy` vía `next/font/local` (`public/fonts/Gistesy.ttf`, archivo
+  provisto por el usuario — no es de Google Fonts, así que no requiere API
+  key ni aparece en la tabla de "Servicios externos"). Se usa únicamente en
+  la frase "¡En Inspira Church siempre habrá un lugar para ti!" del bloque
+  "¿Eres nuevo?" — el resto de Inicio sigue en Anton/Hind. La fuente
+  `caveat` (Google Font) que existía antes para esa misma frase se eliminó
+  de `lib/fonts.ts` por quedar sin uso.
+- **Color de esa frase**: cambiado de `CAMPAIGN_COLORS[4]` (rotativo) a
+  `ABOUT_COLORS.tealLight` (`#508A8C`, fijo) en las 4 piezas del bloque
+  (eyebrow, frase, borde del link, flecha). `CAMPAIGN_COLORS[4]` sigue
+  usándose sin cambios en el paso 3 de "Tres pasos", más abajo en la misma
+  página — son dos usos distintos, no confundir si se vuelve a tocar este
+  archivo.
+- **"Agenda" (eyebrow de "Próximos eventos")**: se experimentó con
+  Gistesy/minúsculas/tamaños distintos y se revirtió explícitamente a como
+  estaba — sigue siendo `<Eyebrow color={CAMPAIGN_COLORS[2]}>Agenda</Eyebrow>`,
+  sin cambios netos.
+- **`<h1>` faltante corregido**: el encabezado de la sección "Bienvenida"
+  de Inicio pasó de `<h2>` a `<h1>` (antes de esto, Inicio no tenía ningún
+  `<h1>` real — mismo tipo de hueco que ya se había corregido en
+  `/oraciones`, ver esa sección arriba).
+- **Bug de contenido (no de código) encontrado y corregido**: la sección
+  "En vivo" no aparecía pese a que el canal de YouTube sí estaba
+  transmitiendo en el momento. Causa: `site_settings.youtubeChannelId`
+  apuntaba a un canal distinto del real — `lib/youtube.ts` solo falla en
+  silencio cuando la variable de entorno o el canal *faltan*, no cuando el
+  ID configurado es simplemente el equivocado, así que no había ningún
+  error visible en logs. Corregido desde `/admin/inicio`, no en código. Si
+  "En vivo" vuelve a no aparecer con el canal transmitiendo, revisar ese
+  campo antes que el código.
+
 ## Servicios externos
 
 | Servicio | Uso confirmado | Evidencia |
@@ -760,7 +798,7 @@ FAB simplemente no muestra la opción de correo (nunca un `mailto:` roto).
 | **GitHub** | Remoto único, `origin` | `github.com/edwinosman/inspira-church-web.git` |
 | **Supabase** | Postgres + Auth + Storage, las tres superficies activas | `@supabase/ssr` + `@supabase/supabase-js` en `package.json`, `lib/supabase/*` |
 | **Cloudflare Turnstile** | Anti-bot en Contacto, Oración, Unirme a grupo, Primera vez (Déjanos tus datos) | `lib/turnstile.ts`, `TurnstileWidget.tsx`, allowlisted en CSP de `next.config.ts` |
-| **Google — Fonts** | Solo `next/font/google` (Anton/Caveat/Hind/Montserrat Alternates en `lib/fonts.ts`, Figtree/Petrona en `app/layout.tsx`) | Self-hosted en build, **no requiere API key** |
+| **Google — Fonts** | `next/font/google` (Anton/Hind/Montserrat Alternates en `lib/fonts.ts`, Figtree/Petrona en `app/layout.tsx`). Aparte, `gistesy` en el mismo archivo es `next/font/local` con un archivo `.ttf` provisto por el usuario — no es un servicio de Google, no requiere configuración | Self-hosted en build, **no requiere API key** |
 | **Google — YouTube Data API v3** | Sección "En vivo" en Inicio | `lib/youtube.ts` llama `googleapis.com/youtube/v3/search` — **sí requiere** proyecto en Google Cloud Console + `YOUTUBE_API_KEY`. Falla en silencio (sección oculta) si falta |
 | **Google — Maps** | Solo enlaces profundos | `lib/maps.ts`: `google.com/maps?q=lat,lng` y enlace de Waze — texto plano, **no requiere API key** ni SDK. El mapa interactivo real usa Leaflet + tiles de OpenStreetMap |
 | **Vercel** | Mencionado como destino de hosting en `README.md`, cabeceras de IP compatibles con su proxy en `lib/rate-limit.ts` | **No confirmado en el repo** — no hay `vercel.json` ni config de build específica. No hay evidencia de que exista un proyecto Vercel ya conectado; verificar con el usuario antes de asumir que el deploy vive ahí |
@@ -795,10 +833,19 @@ con página individual `/oraciones/[slug]` y `sermons.meeting_type`
 (migración 021 — ver sección "Página Oraciones" arriba), el rediseño
 editorial de Eventos con estado calculado por fecha, cuenta regresiva,
 inscripción, información práctica y ubicación (migración 022 — ver sección
-"Página Eventos" arriba), y el rediseño de Contacto con canal preferido,
+"Página Eventos" arriba), el rediseño de Contacto con canal preferido,
 formulario dinámico según motivo (redirige a Oración/Grupos en vez de
 duplicar) y contexto de evento de origen (migración 023 — ver sección
-"Página Contacto" arriba).
+"Página Contacto" arriba), y una serie de ajustes visuales puntuales en
+Inicio — fuente local Gistesy, color fijo en el bloque "¿Eres nuevo?", `<h1>`
+faltante corregido (ver sección "Ajustes puntuales en Inicio" arriba).
+
+**Nota operativa**: `.claude/launch.json` tiene `autoPort: true` en la
+config `inspira-church-dev` porque han corrido varias sesiones de Claude
+Code contra este mismo repo en paralelo en la máquina del usuario — evita
+el error "Another next dev server is already running" reasignando puerto
+en vez de fallar. Si el servidor de desarrollo no responde donde se espera,
+revisar qué puerto tomó antes de asumir que está caído.
 
 **Pendiente / abierto, en orden de relevancia:**
 

@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Todo Inicio usa el lenguaje de cartel real de @inspira.church (negro,
- * Anton, script Caveat, color de campaña rotativo) — ver Hero.tsx y
+ * Anton, script Gistesy, color de campaña rotativo) — ver Hero.tsx y
  * components/public/cartel.tsx (piezas compartidas con /primera-vez). Las
  * demás páginas (Nosotros, Prédicas, Grupos, Eventos, Contacto, /oraciones)
  * y el panel admin siguen con el sistema de diseño original en
