@@ -18,7 +18,7 @@ export function GroupsIntro() {
           Crecemos mejor cuando lo hacemos juntos.
         </h2>
         <p className={cn(hind.className, "mx-auto mt-5 max-w-xl text-base leading-relaxed text-black/70")}>
-          Los grupos de crecimiento son espacios pequeños donde compartimos, aprendemos de la
+          Los grupos de crecimiento son espacios donde compartimos, aprendemos de la
           Palabra, oramos y construimos relaciones reales.
         </p>
       </div>
