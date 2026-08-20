@@ -159,27 +159,33 @@ export function Footer({
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos los derechos
             reservados.
           </p>
-          {privacyPolicyUrl && (
-            <p className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
-              <a
-                href={privacyPolicyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-[#FF7F50] hover:underline"
-              >
-                Política de privacidad
-              </a>
-              <span aria-hidden="true">·</span>
-              <a
-                href={privacyPolicyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-[#FF7F50] hover:underline"
-              >
-                Tratamiento de datos
-              </a>
-            </p>
-          )}
+          <p className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+            <Link href="/donaciones" className="transition-colors hover:text-[#FF7F50] hover:underline">
+              Donaciones
+            </Link>
+            {privacyPolicyUrl && (
+              <>
+                <span aria-hidden="true">·</span>
+                <a
+                  href={privacyPolicyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-[#FF7F50] hover:underline"
+                >
+                  Política de privacidad
+                </a>
+                <span aria-hidden="true">·</span>
+                <a
+                  href={privacyPolicyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-[#FF7F50] hover:underline"
+                >
+                  Tratamiento de datos
+                </a>
+              </>
+            )}
+          </p>
         </Container>
       </div>
     </footer>
