@@ -178,7 +178,7 @@ export default async function HomePage() {
             className={cn(gistesy.className, "mt-2 -rotate-1 text-4xl")}
             style={{ color: ABOUT_COLORS.tealLight }}
           >
-            ¡En Inspira Church siempre habrá un lugar para ti!
+            ¡En <span className="font-bold">Inspira Church</span> siempre habra un lugar para ti!
           </p>
 
           <Link
