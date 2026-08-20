@@ -35,6 +35,11 @@ export default async function PublicLayout({ children }: { children: ReactNode }
         whatsappMessage={settings.whatsappMessage}
         whatsappNumber={settings.whatsappNumber}
         contactEmail={settings.contactEmail}
+        facebookUrl={settings.facebookUrl}
+        instagramUrl={settings.instagramUrl}
+        tiktokUrl={settings.tiktokUrl}
+        xUrl={settings.xUrl}
+        youtubeUrl={settings.youtubeUrl}
       />
     </div>
   );
