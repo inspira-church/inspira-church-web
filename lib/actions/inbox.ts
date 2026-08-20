@@ -103,3 +103,45 @@ export async function deletePrayerRequest(id: string) {
   });
   revalidatePath("/admin/oracion");
 }
+
+/** Staff (is_editor_or_admin) puede borrar — ver política contacts_delete_staff, 008_forms.sql. */
+export async function deleteContact(id: string) {
+  const supabase = await createClient();
+  await supabase.from("contacts").delete().eq("id", id);
+  await logAudit({
+    module: "inbox",
+    action: "delete",
+    entityType: "contact",
+    entityId: id,
+    description: "Borró un contacto.",
+  });
+  revalidatePath("/admin/formularios");
+}
+
+/** Staff (is_editor_or_admin) puede borrar — ver política group_join_requests_delete_staff, 008_forms.sql. */
+export async function deleteGroupJoinRequest(id: string) {
+  const supabase = await createClient();
+  await supabase.from("group_join_requests").delete().eq("id", id);
+  await logAudit({
+    module: "inbox",
+    action: "delete",
+    entityType: "group_join_request",
+    entityId: id,
+    description: "Borró una solicitud de grupo.",
+  });
+  revalidatePath("/admin/formularios");
+}
+
+/** Staff (is_editor_or_admin) puede borrar — ver política first_time_connections_delete_staff, 017_first_time_connections.sql. */
+export async function deleteFirstTimeConnection(id: string) {
+  const supabase = await createClient();
+  await supabase.from("first_time_connections").delete().eq("id", id);
+  await logAudit({
+    module: "inbox",
+    action: "delete",
+    entityType: "first_time_connection",
+    entityId: id,
+    description: "Borró una ficha de conexión de Primera vez.",
+  });
+  revalidatePath("/admin/formularios");
+}

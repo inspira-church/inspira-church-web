@@ -1,6 +1,7 @@
+import { ConfirmForm } from "@/components/admin/ConfirmForm";
 import { Badge } from "@/components/ui/Badge";
 import { SelectField } from "@/components/ui/SelectField";
-import { updateGroupJoinRequest } from "@/lib/actions/inbox";
+import { deleteGroupJoinRequest, updateGroupJoinRequest } from "@/lib/actions/inbox";
 import { FORM_STATUS_OPTIONS } from "@/lib/constants-admin";
 import { formatDate } from "@/lib/format";
 
@@ -105,6 +106,14 @@ export function GroupJoinRequestRow({ request, groupName }: GroupJoinRequestRowP
             Guardar
           </button>
         </form>
+        <ConfirmForm
+          action={deleteGroupJoinRequest.bind(null, request.id)}
+          confirmMessage={`¿Eliminar la solicitud de "${fullName}"? Esta acción no se puede deshacer.`}
+        >
+          <button type="submit" className="text-sm text-danger hover:underline">
+            Eliminar
+          </button>
+        </ConfirmForm>
       </div>
     </details>
   );

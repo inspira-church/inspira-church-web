@@ -1,8 +1,9 @@
+import { ConfirmForm } from "@/components/admin/ConfirmForm";
 import { Badge } from "@/components/ui/Badge";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
-import { updateContact } from "@/lib/actions/inbox";
+import { deleteContact, updateContact } from "@/lib/actions/inbox";
 import { CONTACT_REASON_LABEL, FORM_STATUS_OPTIONS, PREFERRED_CHANNEL_LABEL } from "@/lib/constants-admin";
 import { formatDate } from "@/lib/format";
 
@@ -114,7 +115,7 @@ export function ContactRow({ contact, staffOptions, eventName }: ContactRowProps
               defaultValue={contact.internal_notes ?? ""}
             />
           </div>
-          <div className="sm:col-span-2">
+          <div className="flex items-center gap-4 sm:col-span-2">
             <button
               type="submit"
               className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink hover:bg-accent-strong"
@@ -123,6 +124,14 @@ export function ContactRow({ contact, staffOptions, eventName }: ContactRowProps
             </button>
           </div>
         </form>
+        <ConfirmForm
+          action={deleteContact.bind(null, contact.id)}
+          confirmMessage={`¿Eliminar el contacto de "${contact.name}"? Esta acción no se puede deshacer.`}
+        >
+          <button type="submit" className="text-sm text-danger hover:underline">
+            Eliminar
+          </button>
+        </ConfirmForm>
       </div>
     </details>
   );

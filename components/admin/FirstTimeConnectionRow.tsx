@@ -1,7 +1,8 @@
+import { ConfirmForm } from "@/components/admin/ConfirmForm";
 import { Badge } from "@/components/ui/Badge";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextAreaField } from "@/components/ui/TextAreaField";
-import { updateFirstTimeConnection } from "@/lib/actions/inbox";
+import { deleteFirstTimeConnection, updateFirstTimeConnection } from "@/lib/actions/inbox";
 import { FORM_STATUS_OPTIONS } from "@/lib/constants-admin";
 import { formatDate } from "@/lib/format";
 
@@ -105,6 +106,14 @@ export function FirstTimeConnectionRow({ connection, staffOptions }: FirstTimeCo
             </button>
           </div>
         </form>
+        <ConfirmForm
+          action={deleteFirstTimeConnection.bind(null, connection.id)}
+          confirmMessage={`¿Eliminar la ficha de "${fullName}"? Esta acción no se puede deshacer.`}
+        >
+          <button type="submit" className="text-sm text-danger hover:underline">
+            Eliminar
+          </button>
+        </ConfirmForm>
       </div>
     </details>
   );
