@@ -23,6 +23,7 @@ interface EventFormProps {
     slug: string;
     description: string | null;
     imageUrl: string | null;
+    promoVideoUrl: string | null;
     eventDate: string;
     eventTime: string | null;
     endDate: string | null;
@@ -138,6 +139,18 @@ export function EventForm({ action, defaultValues }: EventFormProps) {
           bucket="events"
           defaultValue={defaultValues?.imageUrl}
         />
+
+        <TextField
+          label="Video promocional (YouTube)"
+          name="promoVideoUrl"
+          type="url"
+          placeholder="https://youtube.com/watch?v=…"
+          defaultValue={defaultValues?.promoVideoUrl ?? ""}
+          hint="Opcional — solo aparece en el sitio público si lo agregas aquí."
+        />
+        {state.fieldErrors?.promoVideoUrl && (
+          <p className="-mt-3 text-xs text-danger">{state.fieldErrors.promoVideoUrl}</p>
+        )}
 
         <TextField
           label="Categoría"

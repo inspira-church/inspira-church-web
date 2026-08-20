@@ -3,7 +3,7 @@ import { isEventUpcoming } from "@/lib/event-status";
 import type { ChurchEvent, EventPracticalInfoItem } from "@/types/content";
 
 const EVENT_FIELDS =
-  "id, name, subtitle, slug, description, image_url, event_date, event_time, end_date, end_time, location_name, address, lat, lng, location_public, modality, category, capacity, requires_registration, registration_url, registration_status, show_countdown, practical_info, cost, age_range, status, published";
+  "id, name, subtitle, slug, description, image_url, promo_video_url, event_date, event_time, end_date, end_time, location_name, address, lat, lng, location_public, modality, category, capacity, requires_registration, registration_url, registration_status, show_countdown, practical_info, cost, age_range, status, published";
 
 interface EventRow {
   id: string;
@@ -12,6 +12,7 @@ interface EventRow {
   slug: string;
   description: string | null;
   image_url: string | null;
+  promo_video_url: string | null;
   event_date: string;
   event_time: string | null;
   end_date: string | null;
@@ -44,6 +45,7 @@ function mapRow(row: EventRow): ChurchEvent {
     slug: row.slug,
     description: row.description ?? "",
     imageUrl: row.image_url ?? "",
+    promoVideoUrl: row.promo_video_url,
     eventDate: row.event_date,
     eventTime: row.event_time,
     endDate: row.end_date,

@@ -75,6 +75,7 @@ export interface ChurchEvent {
   slug: string;
   description: string;
   imageUrl: string;
+  promoVideoUrl: string | null;
   eventDate: string;
   eventTime: string | null;
   endDate: string | null;

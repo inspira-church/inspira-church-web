@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Veinticuatro migraciones en
+auditoría de la reorganización del panel admin). Veinticinco migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -30,6 +30,7 @@ auditoría de la reorganización del panel admin). Veinticuatro migraciones en
 | `022_events_redesign.sql` | 12 columnas nuevas en `events` (subtitle, end_date/end_time, modality, category, requires_registration, registration_status, show_countdown, practical_info, cost, age_range, location_public) + enums `event_modality`/`event_registration_status` — rediseño de /eventos, ver CLAUDE.md sección "Página Eventos" |
 | `023_contacts_redesign.sql` | `contacts`: elimina `whatsapp` (redundante con `phone`, tabla verificada vacía antes de borrar), agrega `preferred_channel` (enum `contact_preferred_channel`), `event_id` (FK a `events`, `on delete set null`), `consent_at`, `privacy_policy_version`; agrega `'evento'` al enum `contact_reason` — rediseño de /contacto, ver CLAUDE.md sección "Página Contacto" |
 | `024_schedules_recurrence.sql` | Enum `schedule_recurrence` ('weekly'\|'monthly') + `schedules.recurrence` (default 'weekly') y `schedules.monthly_week` (nullable, 1..4 o -1 para "última semana") — permite marcar un horario como "el último domingo de cada mes" en vez de cada semana, editable desde `/admin/horarios` |
+| `025_events_promo_video.sql` | `events.promo_video_url` (text, nullable) — video promocional de YouTube en el detalle de un evento, editable desde `/admin/eventos`; la sección pública no se renderiza si el campo está vacío |
 
 ## Aplicar las migraciones
 

@@ -33,6 +33,7 @@ export default async function EditEventPage({
             slug: event.slug,
             description: event.description,
             imageUrl: event.image_url,
+            promoVideoUrl: event.promo_video_url,
             eventDate: event.event_date,
             eventTime: event.event_time,
             endDate: event.end_date,

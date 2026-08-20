@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventCard } from "@/components/public/EventCard";
 import { EventCountdown } from "@/components/public/EventCountdown";
+import { LazySermonVideo } from "@/components/public/LazySermonVideo";
 import { SinglePointMap } from "@/components/public/SinglePointMap";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
@@ -155,6 +156,20 @@ export default async function EventPage({ params }: PageProps) {
               <p className={cn(hind.className, "mt-3 text-lg leading-relaxed text-white/70")}>
                 {event.description}
               </p>
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* Video promocional — solo si el admin cargó un link de YouTube */}
+      {event.promoVideoUrl && (
+        <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-20">
+          <Container>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.coral }}>
+              Video promocional
+            </p>
+            <div className="mt-6 max-w-3xl">
+              <LazySermonVideo url={event.promoVideoUrl} title={event.name} thumbnailUrl={null} />
             </div>
           </Container>
         </section>

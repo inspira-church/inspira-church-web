@@ -18,6 +18,7 @@ export const eventSchema = z
       .regex(slugPattern, "Solo minúsculas, números y guiones (sin espacios ni acentos)."),
     description: z.string().trim().max(2000, "Máximo 2000 caracteres.").optional(),
     imageUrl: z.string().trim().optional(),
+    promoVideoUrl: z.string().trim().url("URL inválida.").optional(),
     eventDate: z.string().trim().min(1, "Ingresa la fecha."),
     eventTime: z.string().trim().optional(),
     endDate: z.string().trim().optional(),
