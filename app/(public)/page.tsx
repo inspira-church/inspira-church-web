@@ -6,7 +6,7 @@ import { Hero } from "@/components/public/Hero";
 import { YouTubeEmbed } from "@/components/public/YouTubeEmbed";
 import { Container } from "@/components/ui/Container";
 import { dayName, formatDate, formatTime, prayerModality } from "@/lib/format";
-import { anton, caveat, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
+import { ABOUT_COLORS, anton, gistesy, hind, CAMPAIGN_COLORS } from "@/lib/fonts";
 import { PRAYER_TOPIC, SITE_CONFIG } from "@/lib/constants";
 import { isEventUpcoming } from "@/lib/event-status";
 import { googleMapsLink } from "@/lib/maps";
@@ -172,11 +172,11 @@ export default async function HomePage() {
       {/* Elige tu camino */}
       <section className="border-b border-white/10 bg-[#0d0d0d] pb-16 pt-8 sm:pb-24 sm:pt-12">
         <Container>
-          <Eyebrow color={CAMPAIGN_COLORS[4]}>¿Eres nuevo?</Eyebrow>
+          <Eyebrow color={ABOUT_COLORS.tealLight}>¿Eres nuevo?</Eyebrow>
           <PosterHeading>Te estábamos esperando</PosterHeading>
           <p
-            className={cn(caveat.className, "mt-2 -rotate-1 text-3xl")}
-            style={{ color: CAMPAIGN_COLORS[4] }}
+            className={cn(gistesy.className, "mt-2 -rotate-1 text-4xl")}
+            style={{ color: ABOUT_COLORS.tealLight }}
           >
             ¡En Inspira Church siempre habrá un lugar para ti!
           </p>
@@ -184,7 +184,7 @@ export default async function HomePage() {
           <Link
             href="/primera-vez"
             className="group mt-10 flex items-center justify-between border-y-2 py-5 transition-colors hover:bg-white/5"
-            style={{ borderColor: CAMPAIGN_COLORS[4] }}
+            style={{ borderColor: ABOUT_COLORS.tealLight }}
           >
             <span
               className={cn(
@@ -196,7 +196,7 @@ export default async function HomePage() {
             </span>
             <span
               className="text-3xl transition-transform group-hover:translate-x-2"
-              style={{ color: CAMPAIGN_COLORS[4] }}
+              style={{ color: ABOUT_COLORS.tealLight }}
               aria-hidden="true"
             >
               →

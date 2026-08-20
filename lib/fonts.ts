@@ -1,4 +1,5 @@
-import { Anton, Caveat, Hind, Montserrat_Alternates } from "next/font/google";
+import localFont from "next/font/local";
+import { Anton, Hind, Montserrat_Alternates } from "next/font/google";
 
 /**
  * Tipografía de cartel para la página de Inicio únicamente (ver
@@ -6,7 +7,6 @@ import { Anton, Caveat, Hind, Montserrat_Alternates } from "next/font/google";
  * sigue usando Petrona/Figtree vía app/layout.tsx sin cambios.
  */
 export const anton = Anton({ weight: "400", subsets: ["latin"] });
-export const caveat = Caveat({ weight: "700", subsets: ["latin"] });
 
 /** Frase destacada de la ficha de conexión en /primera-vez ("Déjanos tus datos"). */
 export const montserratAlternates = Montserrat_Alternates({
@@ -16,6 +16,16 @@ export const montserratAlternates = Montserrat_Alternates({
 
 /** Frases del hero sobre el slide — misma tipografía que usa g12.co para ese mismo tipo de texto. */
 export const hind = Hind({ weight: ["400", "600"], subsets: ["latin"] });
+
+/**
+ * Script manuscrita para la frase destacada de "¿Eres nuevo?" en Inicio —
+ * no está en Google Fonts, el archivo lo proporcionó el usuario
+ * (public/fonts/Gistesy.ttf).
+ */
+export const gistesy = localFont({
+  src: "../public/fonts/Gistesy.ttf",
+  display: "swap",
+});
 
 /** Color de campaña que rota por tarjeta — el mismo patrón real de @inspira.church en Instagram. */
 export const CAMPAIGN_COLORS = ["#FF7F50", "#23d3d9", "#ff8a3d", "#3e6fa8", "#87281B"] as const;
