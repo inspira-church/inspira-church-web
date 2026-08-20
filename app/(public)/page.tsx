@@ -218,7 +218,7 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-col gap-6">
             {[
               {
-                color: CAMPAIGN_COLORS[2],
+                color: "#DE672F",
                 num: "01",
                 step: "Paso 1",
                 title: "Conoce nuestra historia",
@@ -228,7 +228,7 @@ export default async function HomePage() {
                 href: "/nosotros",
               },
               {
-                color: CAMPAIGN_COLORS[3],
+                color: "#AFD6D3",
                 num: "02",
                 step: "Paso 2",
                 title: "Encuentra tu grupo",
@@ -238,7 +238,7 @@ export default async function HomePage() {
                 href: "/grupos",
               },
               {
-                color: CAMPAIGN_COLORS[4],
+                color: "#00545E",
                 num: "03",
                 step: "Paso 3",
                 title: "Crece en la palabra",
