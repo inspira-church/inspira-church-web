@@ -175,7 +175,7 @@ export default async function HomePage() {
           <Eyebrow color={ABOUT_COLORS.tealLight}>¿Eres nuevo?</Eyebrow>
           <PosterHeading>Te estábamos esperando</PosterHeading>
           <p
-            className={cn(gistesy.className, "mt-2 -rotate-1 text-4xl")}
+            className={cn(gistesy.className, "mt-2 -rotate-1 text-[42px]")}
             style={{ color: ABOUT_COLORS.tealLight }}
           >
             ¡En <span className="font-bold">Inspira Church</span> siempre habra un lugar para ti!
