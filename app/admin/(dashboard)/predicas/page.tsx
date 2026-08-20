@@ -6,16 +6,24 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { PRAYER_TOPIC } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { deleteSermon, toggleSermonPublished } from "@/lib/actions/sermons";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SermonsListPage() {
   const supabase = await createClient();
-  const { data: sermons } = await supabase
+  const { data } = await supabase
     .from("sermons")
-    .select("id, title, slug, thumbnail_url, sermon_date, published")
+    .select("id, title, slug, thumbnail_url, sermon_date, published, topics")
     .order("sermon_date", { ascending: false });
+
+  // Las grabaciones de oración tienen su propia lista en /admin/oraciones —
+  // mismo criterio (invertido) que esa página para no duplicarlas aquí.
+  const normalizedTopic = PRAYER_TOPIC.toLowerCase();
+  const sermons = (data ?? []).filter(
+    (sermon) => !(sermon.topics ?? []).some((t: string) => t.toLowerCase() === normalizedTopic)
+  );
 
   return (
     <div>
