@@ -163,12 +163,18 @@ export default async function EventPage({ params }: PageProps) {
 
       {/* Video promocional — solo si el admin cargó un link de YouTube */}
       {event.promoVideoUrl && (
-        <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-20">
+        <section className="border-b border-white/10 bg-[#0d0d0d] pb-16 pt-8 sm:pb-20 sm:pt-10">
           <Container>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.coral }}>
+            <h2
+              className={cn(
+                anton.className,
+                "text-balance text-center text-3xl uppercase leading-[1.05] sm:text-4xl"
+              )}
+              style={{ color: ABOUT_COLORS.coral }}
+            >
               Video promocional
-            </p>
-            <div className="mt-6 max-w-3xl">
+            </h2>
+            <div className="mx-auto mt-8 max-w-3xl">
               <LazySermonVideo url={event.promoVideoUrl} title={event.name} thumbnailUrl={null} />
             </div>
           </Container>
