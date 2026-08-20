@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CheckboxField } from "@/components/ui/CheckboxField";
@@ -76,14 +77,13 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
           privacyPolicyUrl ? (
             <>
               Autorizo el tratamiento de mis datos personales conforme a la{" "}
-              <a
-                href={privacyPolicyUrl}
+              <Link
+                href="/politica-de-privacidad"
                 target="_blank"
-                rel="noopener noreferrer"
                 className="underline hover:text-accent"
               >
                 política de privacidad
-              </a>{" "}
+              </Link>{" "}
               de Inspira Church.
             </>
           ) : (

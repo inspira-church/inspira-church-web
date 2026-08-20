@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  HandCoins,
   Heart,
   HeartHandshake,
   Home,
@@ -28,6 +29,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/grupos": Users,
   "/eventos": CalendarDays,
   "/contacto": Mail,
+  "/donaciones": HandCoins,
 };
 
 interface FooterProps {
@@ -159,33 +161,25 @@ export function Footer({
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos los derechos
             reservados.
           </p>
-          <p className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
-            <Link href="/donaciones" className="transition-colors hover:text-[#FF7F50] hover:underline">
-              Donaciones
-            </Link>
-            {privacyPolicyUrl && (
-              <>
-                <span aria-hidden="true">·</span>
-                <a
-                  href={privacyPolicyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-[#FF7F50] hover:underline"
-                >
-                  Política de privacidad
-                </a>
-                <span aria-hidden="true">·</span>
-                <a
-                  href={privacyPolicyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-[#FF7F50] hover:underline"
-                >
-                  Tratamiento de datos
-                </a>
-              </>
-            )}
-          </p>
+          {privacyPolicyUrl && (
+            <p className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+              <Link
+                href="/politica-de-privacidad"
+                target="_blank"
+                className="transition-colors hover:text-[#FF7F50] hover:underline"
+              >
+                Política de privacidad
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link
+                href="/politica-de-privacidad"
+                target="_blank"
+                className="transition-colors hover:text-[#FF7F50] hover:underline"
+              >
+                Tratamiento de datos
+              </Link>
+            </p>
+          )}
         </Container>
       </div>
     </footer>

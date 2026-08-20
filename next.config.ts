@@ -21,7 +21,7 @@ const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data: https://*.supabase.co https://*.tile.openstreetmap.org https://img.youtube.com https://i.ytimg.com",
   "font-src 'self'",
   "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com",
-  "frame-src https://www.youtube.com https://challenges.cloudflare.com",
+  "frame-src https://www.youtube.com https://challenges.cloudflare.com https://*.supabase.co",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

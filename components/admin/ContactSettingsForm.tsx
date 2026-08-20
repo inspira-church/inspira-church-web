@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { DocumentUploadField } from "@/components/admin/DocumentUploadField";
 import { FormError } from "@/components/admin/FormError";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { TextAreaField } from "@/components/ui/TextAreaField";
@@ -146,12 +147,11 @@ export function ContactSettingsForm({ defaultValues }: { defaultValues: Values }
         <p className="font-display text-lg font-semibold text-ink">Legal</p>
       </div>
 
-      <TextField
-        label="URL de la política de privacidad"
+      <DocumentUploadField
+        label="Política de privacidad y tratamiento de datos (PDF)"
         name="privacyPolicyUrl"
-        type="url"
         defaultValue={defaultValues.privacyPolicyUrl}
-        hint="Opcional — si la defines, los formularios públicos y el footer enlazan aquí."
+        hint="Opcional — si subes un PDF, los formularios públicos y el footer enlazan a una página propia del sitio que lo muestra."
       />
       {state.fieldErrors?.privacyPolicyUrl && (
         <p className="-mt-3 text-xs text-danger">{state.fieldErrors.privacyPolicyUrl}</p>

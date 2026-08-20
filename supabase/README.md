@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Veinticinco migraciones en
+auditoría de la reorganización del panel admin). Veintiséis migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -31,6 +31,7 @@ auditoría de la reorganización del panel admin). Veinticinco migraciones en
 | `023_contacts_redesign.sql` | `contacts`: elimina `whatsapp` (redundante con `phone`, tabla verificada vacía antes de borrar), agrega `preferred_channel` (enum `contact_preferred_channel`), `event_id` (FK a `events`, `on delete set null`), `consent_at`, `privacy_policy_version`; agrega `'evento'` al enum `contact_reason` — rediseño de /contacto, ver CLAUDE.md sección "Página Contacto" |
 | `024_schedules_recurrence.sql` | Enum `schedule_recurrence` ('weekly'\|'monthly') + `schedules.recurrence` (default 'weekly') y `schedules.monthly_week` (nullable, 1..4 o -1 para "última semana") — permite marcar un horario como "el último domingo de cada mes" en vez de cada semana, editable desde `/admin/horarios` |
 | `025_events_promo_video.sql` | `events.promo_video_url` (text, nullable) — video promocional de YouTube en el detalle de un evento, editable desde `/admin/eventos`; la sección pública no se renderiza si el campo está vacío |
+| `026_documents_bucket.sql` | Bucket de Storage `documents` (público de lectura, solo PDF, 10 MB, escritura solo `is_admin()`) — usado por `site_settings.privacyPolicyUrl`, que pasó de link externo pegado a mano a PDF subido desde `/admin/contacto`; se muestra embebido en `/politica-de-privacidad` |
 
 ## Aplicar las migraciones
 
@@ -75,6 +76,13 @@ Supabase (`lib/supabase/client.ts`), directo al bucket — el `anon key` más
 estas políticas RLS son suficiente protección, no hace falta pasar el archivo
 por el servidor de Next.js. Después de subir, una Server Action guarda los
 metadatos en `media` (Fase 8, `lib/actions/media.ts`).
+
+Un sexto bucket, `documents` (`026_documents_bucket.sql`), sigue el mismo
+patrón de subida directa desde el navegador pero **no** pasa por la tabla
+`media` — es un único documento legal (`site_settings.privacyPolicyUrl`), no
+un asset reutilizable de la librería. Solo PDF, 10 MB, y escritura
+restringida a `is_admin()` (no `is_editor_or_admin()`), porque
+`/admin/contacto` ya es `adminOnly` en el nav.
 
 ## Auditoría de RLS (Fase 12)
 

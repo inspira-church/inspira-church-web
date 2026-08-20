@@ -223,14 +223,13 @@ export function ContactForm({ privacyPolicyUrl, eventContext }: ContactFormProps
                 <>
                   Autorizo a Inspira Church para tratar mis datos personales con el fin de
                   responder esta solicitud, de acuerdo con la{" "}
-                  <a
-                    href={privacyPolicyUrl}
+                  <Link
+                    href="/politica-de-privacidad"
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="underline hover:text-[#FF7F50]"
                   >
                     Política de Tratamiento de Datos Personales
-                  </a>
+                  </Link>
                   .
                 </>
               ) : (

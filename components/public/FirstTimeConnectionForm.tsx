@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import {
   CartelCheckbox,
@@ -117,14 +118,13 @@ export function FirstTimeConnectionForm({
           privacyPolicyUrl ? (
             <>
               Acepto la{" "}
-              <a
-                href={privacyPolicyUrl}
+              <Link
+                href="/politica-de-privacidad"
                 target="_blank"
-                rel="noopener noreferrer"
                 className="underline hover:text-[#FF7F50]"
               >
                 política de privacidad
-              </a>
+              </Link>
             </>
           ) : (
             "Acepto la política de privacidad"
