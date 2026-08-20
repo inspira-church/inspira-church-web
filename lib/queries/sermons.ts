@@ -135,7 +135,14 @@ export async function getLatestSermonByTopic(topic: string) {
   return latest ?? null;
 }
 
-/** La prédica publicada más reciente (por fecha) — "Último mensaje" en /predicas. No confundir con featured/"Destacada". */
+/**
+ * La prédica publicada más reciente (por fecha) — "Último mensaje" en
+ * /predicas. No confundir con featured/"Destacada". Excluye PRAYER_TOPIC
+ * (mismo criterio que el resto de este archivo): una grabación de oración
+ * nunca debe aparecer como "Último mensaje" de Prédicas, tiene su propio
+ * "Último encuentro" en /oraciones. Trae varias filas en vez de solo la más
+ * reciente porque esa podría ser justo una grabación de oración.
+ */
 export async function getLatestSermon() {
   const supabase = await createClient();
   const { data } = await supabase
@@ -143,9 +150,8 @@ export async function getLatestSermon() {
     .select(SERMON_FIELDS)
     .eq("published", true)
     .order("sermon_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data;
+    .limit(10);
+  return excludePrayerTopic(data ?? [])[0] ?? null;
 }
 
 /** Prédica marcada manualmente como "Destacada" — independiente de la fecha. Null si ninguna lo está. */
