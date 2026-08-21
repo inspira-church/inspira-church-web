@@ -122,3 +122,15 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
 }
+
+/* Deriva horizontal muy lenta de la palabra "LEGADO" de fondo en el hero de
+ * /generaciones (GenerationsHero.tsx) — usada vía `animate-[generations-legado-drift_46s_linear_infinite]`,
+ * detenida con `motion-reduce:animate-none` en el propio componente. */
+@keyframes generations-legado-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-6%);
+  }
+}
