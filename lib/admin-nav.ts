@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  ClipboardList,
   Clock,
   DoorOpen,
   FileText,
@@ -15,6 +16,7 @@ import {
   type LucideIcon,
   Mic,
   ShieldCheck,
+  Sparkles,
   UserRound,
   Users,
 } from "lucide-react";
@@ -107,6 +109,18 @@ export const ADMIN_NAV: AdminNavSection[] = [
     label: "Contacto",
     items: [
       { href: "/admin/contacto", label: "Configuración de contacto", icon: Mail, adminOnly: true },
+    ],
+  },
+  {
+    label: "Generaciones",
+    items: [
+      { href: "/admin/generaciones", label: "Página Generaciones", icon: Sparkles, adminOnly: true },
+      {
+        href: "/admin/generaciones/inscripciones",
+        label: "Inscripciones",
+        icon: ClipboardList,
+        adminOnly: true,
+      },
     ],
   },
   {

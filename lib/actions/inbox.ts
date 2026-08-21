@@ -145,3 +145,38 @@ export async function deleteFirstTimeConnection(id: string) {
   });
   revalidatePath("/admin/formularios");
 }
+
+/** Solo Admin puede leer/editar/borrar — ver política generations_registrations_select_admin, 027_generations.sql. */
+export async function updateGenerationsRegistration(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const status = formData.get("status");
+  await supabase
+    .from("generations_registrations")
+    .update({
+      status,
+      internal_notes: formData.get("internalNotes") || null,
+    })
+    .eq("id", id);
+  await logAudit({
+    module: "generations",
+    action: "update",
+    entityType: "generations_registration",
+    entityId: id,
+    description: `Actualizó una inscripción de Generaciones (estado: ${status}).`,
+  });
+  revalidatePath("/admin/generaciones/inscripciones");
+}
+
+/** Solo Admin puede borrar — dato de menores de edad, mismo nivel que prayer_requests_delete_admin. */
+export async function deleteGenerationsRegistration(id: string) {
+  const supabase = await createClient();
+  await supabase.from("generations_registrations").delete().eq("id", id);
+  await logAudit({
+    module: "generations",
+    action: "delete",
+    entityType: "generations_registration",
+    entityId: id,
+    description: "Borró una inscripción de Generaciones.",
+  });
+  revalidatePath("/admin/generaciones/inscripciones");
+}

@@ -3,14 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
+import type { GenerationsRhythmWord } from "@/lib/queries/generations";
 import { cn } from "@/lib/utils";
 
-const WORDS = [
-  { word: "Prepárate", text: "Conoce con anticipación lo que necesitas para servir." },
-  { word: "Practica", text: "La excelencia también se construye durante la semana." },
-  { word: "Sirve", text: "Cada área es una oportunidad de honrar a Dios y cuidar a otros." },
-  { word: "Crece", text: "Cada experiencia forma carácter, disciplina, fe y propósito." },
-] as const;
+interface GenerationsRhythmProps {
+  words: GenerationsRhythmWord[];
+}
 
 /**
  * A diferencia de Reveal (que una vez visible se queda así), aquí la
@@ -22,10 +20,10 @@ function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function GenerationsRhythm() {
+export function GenerationsRhythm({ words }: GenerationsRhythmProps) {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState<Set<number>>(() =>
-    prefersReducedMotion() ? new Set(WORDS.map((_, i) => i)) : new Set([0])
+    prefersReducedMotion() ? new Set(words.map((_, i) => i)) : new Set([0])
   );
 
   useEffect(() => {
@@ -53,11 +51,11 @@ export function GenerationsRhythm() {
     <section className="border-b border-white/10 bg-black py-16 sm:py-24">
       <Container>
         <div>
-          {WORDS.map((item, i) => {
+          {words.map((item, i) => {
             const isActive = active.has(i);
             return (
               <div
-                key={item.word}
+                key={i}
                 ref={(el) => {
                   itemRefs.current[i] = el;
                 }}

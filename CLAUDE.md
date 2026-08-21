@@ -26,17 +26,17 @@ Playwright (e2e).
 app/
 ├─ layout.tsx                 Shell raíz — fonts (Figtree/Petrona), metadata OG, sin auth
 ├─ (public)/layout.tsx        revalidate=60, Header+Footer+ContactFAB, sin auth
-├─ (public)/…                 18 páginas públicas (incluye /oraciones/[slug])
+├─ (public)/…                 19 páginas públicas (incluye /oraciones/[slug], /generaciones/inscripcion)
 ├─ auth/confirm/page.tsx      Callback de invitación de staff (token en fragmento #, no PKCE)
 └─ admin/
    ├─ layout.tsx              Solo aplica [data-admin-theme]; NO hace auth
    ├─ (auth)/…                login, recuperar, actualizar-password — sin layout propio, sin AdminShell
    └─ (dashboard)/
       ├─ layout.tsx           Auth gate real (ver abajo) + AdminShell
-      └─ …                    33 páginas del CMS
+      └─ …                    35 páginas del CMS
 ```
 
-55 `page.tsx` en total (18 público, 1 callback de auth, 3 admin-auth, 33
+58 `page.tsx` en total (19 público, 1 callback de auth, 3 admin-auth, 35
 admin-dashboard). Inventario completo de rutas admin: `/admin` (dashboard),
 `inicio`, `nosotros`, `primera-vez`, `contacto` (config general — antes
 `configuracion`, que ahora solo redirige por compatibilidad), `predicas`,
@@ -44,16 +44,20 @@ admin-dashboard). Inventario completo de rutas admin: `/admin` (dashboard),
 (peticiones), `oraciones` (grabaciones — mismos registros de `sermons`
 filtrados por tag `PRAYER_TOPIC`, no es tabla propia), `medios`,
 `actividad` (bitácora), `formularios` (bandeja: contactos + solicitudes de
-grupo + fichas de "Primera vez"), cada módulo de contenido con `nuevo` y
-`[id]` cuando aplica. Público: `/oraciones` (archivo + "Último encuentro")
-gana hermana `/oraciones/[slug]` (página individual propia, no comparte
-ruta con `/predicas/[slug]` — ver sección "Página Oraciones"). Rutas
-públicas nuevas desde la última actualización de este archivo:
-`/generaciones` (pilar de ministerios por edad, rediseño editorial
-completo — ver sección propia más abajo), `/donaciones` ("próximamente",
-enlazada desde el Footer y el menú principal) y `/politica-de-privacidad`
-(muestra embebido el PDF que el admin sube en `/admin/contacto` — ver
-sección "Política de privacidad").
+grupo + fichas de "Primera vez"), `generaciones` (contenido de la página,
+`adminOnly`) + `generaciones/inscripciones` (bandeja de inscripciones,
+`adminOnly` — ver sección "Página Generaciones — contenido editable"),
+cada módulo de contenido con `nuevo` y `[id]` cuando aplica. Público:
+`/oraciones` (archivo + "Último encuentro") gana hermana `/oraciones/[slug]`
+(página individual propia, no comparte ruta con `/predicas/[slug]` — ver
+sección "Página Oraciones"). Rutas públicas nuevas desde la última
+actualización de este archivo: `/generaciones` (pilar de ministerios por
+edad, rediseño editorial completo — ver sección propia más abajo) +
+`/generaciones/inscripcion` (formulario de inscripción propio, tabla
+`generations_registrations`), `/donaciones` ("próximamente", enlazada
+desde el Footer y el menú principal) y `/politica-de-privacidad` (muestra
+embebido el PDF que el admin sube en `/admin/contacto` — ver sección
+"Política de privacidad").
 
 **Auth gate real** — vive en `app/admin/(dashboard)/layout.tsx`, no en
 `app/admin/layout.tsx`: pide `supabase.auth.getUser()`, si no hay user
@@ -149,25 +153,33 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-26 migraciones en `supabase/migrations/`, 001 a 026 (`018` agregó
+27 migraciones en `supabase/migrations/`, 001 a 027 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
 `sermons.featured`; `021` agregó `sermons.meeting_type`; `022` agregó 12
 columnas nuevas a `events`; `023` rediseñó `contacts` (canal preferido,
 evento de origen, consentimiento con timestamp); `024` agregó recurrencia
 mensual a `schedules`; `025` agregó `events.promo_video_url`; `026` creó el
-bucket de Storage `documents` para la política de privacidad en PDF — ver
-secciones "Página Nosotros", "Página Grupos", "Página Prédicas", "Página
-Oraciones", "Página Eventos", "Página Contacto", "Horarios — recurrencia
-mensual", "Video promocional en Eventos" y "Política de privacidad" más
-abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese archivo
-para el detalle migración por migración, el bootstrap del primer admin, y
-la auditoría de RLS completa (Fase 12). **Todas las migraciones 018–026 se
-aplicaron a producción a mano vía el SQL Editor de Supabase** (el entorno
-de desarrollo no tiene el CLI de Supabase enlazado — `supabase login`
-requeriría un Personal Access Token que no existe en este proyecto; ver
-nota en "Estado del proyecto y pendientes" si se quiere automatizar esto a
-futuro).
+bucket de Storage `documents` para la política de privacidad en PDF; `027`
+crea `generations_registrations` (formulario de inscripción propio de
+Generaciones, RLS `is_admin()`-only) y extiende `media_select_public_hero`
+con `module like 'generaciones-%'` — ver secciones "Página Nosotros",
+"Página Grupos", "Página Prédicas", "Página Oraciones", "Página Eventos",
+"Página Contacto", "Horarios — recurrencia mensual", "Video promocional en
+Eventos", "Política de privacidad" y "Página Generaciones — contenido
+editable + inscripción propia" más abajo, y la tabla de
+`supabase/README.md`, ya actualizada). Ver ese archivo para el detalle
+migración por migración, el bootstrap del primer admin, y la auditoría de
+RLS completa (Fase 12). **Todas las migraciones 018–027 ya se aplicaron a
+producción vía el SQL Editor de Supabase** (el entorno de desarrollo no
+tiene el CLI de Supabase enlazado — `supabase login` requeriría un
+Personal Access Token que no existe en este proyecto; ver nota en "Estado
+del proyecto y pendientes" si se quiere automatizar esto a futuro). `018`
+a `026` las corrió el usuario a mano; `027` fue la primera que Claude
+Code aplicó directamente manejando el navegador contra Supabase Studio
+(en sesiones anteriores esa página no cargaba en el navegador embebido —
+esta vez sí renderizó y la ejecución se verificó con una consulta aparte
+confirmando la tabla y las 5 políticas nuevas antes de darla por buena).
 Resumen de lo no cubierto ahí:
 
 - Patrón de RLS confirmado con spot-checks: tablas de contenido (`sermons`,
@@ -955,16 +967,129 @@ emergencia) — antes de crear cualquier tabla o política RLS para esto hace
 falta decidir con el usuario: ¿tabla nueva o reutilizar alguna existente?,
 ¿quién en Admin puede leerla (solo `is_admin()`, o también
 `is_editor_or_admin()`)?, ¿cómo se separa la autorización de tratamiento
-de datos de la autorización de uso de imagen? Ninguna de estas decisiones
-se tomó todavía — no existe ninguna tabla, RLS ni Server Action para
-inscripciones de Generaciones en el repo.
+de datos de la autorización de uso de imagen? **Resuelto en una sesión
+posterior** — ver "Página Generaciones — contenido editable + inscripción
+propia" más abajo: el usuario respondió las tres preguntas explícitamente
+(tabla nueva, solo `is_admin()`, consentimientos separados) antes de tocar
+Supabase.
 
-**Otro pendiente real, más simple**: fotos reales, "Próxima fecha", "Guía
-para padres" y "Lineamientos de cuidado" siguen sin ningún dato — hoy se
-ven bien (placeholder/estado neutro), pero conectarlos a Admin de verdad
-(nuevos módulos de `media`, un campo de fecha en `site_settings` o una
-tabla propia, subida de PDF reutilizando el patrón de "Política de
-privacidad" de abajo) es trabajo aparte, no incluido en este rediseño.
+**Otro pendiente ya resuelto**: fotos reales, "Próxima fecha", "Guía para
+padres" y "Lineamientos de cuidado" — todo el contenido de la página, sin
+excepción, es editable desde `/admin/generaciones` desde la sesión
+siguiente a este rediseño. Ver la sección nueva más abajo.
+
+## Página Generaciones — contenido editable + inscripción propia
+
+Sesión posterior al rediseño editorial de arriba. El usuario pidió que
+"todo esté vinculado con el panel administrativo, totalmente editable
+desde allí" y que el formulario de inscripción fuera "independiente" (no
+reutilizar `/contacto`) — resolviendo así, con su aprobación explícita
+sección por sección, los dos pendientes que habían quedado marcados en el
+rediseño original.
+
+**Contenido — mismo patrón `site_settings` que Nosotros, sin migración de
+esquema.** `lib/queries/generations.ts` (nuevo) sigue exactamente la
+plantilla de `lib/queries/about.ts`: interfaz `GenerationsContent`,
+`DEFAULT_GENERATIONS_CONTENT` = copia literal de lo que ya estaba
+hardcodeado (la página no cambió ni un carácter al momento de activar
+esto), `getGenerationsContent()` lee `site_settings` (`key='generaciones'`)
+con el cliente público y hace merge sobre los defaults. **Diseño se queda
+en código, contenido en el panel** — mismo principio que Nosotros: el
+color y el tamaño de cada tarjeta de área (`AREA_STYLE` en
+`GenerationsAreas.tsx`, mapeado por el `id` estable de cada área) no es
+editable, solo texto/fotos/listas. Los encabezados compuestos ("blanco +
+coral", multilínea) se partieron en 2-4 campos cortos con nombre semántico
+(ej. `heroTaglineWhite`/`heroTaglineCoral`, `legacyTitleWhite`/
+`legacyTitleCoral`) en vez de un solo campo con marcado — así el admin
+edita texto plano y el componente sigue componiendo exactamente el mismo
+efecto visual de antes.
+
+**La pieza más compleja: `GenerationsAreasEditor.tsx`**, dos niveles de
+`BeliefsEditor` anidados — lista de 9+ áreas y, dentro de cada una, una
+sub-lista de horarios/subgrupos (label/edad/horario/práctica) con su
+propio add/remove/reordenar. El `id` de cada área es estable (no se
+recalcula al renombrarla) porque alimenta el módulo de foto
+`generaciones-area-{id}` — cambiarlo huerfanaría la foto ya subida. Otros
+forks de `BeliefsEditor`/`PracticalInfoEditor` nuevos:
+`GenerationsJourneyEditor`, `GenerationsRhythmEditor` (4 palabras),
+`GenerationsSafetyEditor` (lista simple de principios, sin categoría ni
+visibilidad — el fork más simple), `GenerationsFAQEditor` (pares
+pregunta/respuesta).
+
+**15 slots de foto, una sola query por página.** 6 fotos de sección
+(`generaciones-hero`, `-legacy-1`, `-legacy-2`, `-altar`, `-families`,
+`-cta`) más una por área (`generaciones-area-{id}`), todas bucket `site`,
+subidas con `ImageUploadField` igual que Nosotros. `lib/queries/
+generations-media.ts` agrupa las ~15 en una sola consulta
+(`.like("module", "generaciones-%")`) en vez de una por slot —
+`getGenerationsMedia()` (cliente anon, sitio público) y
+`getGenerationsMediaForAdmin()` (cliente de sesión, usado solo por
+`/admin/generaciones`). **Bug evitado a propósito, no encontrado en
+producción**: si el admin hubiera usado el cliente anon también en el
+panel (como se intentó al principio), una foto recién subida no se vería
+en `/admin/generaciones` hasta correr la migración 027 — exactamente el
+mismo "gotcha" ya documentado para Nosotros (`media_select_public_hero`).
+Se corrigió antes de terminar la sesión usando el cliente de sesión en el
+admin, que ya pasa `is_editor_or_admin()` sin depender de esa política.
+Migración `027_generations.sql` extiende `media_select_public_hero` con
+`module like 'generaciones-%'` (comodín, no una lista fija) — cualquier
+foto nueva de Generaciones queda cubierta sin volver a tocar SQL.
+
+**Bug real de bundling encontrado y corregido en la misma sesión**:
+`GenerationsAreasEditor.tsx` (componente cliente) importaba
+`generationsAreaPhotoModule` directo de `lib/queries/generations-media.ts`
+— pero ese archivo también importa el cliente de sesión
+(`@/lib/supabase/server`, depende de `next/headers`), así que el build de
+producción fallaba ("estás importando un módulo que depende de
+`next/headers`... pero lo usas en el Pages Router", el error genérico de
+Next para cualquier import server-only arrastrado a un bundle de cliente).
+Se resolvió extrayendo las constantes puras (`GENERATIONS_PHOTO_MODULES`,
+`generationsAreaPhotoModule`) a `lib/generations-photo-modules.ts`, sin
+ningún import de Supabase — el componente cliente importa de ahí, y
+`lib/queries/generations-media.ts` (con sus dos clientes) solo lo importan
+Server Components.
+
+**Formulario de inscripción — tabla e independiente de `/contacto`,
+datos de menores, solo Administrador.** Migración `027_generations.sql`
+crea `generations_registrations`: datos del niño/joven (nombre, edad,
+colegio, alergias, área de interés), del acudiente (nombre, teléfono,
+correo) y de un contacto de emergencia opcional. RLS: insert abierto
+(cualquier visitante), `select`/`update`/`delete` **solo `is_admin()`** —
+mismo nivel que `prayer_requests.is_private`, la decisión explícita que el
+usuario dio en las preguntas de aclaración de esta sesión.
+`data_consent` (tratamiento de datos, obligatorio) e `image_consent` (uso
+de imagen, opcional) son columnas **separadas a propósito** — la
+distinción que había quedado pendiente de aprobación humana en el
+rediseño original. Nueva ruta pública `/generaciones/inscripcion`
+(`GenerationsRegistrationForm`, mismo patrón Turnstile + rate limit +
+Zod que `GroupJoinForm`, sin `logAudit` — los envíos públicos nunca se
+auditan) y el botón "Inscríbete en Generaciones" del CTA final ahora
+enlaza ahí en vez de a `/contacto`. Bandeja nueva
+`/admin/generaciones/inscripciones` — mismo patrón que `/admin/oracion`
+(RLS ya limita a admin, así que un Editor que llegue a la URL
+simplemente ve una lista vacía, sin chequeo de rol adicional en código).
+`lib/actions/inbox.ts` gana `updateGenerationsRegistration`/
+`deleteGenerationsRegistration`, mismo patrón `logAudit` que el resto del
+archivo. `lib/admin-nav.ts` gana la sección "Generaciones" (dos ítems,
+ambos `adminOnly: true`); `lib/permissions.ts` gana el módulo
+`"generations"` (no agregado a `EDITOR_MODULES`, igual que `"about"`).
+
+**Documentos "Guía para padres"/"Lineamientos de cuidado"** — dos
+`DocumentUploadField` más dentro del mismo formulario de contenido
+(mismo bucket `documents`, mismo patrón que Política de privacidad), URL
+guardada como campo de texto normal en el blob `generaciones`. Los
+botones que antes estaban permanentemente deshabilitados en
+`GenerationsFamilies`/`GenerationsSafety`/`GenerationsCTA` ahora son
+condicionales: enlace real si el campo tiene valor, deshabilitado si no
+— nunca un link muerto, mismo criterio que el resto del sitio.
+
+**Aplicación de la migración**: `027_generations.sql` se entrega para
+correr a mano en el SQL Editor de Supabase, igual que `018`–`026` (sin
+CLI enlazado en este entorno). El contenido de texto **no depende** de
+esta migración (ya podía editarse en cuanto se desplegó el código, porque
+`site_settings` ya tenía RLS de escritura admin desde la migración `009`)
+— solo la tabla de inscripciones y la visibilidad pública de fotos nuevas
+de Generaciones esperan a que se aplique.
 
 ## Página Prédicas — corrección: grabaciones de oración se colaban
 
@@ -1133,7 +1258,7 @@ fecha, cuenta regresiva, inscripción, información práctica y ubicación
 dinámico según motivo (redirige a Oración/Grupos en vez de duplicar) y
 contexto de evento de origen (migración 023).
 
-**Sesión más reciente (esta), también ya en `main`**: logo recoloreado a
+**Sesión anterior**: logo recoloreado a
 `#508A8C` sin efectos de brillo (favicon/OG/header/footer incluidos),
 botón "Generaciones" reemplazando "Planea tu visita" en el Header, colores
 fijos nuevos en "Tres pasos" e "Bienvenido a Inspira Church" de Inicio,
@@ -1153,6 +1278,23 @@ grupo/Primera vez, páginas nuevas `/donaciones` (próximamente) y el
 rediseño editorial completo de `/generaciones` (13 secciones, ver sección
 "Página Generaciones" arriba) — ver detalle de cada uno en sus secciones
 correspondientes arriba y `git log` para los commits exactos.
+
+**Sesión más reciente (esta)**: todo el contenido de `/generaciones` pasa
+a ser editable desde `/admin/generaciones` (mismo patrón `site_settings`
+que Nosotros, sin migración de esquema para el texto), y el CTA
+"Inscríbete en Generaciones" gana un formulario de inscripción propio en
+`/generaciones/inscripcion` (tabla `generations_registrations`, migración
+`027`, RLS `is_admin()`-only por tratarse de datos de menores de edad) con
+su propia bandeja `/admin/generaciones/inscripciones` — ver sección
+"Página Generaciones — contenido editable + inscripción propia" arriba
+para el detalle completo, incluidas las decisiones de seguridad que el
+usuario aprobó explícitamente antes de tocar Supabase. **La migración
+`027` ya se aplicó en producción** — a diferencia de `018`–`026`
+(corridas a mano por el usuario), esta la ejecutó Claude Code directamente
+en Supabase Studio vía el navegador embebido, a pedido explícito del
+usuario ("Hazlo tu mismo en supabase"), y se verificó con una consulta
+aparte que confirmó la tabla `generations_registrations` y sus 5 políticas
+antes de cerrar la sesión de navegador.
 
 **Nota operativa**: `.claude/launch.json` tiene `autoPort: true` en la
 config `inspira-church-dev` porque han corrido varias sesiones de Claude
@@ -1204,21 +1346,22 @@ revisar qué puerto tomó antes de asumir que está caído.
     misma forma en varios otros `lib/actions/*.ts` no auditados — vale la
     pena revisar `sermons.ts`, `growth-groups.ts`, `team-members.ts`,
     `about.ts` y `sermon-series.ts` por el mismo patrón.
-11. **Generaciones — inscripción real, requiere decisión humana antes de
-    tocar Supabase.** `/generaciones` (rediseño de esta sesión) todavía no
-    tiene un formulario de inscripción propio — "Inscríbete en
-    Generaciones" enlaza a `/contacto`. Un formulario real recolectaría
-    datos de **menores de edad** (nombre, edad, colegio, alergias, contacto
-    de emergencia) y necesita, antes de crear cualquier tabla/política RLS:
-    decidir si reutiliza alguna tabla existente o crea una nueva, quién en
-    Admin puede leerla (`is_admin()` vs. `is_editor_or_admin()`), y cómo se
-    separa el consentimiento de tratamiento de datos del de uso de imagen.
-    Ver sección "Página Generaciones" arriba.
-12. Generaciones — fotos reales, "Próxima fecha", "Guía para padres" y
-    "Lineamientos de cuidado" siguen sin contenido real (todos con estado
-    neutro/deshabilitado a propósito, nunca inventado) — conectarlos exige
-    nuevos módulos de `media`/`site_settings` o subida de PDF (mismo patrón
-    que Política de privacidad), trabajo aparte no incluido en el rediseño.
+11. ~~Migración `027_generations.sql` sin aplicar en producción~~ —
+    resuelto: aplicada (crea `generations_registrations` y extiende
+    `media_select_public_hero`), verificada con una consulta de
+    confirmación (tabla + 5 políticas presentes). El formulario público
+    `/generaciones/inscripcion` y las fotos nuevas de Generaciones en el
+    sitio público ya funcionan. ~~Generaciones — inscripción real, requiere
+    decisión humana antes de tocar Supabase~~ — resuelto: el usuario
+    respondió las tres preguntas pendientes (tabla nueva, solo
+    `is_admin()`, consentimientos separados) y la tabla/RLS/formulario ya
+    existen en el repo. Ver sección "Página Generaciones — contenido
+    editable + inscripción propia".
+12. ~~Generaciones — fotos reales, "Próxima fecha", "Guía para padres" y
+    "Lineamientos de cuidado" sin contenido real~~ — resuelto: los 15 slots
+    de foto, la fecha y los dos documentos PDF ya son editables desde
+    `/admin/generaciones` (siguen sin foto/fecha/documento real cargados,
+    pero eso es contenido pendiente de subir, no una limitación de código).
 13. Discrepancia de logo reportada por el usuario durante esta sesión
     ("sigo viendo el mismo [logo]") nunca se confirmó resuelta con
     evidencia visual en vivo — el código y los archivos en el repo ya

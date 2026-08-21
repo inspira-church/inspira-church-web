@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Reveal } from "@/components/public/Reveal";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
+import type { GenerationsJourneyStep } from "@/lib/queries/generations";
 import { cn } from "@/lib/utils";
 
-const STEPS = [
-  { num: "01", title: "Explora", when: "Primer semestre", text: "Los niños y jóvenes conocen las diferentes áreas y participan en ellas." },
-  { num: "02", title: "Descubre", when: "", text: "Identifican afinidades, dones, habilidades y formas de servir." },
-  { num: "03", title: "Encuentra tu lugar", when: "", text: "La decisión se acompaña entre el niño o joven, su familia y los líderes." },
-  { num: "04", title: "Crece", when: "Segundo semestre", text: "Se conforman equipos base donde cada quien profundiza en su área principal." },
-] as const;
+interface GenerationsJourneyProps {
+  title: string;
+  steps: GenerationsJourneyStep[];
+}
 
 /**
  * Línea de progreso que avanza conforme cada etapa entra en viewport — no
@@ -23,11 +22,11 @@ function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function GenerationsJourney() {
+export function GenerationsJourney({ title, steps }: GenerationsJourneyProps) {
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   // Lazy initializer (no un setState dentro del efecto): con
   // prefers-reduced-motion arranca ya con todas las etapas activas.
-  const [activeCount, setActiveCount] = useState(() => (prefersReducedMotion() ? STEPS.length : 0));
+  const [activeCount, setActiveCount] = useState(() => (prefersReducedMotion() ? steps.length : 0));
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -50,7 +49,7 @@ export function GenerationsJourney() {
       <Container>
         <Reveal>
           <h2 className={cn(anton.className, "text-balance text-center text-3xl uppercase leading-[0.95] text-white sm:text-5xl")}>
-            Un proceso para descubrir tu lugar
+            {title}
           </h2>
         </Reveal>
 
@@ -58,16 +57,16 @@ export function GenerationsJourney() {
           <div className="absolute left-0 top-[7px] hidden h-0.5 w-full bg-white/10 sm:block" aria-hidden="true">
             <div
               className="h-full transition-[width] duration-700 ease-out motion-reduce:transition-none"
-              style={{ backgroundColor: ABOUT_COLORS.coral, width: `${(activeCount / STEPS.length) * 100}%` }}
+              style={{ backgroundColor: ABOUT_COLORS.coral, width: `${(activeCount / steps.length) * 100}%` }}
             />
           </div>
 
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-4 sm:gap-6">
-            {STEPS.map((step, i) => {
+            {steps.map((step, i) => {
               const active = i < activeCount;
               return (
                 <div
-                  key={step.num}
+                  key={i}
                   ref={(el) => {
                     stepRefs.current[i] = el;
                   }}
@@ -85,7 +84,7 @@ export function GenerationsJourney() {
                     className={cn(anton.className, "text-xs tracking-widest transition-colors duration-500 ease-out motion-reduce:transition-none")}
                     style={{ color: active ? ABOUT_COLORS.coral : "rgba(255,255,255,.3)" }}
                   >
-                    {step.num}
+                    {String(i + 1).padStart(2, "0")}
                   </p>
                   <p className={cn(anton.className, "mt-2 text-xl uppercase leading-tight text-white sm:text-2xl")}>
                     {step.title}

@@ -1,7 +1,7 @@
 # Supabase — Inspira Church
 
 Esquema definitivo de la Fase 2 (+ Storage de la Fase 8, permisos y
-auditoría de la reorganización del panel admin). Veintiséis migraciones en
+auditoría de la reorganización del panel admin). Veintisiete migraciones en
 `migrations/`, en orden:
 
 | Archivo | Contenido |
@@ -32,6 +32,7 @@ auditoría de la reorganización del panel admin). Veintiséis migraciones en
 | `024_schedules_recurrence.sql` | Enum `schedule_recurrence` ('weekly'\|'monthly') + `schedules.recurrence` (default 'weekly') y `schedules.monthly_week` (nullable, 1..4 o -1 para "última semana") — permite marcar un horario como "el último domingo de cada mes" en vez de cada semana, editable desde `/admin/horarios` |
 | `025_events_promo_video.sql` | `events.promo_video_url` (text, nullable) — video promocional de YouTube en el detalle de un evento, editable desde `/admin/eventos`; la sección pública no se renderiza si el campo está vacío |
 | `026_documents_bucket.sql` | Bucket de Storage `documents` (público de lectura, solo PDF, 10 MB, escritura solo `is_admin()`) — usado por `site_settings.privacyPolicyUrl`, que pasó de link externo pegado a mano a PDF subido desde `/admin/contacto`; se muestra embebido en `/politica-de-privacidad` |
+| `027_generations.sql` | Tabla `generations_registrations` (formulario de inscripción propio de /generaciones, datos de menores de edad — RLS `is_admin()`-only en select/update/delete, insert abierto) + extiende `media_select_public_hero` con `module like 'generaciones-%'` para las ~15 fotos nuevas de la página. El contenido de texto de Generaciones (`site_settings.key='generaciones'`) no depende de esta migración. **Aplicada en producción** (por Claude Code, vía el navegador contra Supabase Studio) — ver CLAUDE.md, sección "Página Generaciones — contenido editable + inscripción propia" |
 
 ## Aplicar las migraciones
 

@@ -25,6 +25,7 @@ export const PERMISSION_MODULES = [
   "media",
   "users",
   "audit",
+  "generations",
 ] as const;
 
 export type PermissionModule = (typeof PERMISSION_MODULES)[number];

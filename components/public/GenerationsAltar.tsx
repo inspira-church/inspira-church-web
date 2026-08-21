@@ -6,7 +6,14 @@ import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
-export function GenerationsAltar() {
+interface GenerationsAltarProps {
+  title: string;
+  text: string;
+  tagline: string;
+  photoUrl?: string | null;
+}
+
+export function GenerationsAltar({ title, text, tagline, photoUrl }: GenerationsAltarProps) {
   const { ref, revealed } = useScrollReveal<HTMLDivElement>(0.3);
 
   return (
@@ -18,7 +25,7 @@ export function GenerationsAltar() {
             revealed ? "scale-100" : "scale-110"
           )}
         >
-          <GenerationsPhotoSlot label="Foto — un joven sirviendo" tint={ABOUT_COLORS.tealLight} />
+          <GenerationsPhotoSlot photoUrl={photoUrl} label="Foto — un joven sirviendo" tint={ABOUT_COLORS.tealLight} />
         </div>
         <div
           className="absolute inset-0"
@@ -28,20 +35,15 @@ export function GenerationsAltar() {
 
       <Container className="relative z-10 py-20 sm:py-28">
         <div className="max-w-2xl">
-          <h2 className={cn(anton.className, "text-balance text-4xl uppercase leading-[0.92] text-white sm:text-7xl")}>
-            Toda área
-            <br />
-            es altar.
+          <h2 className={cn(anton.className, "text-balance text-4xl uppercase leading-[0.92] text-white sm:text-7xl whitespace-pre-line")}>
+            {title}
           </h2>
-          <p className={cn(hind.className, "mt-6 max-w-[52ch] text-lg text-white/70 sm:text-xl")}>
-            No importa si alguien canta, recibe a los visitantes, sirve en cafetería, apoya en
-            logística o trabaja detrás de una cámara. Cada lugar de servicio tiene valor.
-          </p>
+          <p className={cn(hind.className, "mt-6 max-w-[52ch] text-lg text-white/70 sm:text-xl")}>{text}</p>
           <p
             className="mt-5 text-sm font-bold uppercase tracking-wide sm:text-base"
             style={{ color: ABOUT_COLORS.coral }}
           >
-            Aquí no formamos figuras. Formamos corazones dispuestos a servir.
+            {tagline}
           </p>
         </div>
       </Container>

@@ -5,124 +5,67 @@ import { GenerationsPhotoSlot } from "@/components/public/GenerationsPhotoSlot";
 import { Reveal } from "@/components/public/Reveal";
 import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
+import type { GenerationsArea } from "@/lib/queries/generations";
 import { cn } from "@/lib/utils";
 
-interface AreaGroup {
-  label?: string;
-  age: string;
-  when: string;
-  practice?: string;
+interface GenerationsAreasProps {
+  title: string;
+  intro: string;
+  areas: GenerationsArea[];
+  photoByAreaId: Record<string, string | undefined>;
 }
 
-interface Area {
-  id: string;
-  name: string;
-  tags: string;
-  tint: string;
-  span: string;
-  groups: AreaGroup[];
-  purpose: string;
+/**
+ * Color y tamaño de grilla de cada tarjeta se quedan fijos en código, no en
+ * el panel (mismo principio que el resto del CMS: diseño en código,
+ * contenido en admin) — mapeados por el id estable de cada área. Un área
+ * nueva creada desde el admin (id no reconocido aquí) cae a un color de la
+ * paleta rotativo y ocupa una sola celda — nunca rompe el layout.
+ */
+const AREA_STYLE: Record<string, { tint: string; span: string }> = {
+  alabanza: { tint: ABOUT_COLORS.coral, span: "col-span-2 row-span-2 sm:col-span-3 sm:row-span-2" },
+  medios: { tint: ABOUT_COLORS.tealLight, span: "col-span-2 sm:col-span-3" },
+  teatro: { tint: ABOUT_COLORS.cream, span: "row-span-2 sm:col-span-1 sm:row-span-2" },
+  "real-love": { tint: "#c9603b", span: "sm:col-span-2" },
+  kids: { tint: ABOUT_COLORS.teal, span: "sm:col-span-2" },
+  logistica: { tint: "#5b5b58", span: "" },
+  cafeteria: { tint: ABOUT_COLORS.cream, span: "" },
+  anuncios: { tint: ABOUT_COLORS.tealLight, span: "" },
+  diezmos: { tint: ABOUT_COLORS.coral, span: "" },
+};
+
+const FALLBACK_TINTS = [ABOUT_COLORS.coral, ABOUT_COLORS.tealLight, ABOUT_COLORS.cream, ABOUT_COLORS.teal];
+
+function styleForArea(id: string, index: number) {
+  return AREA_STYLE[id] ?? { tint: FALLBACK_TINTS[index % FALLBACK_TINTS.length], span: "" };
 }
 
-/** Edades y horarios tal como están definidos hoy — nada inventado; donde aún no hay dato se deja "Por definir". */
-const AREAS: Area[] = [
-  {
-    id: "alabanza",
-    name: "Alabanza",
-    tags: "Adoración · Disciplina · Sensibilidad",
-    tint: ABOUT_COLORS.coral,
-    span: "col-span-2 row-span-2 sm:col-span-3 sm:row-span-2",
-    groups: [
-      { label: "Voces", age: "Por definir", when: "Sábado · 9:00–11:00 a. m.", practice: "45 min al día" },
-      { label: "Instrumentos", age: "8 años (sugerido)", when: "Sábado · 9:00–11:00 a. m.", practice: "Aprox. 1 hora al día" },
-    ],
-    purpose: "Adorar con excelencia y guiar a la congregación a encontrarse con la presencia de Dios.",
-  },
-  {
-    id: "medios",
-    name: "Medios",
-    tags: "Creatividad · Técnica · Concentración",
-    tint: ABOUT_COLORS.tealLight,
-    span: "col-span-2 sm:col-span-3",
-    groups: [{ age: "10 años (sugerido)", when: "Preparación el sábado previo" }],
-    purpose: "Contar la historia de lo que Dios hace, con excelencia técnica y sensibilidad creativa.",
-  },
-  {
-    id: "teatro",
-    name: "Teatro",
-    tags: "Expresión · Creatividad · Confianza",
-    tint: ABOUT_COLORS.cream,
-    span: "row-span-2 sm:col-span-1 sm:row-span-2",
-    groups: [{ age: "4 años", when: "Primer y tercer sábado · 9:00–11:00 a. m." }],
-    purpose: "Enseñar verdades de Dios a través de la expresión artística y corporal.",
-  },
-  {
-    id: "real-love",
-    name: "Real Love",
-    tags: "Hospitalidad · Empatía · Servicio",
-    tint: "#c9603b",
-    span: "sm:col-span-2",
-    groups: [{ age: "6 años", when: "Preparación breve antes del servicio" }],
-    purpose: "Ser el primer rostro que recibe a cada familia que llega, con calidez y atención genuina.",
-  },
-  {
-    id: "kids",
-    name: "Kids",
-    tags: "Paciencia · Enseñanza · Acompañamiento",
-    tint: ABOUT_COLORS.teal,
-    span: "sm:col-span-2",
-    groups: [{ age: "10 años (sugerido)", when: "Preparación el sábado previo" }],
-    purpose: "Acompañar a los más pequeños con paciencia, enseñando la Palabra de forma que puedan entenderla.",
-  },
-  {
-    id: "logistica",
-    name: "Logística",
-    tags: "Orden · Atención · Equipo",
-    tint: "#5b5b58",
-    span: "",
-    groups: [{ age: "8 años", when: "Día del servicio · llegada 9:00 a. m." }],
-    purpose: "Cuidar los detalles que hacen que todo funcione: orden, atención y trabajo en equipo.",
-  },
-  {
-    id: "cafeteria",
-    name: "Cafetería",
-    tags: "Servicio · Cuidado",
-    tint: ABOUT_COLORS.cream,
-    span: "",
-    groups: [{ age: "8 años", when: "Día del servicio · llegada 9:00 a. m." }],
-    purpose: "Servir con calidez algo tan sencillo como un café, y hacer sentir a alguien bienvenido.",
-  },
-  {
-    id: "anuncios",
-    name: "Anuncios",
-    tags: "Comunicación · Confianza",
-    tint: ABOUT_COLORS.tealLight,
-    span: "",
-    groups: [{ age: "8 años", when: "Día del servicio + ensayo previo" }],
-    purpose: "Comunicar con claridad lo que la iglesia necesita saber, con seguridad y buena dicción.",
-  },
-  {
-    id: "diezmos",
-    name: "Diezmos",
-    tags: "Mayordomía · Honra",
-    tint: ABOUT_COLORS.coral,
-    span: "",
-    groups: [{ age: "8 años", when: "Día del servicio · llegada 9:00 a. m." }],
-    purpose: "Aprender mayordomía sirviendo con honestidad en una de las áreas de mayor confianza.",
-  },
-];
-
-function AreaTile({ area, onOpen }: { area: Area; onOpen: (area: Area) => void }) {
+function AreaTile({
+  area,
+  style,
+  photoUrl,
+  onOpen,
+}: {
+  area: GenerationsArea;
+  style: { tint: string; span: string };
+  photoUrl: string | undefined;
+  onOpen: (area: GenerationsArea) => void;
+}) {
   return (
     <button
       type="button"
       onClick={() => onOpen(area)}
       className={cn(
         "group relative overflow-hidden border border-white/10 bg-[#141414] text-left transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
-        area.span
+        style.span
       )}
     >
-      <GenerationsPhotoSlot label="" tint={area.tint} className="transition-transform duration-400 ease-out group-hover:scale-105" />
+      <GenerationsPhotoSlot
+        photoUrl={photoUrl}
+        label=""
+        tint={style.tint}
+        className="transition-transform duration-400 ease-out group-hover:scale-105"
+      />
       <div
         className="absolute inset-0"
         style={{ background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,.92) 100%)" }}
@@ -131,7 +74,7 @@ function AreaTile({ area, onOpen }: { area: Area; onOpen: (area: Area) => void }
       <span
         aria-hidden="true"
         className="absolute inset-0 bg-[--tint] opacity-0 mix-blend-multiply transition-opacity duration-300 ease-out group-hover:opacity-20"
-        style={{ ["--tint" as string]: area.tint }}
+        style={{ ["--tint" as string]: style.tint }}
       />
       <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border border-white/30 text-sm text-white/70">
         +
@@ -146,11 +89,11 @@ function AreaTile({ area, onOpen }: { area: Area; onOpen: (area: Area) => void }
   );
 }
 
-export function GenerationsAreas() {
+export function GenerationsAreas({ title, intro, areas, photoByAreaId }: GenerationsAreasProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [selected, setSelected] = useState<Area | null>(null);
+  const [selected, setSelected] = useState<GenerationsArea | null>(null);
 
-  function openArea(area: Area) {
+  function openArea(area: GenerationsArea) {
     setSelected(area);
     dialogRef.current?.showModal();
   }
@@ -160,17 +103,20 @@ export function GenerationsAreas() {
       <Container>
         <Reveal className="max-w-xl">
           <h2 className={cn(anton.className, "text-balance text-4xl uppercase leading-[0.95] text-white sm:text-6xl")}>
-            Descubre tu lugar
+            {title}
           </h2>
-          <p className={cn(hind.className, "mt-4 text-lg text-white/70")}>
-            Cada área es una oportunidad para servir, aprender y descubrir los dones que Dios ha
-            puesto en cada niño y joven. Toca cualquiera para ver los detalles.
-          </p>
+          <p className={cn(hind.className, "mt-4 text-lg text-white/70")}>{intro}</p>
         </Reveal>
 
         <Reveal delay={150} className="mt-10 grid auto-rows-[120px] grid-cols-2 gap-2.5 sm:mt-14 sm:auto-rows-[110px] sm:grid-cols-6">
-          {AREAS.map((area) => (
-            <AreaTile key={area.id} area={area} onOpen={openArea} />
+          {areas.map((area, i) => (
+            <AreaTile
+              key={area.id}
+              area={area}
+              style={styleForArea(area.id, i)}
+              photoUrl={photoByAreaId[area.id]}
+              onOpen={openArea}
+            />
           ))}
         </Reveal>
       </Container>
