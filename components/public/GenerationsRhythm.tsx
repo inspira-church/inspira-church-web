@@ -63,7 +63,7 @@ export function GenerationsRhythm({ words }: GenerationsRhythmProps) {
               >
                 <p
                   className={cn(anton.className, "text-4xl uppercase leading-[0.9] transition-colors duration-500 ease-out motion-reduce:transition-none sm:text-7xl")}
-                  style={{ color: isActive ? ABOUT_COLORS.coral : "rgba(255,255,255,.3)" }}
+                  style={{ color: isActive ? ABOUT_COLORS.tealLight : "rgba(255,255,255,.3)" }}
                 >
                   {item.word}
                 </p>

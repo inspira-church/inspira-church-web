@@ -22,7 +22,7 @@ export function GenerationsNextDate({ eyebrow, nextDate, note }: GenerationsNext
     <section className="border-b border-white/10 bg-[#0d0d0d] py-16 text-center sm:py-24">
       <Container>
         <Reveal>
-          <Eyebrow color={ABOUT_COLORS.coral}>{eyebrow}</Eyebrow>
+          <Eyebrow color={ABOUT_COLORS.tealLight}>{eyebrow}</Eyebrow>
         </Reveal>
         <Reveal delay={120} className="mx-auto mt-7 max-w-lg border border-white/12 px-8 py-10 sm:px-12 sm:py-14">
           {nextDate ? (
@@ -30,13 +30,13 @@ export function GenerationsNextDate({ eyebrow, nextDate, note }: GenerationsNext
               <p className={cn(anton.className, "text-sm uppercase tracking-widest text-white/50")}>
                 {dayNameFromDate(nextDate)}
               </p>
-              <p className={cn(anton.className, "mt-2 text-2xl uppercase leading-[1.05] sm:text-4xl")} style={{ color: ABOUT_COLORS.coral }}>
+              <p className={cn(anton.className, "mt-2 text-2xl uppercase leading-[1.05] sm:text-4xl")} style={{ color: ABOUT_COLORS.tealLight }}>
                 {formatDate(nextDate)}
               </p>
             </>
           ) : (
             <p className={cn(anton.className, "text-2xl uppercase leading-[1.05] text-white sm:text-4xl")}>
-              Próxima fecha <span style={{ color: ABOUT_COLORS.coral }}>muy pronto</span>
+              Próxima fecha <span style={{ color: ABOUT_COLORS.tealLight }}>muy pronto</span>
             </p>
           )}
           {note && <p className={cn(hind.className, "mt-3.5 text-sm text-white/50")}>{note}</p>}

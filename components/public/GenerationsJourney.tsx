@@ -57,7 +57,7 @@ export function GenerationsJourney({ title, steps }: GenerationsJourneyProps) {
           <div className="absolute left-0 top-[7px] hidden h-0.5 w-full bg-white/10 sm:block" aria-hidden="true">
             <div
               className="h-full transition-[width] duration-700 ease-out motion-reduce:transition-none"
-              style={{ backgroundColor: ABOUT_COLORS.coral, width: `${(activeCount / steps.length) * 100}%` }}
+              style={{ backgroundColor: ABOUT_COLORS.tealLight, width: `${(activeCount / steps.length) * 100}%` }}
             />
           </div>
 
@@ -76,13 +76,13 @@ export function GenerationsJourney({ title, steps }: GenerationsJourneyProps) {
                     aria-hidden="true"
                     className="absolute left-0 top-0 h-4 w-4 rounded-full border-2 transition-colors duration-500 ease-out motion-reduce:transition-none"
                     style={{
-                      backgroundColor: active ? ABOUT_COLORS.coral : "#000",
-                      borderColor: active ? ABOUT_COLORS.coral : "rgba(255,255,255,.3)",
+                      backgroundColor: active ? ABOUT_COLORS.tealLight : "#000",
+                      borderColor: active ? ABOUT_COLORS.tealLight : "rgba(255,255,255,.3)",
                     }}
                   />
                   <p
                     className={cn(anton.className, "text-xs tracking-widest transition-colors duration-500 ease-out motion-reduce:transition-none")}
-                    style={{ color: active ? ABOUT_COLORS.coral : "rgba(255,255,255,.3)" }}
+                    style={{ color: active ? ABOUT_COLORS.tealLight : "rgba(255,255,255,.3)" }}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </p>

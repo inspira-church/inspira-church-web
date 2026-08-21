@@ -32,7 +32,7 @@ export function GenerationsFamilies({ title, text, parentsGuideUrl, photoUrl }: 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center border border-white/70 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:border-white"
-                  style={{ borderColor: ABOUT_COLORS.coral, color: ABOUT_COLORS.coral }}
+                  style={{ borderColor: ABOUT_COLORS.tealLight, color: ABOUT_COLORS.tealLight }}
                 >
                   Conoce la guía para padres
                 </a>

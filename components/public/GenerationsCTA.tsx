@@ -22,7 +22,7 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
   return (
     <section className="relative flex min-h-[80vh] items-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <GenerationsPhotoSlot photoUrl={photoUrl} label="Foto — Generaciones en servicio" tint={ABOUT_COLORS.coral} />
+        <GenerationsPhotoSlot photoUrl={photoUrl} label="Foto — Generaciones en servicio" tint={ABOUT_COLORS.tealLight} />
         <div
           className="absolute inset-0"
           style={{ background: "linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.35) 40%, #000 100%)" }}
@@ -36,7 +36,7 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
           </h2>
           <p
             className={cn(anton.className, "mt-4 text-base uppercase tracking-wide sm:text-xl")}
-            style={{ color: ABOUT_COLORS.coral }}
+            style={{ color: ABOUT_COLORS.tealLight }}
           >
             {tagline}
           </p>
@@ -44,8 +44,8 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <Link
               href="/generaciones/inscripcion"
-              className="group inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
-              style={{ backgroundColor: ABOUT_COLORS.coral }}
+              className="group inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
+              style={{ backgroundColor: ABOUT_COLORS.tealLight }}
             >
               Inscríbete en Generaciones
               <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden="true">

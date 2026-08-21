@@ -102,7 +102,7 @@ export function GenerationsRegistrationForm({ areaOptions }: GenerationsRegistra
           label={
             <>
               Autorizo el tratamiento de los datos personales de mi hijo/a conforme a la{" "}
-              <Link href="/politica-de-privacidad" target="_blank" className="underline hover:text-[#FF7F50]">
+              <Link href="/politica-de-privacidad" target="_blank" className="underline hover:text-[#508A8C]">
                 política de privacidad
               </Link>{" "}
               de Inspira Church.

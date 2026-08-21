@@ -24,8 +24,8 @@ function LegadoBackdrop() {
       aria-hidden="true"
       className={cn(
         anton.className,
-        "pointer-events-none absolute left-[-4%] top-[8%] whitespace-nowrap text-[6rem] uppercase text-white opacity-[0.05] sm:text-[12rem] lg:text-[18rem]",
-        "animate-[generations-legado-drift_46s_linear_infinite] motion-reduce:animate-none"
+        "pointer-events-none absolute left-[8%] top-[8%] whitespace-nowrap text-[6rem] uppercase text-white sm:text-[12rem] lg:text-[18rem]",
+        "animate-[generations-legado-drift_42s_linear_infinite] motion-reduce:animate-none motion-reduce:opacity-[0.05]"
       )}
     >
       Legado
@@ -48,7 +48,7 @@ export function GenerationsHero({
         <GenerationsPhotoSlot
           photoUrl={photoUrl}
           label="Foto — niños y jóvenes sirviendo"
-          tint={ABOUT_COLORS.coral}
+          tint={ABOUT_COLORS.tealLight}
           priority
         />
         <div
@@ -60,14 +60,23 @@ export function GenerationsHero({
       <LegadoBackdrop />
 
       <Container className="relative z-10">
-        <p className="inline-block border border-[#FF7F50] px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#FF7F50]">
+        <p className="inline-block border border-[#508A8C] px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#508A8C]">
           {eyebrow}
         </p>
         <h1
           className={cn(
             anton.className,
-            "mt-5 text-balance text-[3.4rem] uppercase leading-[0.86] text-white sm:text-[6.5rem] lg:text-[9rem]"
+            "mt-5 text-balance text-[3.4rem] uppercase leading-[0.98] sm:text-[6.5rem] lg:text-[9rem]",
+            "animate-[generations-title-shimmer_9s_ease-in-out_infinite_alternate] motion-reduce:animate-none"
           )}
+          style={{
+            backgroundImage:
+              "linear-gradient(100deg, #00545E 0%, #266C62 12.5%, #508A8C 25%, #58978F 37.5%, #FFFFFF 50%, #58978F 62.5%, #508A8C 75%, #266C62 87.5%, #00545E 100%)",
+            backgroundSize: "260% 100%",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
         >
           {title}
         </h1>
@@ -77,14 +86,14 @@ export function GenerationsHero({
             "mt-6 max-w-[18ch] text-balance text-2xl uppercase leading-[1.08] text-white sm:text-4xl"
           )}
         >
-          {taglineWhite} <span style={{ color: ABOUT_COLORS.coral }}>{taglineCoral}</span>
+          {taglineWhite} <span style={{ color: ABOUT_COLORS.tealLight }}>{taglineCoral}</span>
         </p>
         <blockquote
           className={cn(
             hind.className,
             "mt-7 max-w-md border-l-2 pl-4 text-sm italic text-white/50 sm:text-base"
           )}
-          style={{ borderColor: ABOUT_COLORS.coral }}
+          style={{ borderColor: ABOUT_COLORS.tealLight }}
         >
           «{verseText}»
           <cite className="mt-2 block text-xs not-italic uppercase tracking-widest text-white/30">

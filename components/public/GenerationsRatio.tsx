@@ -44,7 +44,7 @@ export function GenerationsRatio({
             <p className={cn(hind.className, "mx-auto mt-2.5 max-w-[34ch] text-sm text-white/70")}>{leftText}</p>
           </div>
           <div>
-            <p className={cn(anton.className, "text-[5rem] leading-[0.85] sm:text-8xl")} style={{ color: ABOUT_COLORS.coral }}>
+            <p className={cn(anton.className, "text-[5rem] leading-[0.85] sm:text-8xl")} style={{ color: ABOUT_COLORS.tealLight }}>
               {rightPercent}
               <span className="text-[0.4em] align-top">%</span>
             </p>
@@ -60,7 +60,7 @@ export function GenerationsRatio({
           />
           <div
             className="h-full transition-[width] duration-[1400ms] ease-out motion-reduce:transition-none"
-            style={{ width: revealed ? `${rightWidth}%` : "0%", backgroundColor: ABOUT_COLORS.coral }}
+            style={{ width: revealed ? `${rightWidth}%` : "0%", backgroundColor: ABOUT_COLORS.tealLight }}
           />
         </div>
 

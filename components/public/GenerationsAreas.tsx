@@ -76,12 +76,12 @@ function AreaTile({
         className="absolute inset-0 bg-[--tint] opacity-0 mix-blend-multiply transition-opacity duration-300 ease-out group-hover:opacity-20"
         style={{ ["--tint" as string]: style.tint }}
       />
-      <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border border-white/30 text-sm text-white/70">
+      <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border border-white/30 text-sm text-white/70 transition-all duration-300 ease-out group-hover:scale-125 group-hover:border-[#DE672F] group-hover:text-[#DE672F]">
         +
       </span>
       <div className="absolute inset-x-4 bottom-3.5">
         <p className={cn(anton.className, "text-lg uppercase leading-none text-white sm:text-2xl")}>{area.name}</p>
-        <p className="mt-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.coral }}>
+        <p className="mt-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.tealLight }}>
           {area.tags}
         </p>
       </div>
@@ -142,7 +142,7 @@ export function GenerationsAreas({ title, intro, areas, photoByAreaId }: Generat
             <p id="generations-area-name" className={cn(anton.className, "pr-8 text-2xl uppercase text-white sm:text-3xl")}>
               {selected.name}
             </p>
-            <p className="mt-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.coral }}>
+            <p className="mt-1.5 text-xs font-bold uppercase tracking-widest" style={{ color: ABOUT_COLORS.tealLight }}>
               {selected.tags}
             </p>
 

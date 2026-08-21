@@ -33,18 +33,18 @@ export function GenerationsVision({
             >
               {titleWhite1}
               <br />
-              <span style={{ color: ABOUT_COLORS.coral }}>{titleCoral1}</span>
+              <span style={{ color: ABOUT_COLORS.tealLight }}>{titleCoral1}</span>
               <br />
               {titleWhite2}
               <br />
-              <span style={{ color: ABOUT_COLORS.coral }}>{titleCoral2}</span>
+              <span style={{ color: ABOUT_COLORS.tealLight }}>{titleCoral2}</span>
             </h2>
           </Reveal>
 
           <Reveal delay={120}>
             <p className={cn(hind.className, "max-w-md text-lg leading-relaxed text-white/70")}>{text}</p>
             <div className="mt-7 flex items-center gap-4">
-              <span aria-hidden="true" className="h-px w-12" style={{ backgroundColor: ABOUT_COLORS.coral }} />
+              <span aria-hidden="true" className="h-px w-12" style={{ backgroundColor: ABOUT_COLORS.tealLight }} />
               <p className={cn(anton.className, "text-xl uppercase text-white sm:text-2xl")}>{closing}</p>
             </div>
           </Reveal>

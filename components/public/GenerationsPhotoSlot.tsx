@@ -47,9 +47,11 @@ export function GenerationsPhotoSlot({
       className={cn("absolute inset-0", className)}
       style={{ background: `radial-gradient(120% 100% at 20% 15%, ${tint}55 0%, #0a0a0a 78%)` }}
     >
-      <span className="absolute right-3 top-3 rounded border border-white/25 bg-black/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
-        {label}
-      </span>
+      {label && (
+        <span className="absolute right-3 top-3 rounded border border-white/25 bg-black/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
+          {label}
+        </span>
+      )}
     </div>
   );
 }

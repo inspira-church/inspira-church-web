@@ -28,13 +28,13 @@ export function GenerationsLegacy({ titleWhite, titleCoral, photoUrl1, photoUrl2
               "hidden h-40 w-px origin-top transition-transform duration-[1100ms] ease-out motion-reduce:transition-none sm:block sm:h-56",
               lineRevealed ? "scale-y-100" : "scale-y-0"
             )}
-            style={{ backgroundColor: ABOUT_COLORS.coral }}
+            style={{ backgroundColor: ABOUT_COLORS.tealLight }}
           />
 
           <Reveal>
             <h2 className={cn(anton.className, "text-balance text-4xl uppercase leading-[0.95] text-white sm:text-6xl whitespace-pre-line")}>
               {titleWhite}
-              <span className="mt-3 block sm:mt-4" style={{ color: ABOUT_COLORS.coral }}>
+              <span className="mt-3 block sm:mt-4" style={{ color: ABOUT_COLORS.tealLight }}>
                 {titleCoral}
               </span>
             </h2>

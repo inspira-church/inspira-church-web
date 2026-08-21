@@ -41,7 +41,7 @@ export function GenerationsAltar({ title, text, tagline, photoUrl }: Generations
           <p className={cn(hind.className, "mt-6 max-w-[52ch] text-lg text-white/70 sm:text-xl")}>{text}</p>
           <p
             className="mt-5 text-sm font-bold uppercase tracking-wide sm:text-base"
-            style={{ color: ABOUT_COLORS.coral }}
+            style={{ color: ABOUT_COLORS.tealLight }}
           >
             {tagline}
           </p>
