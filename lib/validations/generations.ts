@@ -89,7 +89,8 @@ export const generationsContentSchema = z.object({
 
   ctaTitle: z.string().trim().min(1, "Ingresa el título."),
   ctaTagline: z.string().trim().min(1, "Ingresa la frase."),
-  ctaClosing: z.string().trim().min(1, "Ingresa el texto."),
+  ctaClosingWhite: z.string().trim().min(1, "Ingresa el texto."),
+  ctaClosingHighlight: z.string().trim().min(1, "Ingresa el texto."),
 });
 
 export type GenerationsContentInput = z.infer<typeof generationsContentSchema>;

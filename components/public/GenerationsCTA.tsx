@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 interface GenerationsCTAProps {
   title: string;
   tagline: string;
-  closing: string;
+  closingWhite: string;
+  closingHighlight: string;
   parentsGuideUrl?: string;
   photoUrl?: string | null;
 }
@@ -18,7 +19,14 @@ interface GenerationsCTAProps {
  * /generaciones/inscripcion (tabla generations_registrations, RLS
  * is_admin()-only) — ya no redirige a /contacto.
  */
-export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photoUrl }: GenerationsCTAProps) {
+export function GenerationsCTA({
+  title,
+  tagline,
+  closingWhite,
+  closingHighlight,
+  parentsGuideUrl,
+  photoUrl,
+}: GenerationsCTAProps) {
   return (
     <section className="relative flex min-h-[80vh] items-center overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -36,7 +44,7 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
           </h2>
           <p
             className={cn(anton.className, "mt-4 text-base uppercase tracking-wide sm:text-xl")}
-            style={{ color: ABOUT_COLORS.tealLight }}
+            style={{ color: "#FF7F50" }}
           >
             {tagline}
           </p>
@@ -45,7 +53,7 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
             <Link
               href="/generaciones/inscripcion"
               className="group inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-110"
-              style={{ backgroundColor: ABOUT_COLORS.tealLight }}
+              style={{ backgroundColor: "#FF7F50" }}
             >
               Inscríbete en Generaciones
               <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden="true">
@@ -57,7 +65,7 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
                 href={parentsGuideUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border border-white/70 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:border-white"
+                className="rounded-md border border-white/70 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#508A8C] hover:bg-[#508A8C]/10 hover:shadow-[0_0_25px_rgba(80,138,140,0.55)]"
               >
                 Guía para padres
               </a>
@@ -72,7 +80,13 @@ export function GenerationsCTA({ title, tagline, closing, parentsGuideUrl, photo
             )}
           </div>
 
-          <p className={cn(hind.className, "mt-10 max-w-[48ch] text-white/50")}>{closing}</p>
+          <p className={cn(hind.className, "mt-10 max-w-[48ch] font-bold text-white/50")}>
+            {closingWhite}
+            <br />
+            <span className="uppercase" style={{ color: "#D4C78F" }}>
+              {closingHighlight}
+            </span>
+          </p>
         </Reveal>
       </Container>
     </section>

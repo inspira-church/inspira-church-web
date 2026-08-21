@@ -42,8 +42,8 @@ export function GenerationsSafety({ eyebrow, title, principles, careGuidelinesUr
                   href={careGuidelinesUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center border px-6 py-3 text-sm font-bold uppercase tracking-wide transition-colors"
-                  style={{ borderColor: ABOUT_COLORS.tealLight, color: ABOUT_COLORS.tealLight }}
+                  className="inline-flex items-center rounded-md border-2 px-6 py-3 text-sm font-bold uppercase tracking-wide transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#508A8C]/10 hover:shadow-[0_0_25px_rgba(80,138,140,0.55)]"
+                  style={{ borderColor: "#FFFFFF", color: ABOUT_COLORS.tealLight }}
                 >
                   Conoce los lineamientos de cuidado
                 </a>

@@ -107,7 +107,8 @@ function parseForm(formData: FormData) {
 
     ctaTitle: formData.get("ctaTitle"),
     ctaTagline: formData.get("ctaTagline"),
-    ctaClosing: formData.get("ctaClosing"),
+    ctaClosingWhite: formData.get("ctaClosingWhite"),
+    ctaClosingHighlight: formData.get("ctaClosingHighlight"),
   };
 }
 

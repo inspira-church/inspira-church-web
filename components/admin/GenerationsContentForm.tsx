@@ -191,7 +191,20 @@ export function GenerationsContentForm({
         <h2 className="font-display text-lg font-semibold text-ink">CTA final</h2>
         <TextAreaField label="Título" name="ctaTitle" defaultValue={defaultValues.ctaTitle} rows={2} hint="Puede tener varias líneas." required />
         <TextField label="Frase" name="ctaTagline" defaultValue={defaultValues.ctaTagline} required />
-        <TextAreaField label="Texto de cierre" name="ctaClosing" defaultValue={defaultValues.ctaClosing} rows={2} required />
+        <TextAreaField
+          label="Texto de cierre — línea blanca"
+          name="ctaClosingWhite"
+          defaultValue={defaultValues.ctaClosingWhite}
+          rows={2}
+          required
+        />
+        <TextAreaField
+          label="Texto de cierre — línea destacada (debajo, en mayúscula y color propio)"
+          name="ctaClosingHighlight"
+          defaultValue={defaultValues.ctaClosingHighlight}
+          rows={2}
+          required
+        />
         <p className="text-xs text-ink-faint">
           El botón &ldquo;Inscríbete en Generaciones&rdquo; siempre lleva a /generaciones/inscripcion — no
           es editable aquí. &ldquo;Guía para padres&rdquo; reutiliza el documento subido arriba, en

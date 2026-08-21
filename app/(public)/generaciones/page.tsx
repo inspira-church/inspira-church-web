@@ -95,7 +95,8 @@ export default async function GenerationsPage() {
       <GenerationsCTA
         title={content.ctaTitle}
         tagline={content.ctaTagline}
-        closing={content.ctaClosing}
+        closingWhite={content.ctaClosingWhite}
+        closingHighlight={content.ctaClosingHighlight}
         parentsGuideUrl={content.parentsGuideUrl}
         photoUrl={media[GENERATIONS_PHOTO_MODULES.cta]}
       />

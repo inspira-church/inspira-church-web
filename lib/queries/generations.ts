@@ -90,7 +90,8 @@ export interface GenerationsContent {
 
   ctaTitle: string;
   ctaTagline: string;
-  ctaClosing: string;
+  ctaClosingWhite: string;
+  ctaClosingHighlight: string;
 }
 
 /** Copia literal de las 9 áreas hoy hardcodeadas en GenerationsAreas.tsx — nada inventado, "Por definir" donde el dato real todavía no existe. */
@@ -278,7 +279,8 @@ export const DEFAULT_GENERATIONS_CONTENT: GenerationsContent = {
 
   ctaTitle: "Hay un lugar\npara ti.",
   ctaTagline: "Descubre. Sirve. Crece.",
-  ctaClosing: "Porque no solo estamos formando iglesia… estamos formando generaciones para Dios.",
+  ctaClosingWhite: "Porque no solo estamos formando iglesia…",
+  ctaClosingHighlight: "estamos formando generaciones para Dios.",
 };
 
 function normalizeAreas(raw: unknown): GenerationsArea[] | null {

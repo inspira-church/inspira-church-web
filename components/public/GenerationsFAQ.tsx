@@ -27,7 +27,12 @@ function FAQRow({ q, a }: { q: string; a: string }) {
           onClick={() => setOpen((v) => !v)}
           className="flex w-full items-center justify-between gap-6 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         >
-          <span className="text-base font-medium text-white sm:text-lg">{q}</span>
+          <span
+            className="text-base font-medium transition-colors duration-300 ease-out sm:text-lg"
+            style={{ color: open ? "#FF7F50" : "#FFFFFF" }}
+          >
+            {q}
+          </span>
           <span
             aria-hidden="true"
             className={cn(
