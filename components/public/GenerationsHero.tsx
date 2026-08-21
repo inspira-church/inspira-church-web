@@ -14,9 +14,13 @@ interface GenerationsHeroProps {
 }
 
 /**
- * Palabra de fondo gigante y muy tenue, con una deriva horizontal lenta —
- * puramente CSS (sin listener de scroll), y `motion-reduce:animate-none`
- * la detiene por completo si el usuario prefiere menos movimiento.
+ * Palabra de fondo gigante, con una deriva horizontal lenta — puramente CSS
+ * (sin listener de scroll), y `motion-reduce:animate-none` la detiene por
+ * completo si el usuario prefiere menos movimiento. `mix-blend-overlay`
+ * hace que el blanco reaccione al color de la foto de fondo (se aclara
+ * sobre zonas oscuras, se oscurece sobre zonas claras) en vez de un blanco
+ * plano que puede perderse según qué foto suba el admin — sigue siendo
+ * perceptible sin importar los colores de la imagen.
  */
 function LegadoBackdrop() {
   return (
@@ -24,8 +28,8 @@ function LegadoBackdrop() {
       aria-hidden="true"
       className={cn(
         anton.className,
-        "pointer-events-none absolute left-[8%] top-[8%] whitespace-nowrap text-[6rem] uppercase text-white sm:text-[12rem] lg:text-[18rem]",
-        "animate-[generations-legado-drift_42s_linear_infinite] motion-reduce:animate-none motion-reduce:opacity-[0.05]"
+        "pointer-events-none absolute left-[8%] top-1/2 whitespace-nowrap text-[6rem] uppercase text-white mix-blend-overlay sm:text-[12rem] lg:text-[18rem]",
+        "animate-[generations-legado-drift_42s_linear_infinite] motion-reduce:animate-none motion-reduce:opacity-[0.06] motion-reduce:-translate-y-1/2"
       )}
     >
       Legado
@@ -43,7 +47,7 @@ export function GenerationsHero({
   photoUrl,
 }: GenerationsHeroProps) {
   return (
-    <section className="relative flex min-h-[92svh] flex-col justify-end overflow-hidden border-b border-white/10 bg-black pb-12 pt-24 sm:min-h-screen sm:pb-16">
+    <section className="relative flex min-h-[92svh] flex-col overflow-hidden border-b border-white/10 bg-black pb-12 pt-24 sm:min-h-screen sm:pb-16">
       <div className="absolute inset-0 z-0">
         <GenerationsPhotoSlot
           photoUrl={photoUrl}
@@ -57,7 +61,13 @@ export function GenerationsHero({
         />
       </div>
 
-      <LegadoBackdrop />
+      {/* Ocupa exactamente el espacio entre el borde superior de la foto y el
+          bloque de texto de abajo — LEGADO se centra dentro de este bloque
+          (top-1/2 + translateY(-50%) en el propio span), sin depender de un
+          top-% fijo que se rompería en distintos alto de viewport/contenido. */}
+      <div className="relative z-[5] flex-1">
+        <LegadoBackdrop />
+      </div>
 
       <Container className="relative z-10">
         <p className="inline-block border border-[#508A8C] px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#508A8C]">

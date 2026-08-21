@@ -125,14 +125,23 @@ body {
 
 /* Deriva horizontal muy lenta de la palabra "LEGADO" de fondo en el hero de
  * /generaciones (GenerationsHero.tsx) — usada vía
- * `animate-[generations-legado-drift_42s_linear_infinite]`. La opacidad
- * también forma parte del keyframe (no es una clase estática) para que el
- * ciclo aparezca y desaparezca desvanecido en vez de saltar de golpe al
- * reiniciar: sube a su opacidad tenue (0.05) en el primer 8% del ciclo, se
- * mantiene ahí, y baja a 0 en el último 8% antes de reiniciar. Detenida por
- * completo con `motion-reduce:animate-none` en el propio componente (que
- * en ese caso aplica `motion-reduce:opacity-[0.05]` como reemplazo estático
- * de la opacidad que normalmente controla este keyframe). */
+ * `animate-[generations-legado-drift_42s_linear_infinite]`. El elemento
+ * vive en `top-1/2` de un bloque `flex-1` que ocupa exactamente el espacio
+ * entre el borde superior de la foto y el bloque de texto de abajo, así
+ * que cada paso del keyframe arranca con `translateY(-50%)` para
+ * mantenerlo centrado verticalmente en ese bloque mientras `translateX`
+ * hace la deriva horizontal — ambas viven en la misma propiedad
+ * `transform`, no se pueden separar en clases distintas sin que una
+ * pise a la otra. La opacidad también forma parte del keyframe (no es una
+ * clase estática) para que el ciclo aparezca y desaparezca desvanecido en
+ * vez de saltar de golpe al reiniciar: sube a 0.06 en el primer 8% del
+ * ciclo (muy tenue a propósito — con `mix-blend-overlay` un valor más alto
+ * se ve demasiado blanco/marcado y pierde el efecto sutil original), se
+ * mantiene ahí, y baja a 0 en el último 8% antes de reiniciar. Detenida
+ * por completo con `motion-reduce:animate-none` en el propio componente
+ * (que en ese caso aplica
+ * `motion-reduce:opacity-[0.06] motion-reduce:-translate-y-1/2` como
+ * reemplazo estático de lo que normalmente controla este keyframe). */
 /* Brillo animado del título "GENERACIONES" en el hero de /generaciones
  * (GenerationsHero.tsx) — degradado de 4 tonos de la marca (#508A8C,
  * #58978F, #266C62, #00545E) recortado al texto (`background-clip: text`),
@@ -150,17 +159,17 @@ body {
 
 @keyframes generations-legado-drift {
   0% {
-    transform: translateX(0);
+    transform: translateY(-50%) translateX(0);
     opacity: 0;
   }
   8% {
-    opacity: 0.05;
+    opacity: 0.06;
   }
   92% {
-    opacity: 0.05;
+    opacity: 0.06;
   }
   100% {
-    transform: translateX(-6%);
+    transform: translateY(-50%) translateX(-6%);
     opacity: 0;
   }
 }
