@@ -25,8 +25,8 @@ Playwright (e2e).
 ```
 app/
 ├─ layout.tsx                 Shell raíz — fonts (Figtree/Petrona), metadata OG, sin auth
-├─ (public)/layout.tsx        revalidate=60, Header+Footer+WhatsAppButton, sin auth
-├─ (public)/…                 15 páginas públicas (incluye /oraciones/[slug])
+├─ (public)/layout.tsx        revalidate=60, Header+Footer+ContactFAB, sin auth
+├─ (public)/…                 18 páginas públicas (incluye /oraciones/[slug])
 ├─ auth/confirm/page.tsx      Callback de invitación de staff (token en fragmento #, no PKCE)
 └─ admin/
    ├─ layout.tsx              Solo aplica [data-admin-theme]; NO hace auth
@@ -36,7 +36,7 @@ app/
       └─ …                    33 páginas del CMS
 ```
 
-52 `page.tsx` en total (15 público, 1 callback de auth, 3 admin-auth, 33
+55 `page.tsx` en total (18 público, 1 callback de auth, 3 admin-auth, 33
 admin-dashboard). Inventario completo de rutas admin: `/admin` (dashboard),
 `inicio`, `nosotros`, `primera-vez`, `contacto` (config general — antes
 `configuracion`, que ahora solo redirige por compatibilidad), `predicas`,
@@ -47,7 +47,13 @@ filtrados por tag `PRAYER_TOPIC`, no es tabla propia), `medios`,
 grupo + fichas de "Primera vez"), cada módulo de contenido con `nuevo` y
 `[id]` cuando aplica. Público: `/oraciones` (archivo + "Último encuentro")
 gana hermana `/oraciones/[slug]` (página individual propia, no comparte
-ruta con `/predicas/[slug]` — ver sección "Página Oraciones").
+ruta con `/predicas/[slug]` — ver sección "Página Oraciones"). Rutas
+públicas nuevas desde la última actualización de este archivo:
+`/generaciones` (pilar de ministerios por edad, rediseño editorial
+completo — ver sección propia más abajo), `/donaciones` ("próximamente",
+enlazada desde el Footer y el menú principal) y `/politica-de-privacidad`
+(muestra embebido el PDF que el admin sube en `/admin/contacto` — ver
+sección "Política de privacidad").
 
 **Auth gate real** — vive en `app/admin/(dashboard)/layout.tsx`, no en
 `app/admin/layout.tsx`: pide `supabase.auth.getUser()`, si no hay user
@@ -143,16 +149,25 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-23 migraciones en `supabase/migrations/`, 001 a 023 (`018` agregó
+26 migraciones en `supabase/migrations/`, 001 a 026 (`018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
 `sermons.featured`; `021` agregó `sermons.meeting_type`; `022` agregó 12
 columnas nuevas a `events`; `023` rediseñó `contacts` (canal preferido,
-evento de origen, consentimiento con timestamp) — ver secciones "Página
-Nosotros", "Página Grupos", "Página Prédicas", "Página Oraciones", "Página
-Eventos" y "Página Contacto" más abajo, y la tabla de `supabase/README.md`,
-ya actualizada). Ver ese archivo para el detalle migración por migración, el bootstrap del primer
-admin, y la auditoría de RLS completa (Fase 12).
+evento de origen, consentimiento con timestamp); `024` agregó recurrencia
+mensual a `schedules`; `025` agregó `events.promo_video_url`; `026` creó el
+bucket de Storage `documents` para la política de privacidad en PDF — ver
+secciones "Página Nosotros", "Página Grupos", "Página Prédicas", "Página
+Oraciones", "Página Eventos", "Página Contacto", "Horarios — recurrencia
+mensual", "Video promocional en Eventos" y "Política de privacidad" más
+abajo, y la tabla de `supabase/README.md`, ya actualizada). Ver ese archivo
+para el detalle migración por migración, el bootstrap del primer admin, y
+la auditoría de RLS completa (Fase 12). **Todas las migraciones 018–026 se
+aplicaron a producción a mano vía el SQL Editor de Supabase** (el entorno
+de desarrollo no tiene el CLI de Supabase enlazado — `supabase login`
+requeriría un Personal Access Token que no existe en este proyecto; ver
+nota en "Estado del proyecto y pendientes" si se quiere automatizar esto a
+futuro).
 Resumen de lo no cubierto ahí:
 
 - Patrón de RLS confirmado con spot-checks: tablas de contenido (`sermons`,
@@ -170,6 +185,13 @@ Resumen de lo no cubierto ahí:
   Subida real ocurre directo del navegador al bucket con el cliente
   `anon`; una Server Action en `lib/actions/media.ts` guarda los metadatos
   en `media` después.
+- Sexto bucket, `documents` (`026`): público de lectura, solo
+  `application/pdf`, 10 MB. **Escritura restringida a `is_admin()`** (no
+  `is_editor_or_admin()` como los otros cinco) porque el único consumidor
+  hoy es `/admin/contacto`, que ya es `adminOnly` en el nav. Sube directo
+  desde el navegador igual que los demás, pero **no** pasa por la tabla
+  `media` — es un único documento legal (`site_settings.privacyPolicyUrl`),
+  no un asset reutilizable de la librería (ver "Política de privacidad").
 
 ## Página Nosotros — rediseño editorial (arquitectura final)
 
@@ -737,21 +759,40 @@ No se creó una tercera implementación de mapas.
 ## Botón flotante de contacto (`ContactFAB`)
 
 Reemplaza el botón fijo de WhatsApp que vivía en `app/(public)/layout.tsx`
-— ahora un solo botón circular (`#D2431B`, ícono de tres puntos vía
-`lucide-react` `MoreHorizontal`/`ellipsis`) se despliega en sub-botones
-apilados verticalmente al hacer clic: correo (`mailto:`, solo si
-`settings.contactEmail` está configurado) y WhatsApp (siempre, reutiliza
-`whatsappLink()` de `lib/constants.ts`, mismo SVG que el componente
-original). Cierra con Escape, clic afuera, o clic de nuevo en el botón
+— un botón circular (`#D2431B`, ícono de tres puntos vía `lucide-react`
+`MoreHorizontal`/`X`) se despliega en sub-botones apilados verticalmente al
+hacer clic. Cierra con Escape, clic afuera, o clic de nuevo en el botón
 principal. `components/public/WhatsAppButton.tsx` **no se tocó** — sigue
 usándose tal cual para el enlace "inline" dentro de `/contacto` (la línea
-"¿Prefieres algo más directo?"), que es un caso de uso distinto.
+"¿Prefieres algo más directo?"), caso de uso distinto.
 
-`site_settings.contactEmail` es un campo nuevo (sin migración — vive en el
-mismo blob JSONB `general` que `whatsappNumber`/`facebookUrl`/etc., sin
-esquema propio) — administrable desde `/admin/contacto` junto al resto de
-la configuración de contacto. Vacío por defecto; si no se configura, el
-FAB simplemente no muestra la opción de correo (nunca un `mailto:` roto).
+**Rediseñado en esta sesión — ahora muestra todas las redes sociales, no
+solo correo/WhatsApp.** `ContactFAB` recibe `facebookUrl`/`instagramUrl`/
+`tiktokUrl`/`xUrl`/`youtubeUrl` desde `app/(public)/layout.tsx` (los mismos
+campos de `site_settings` que ya alimentan `SocialLinks` en el Footer) y
+construye una lista de opciones (correo → WhatsApp → Facebook → Instagram
+→ TikTok → X → YouTube, cada una `&&` condicional sobre si el dato existe)
+en vez de dos bloques hardcodeados. Los íconos de cada red (`FacebookIcon`,
+`InstagramIcon`, `TikTokIcon`, `XIcon`, `YouTubeIcon`) se **exportaron**
+desde `SocialLinks.tsx` (antes privados a ese archivo) para reutilizarlos
+aquí sin duplicar el SVG — cada uno ahora acepta un `className` opcional
+para el tamaño, con el color fijado vía atributo `fill`/`stroke`
+`currentColor` directo en el SVG (no una clase Tailwind `fill-current`),
+así el llamador puede cambiar el tamaño sin perder el color.
+
+**Un solo diseño, no el color de marca de cada red.** Todas las opciones
+comparten el mismo círculo (`ABOUT_COLORS.tealLight`, `#508A8C`) en vez del
+azul de Facebook/rosa de Instagram/etc. — la marca solo vive en el ícono.
+Cada opción lleva una etiqueta de texto a la izquierda (Montserrat
+Alternates, `9px`, color `#AFD6D3`) para identificarla sin depender del
+ícono solo. Orden de abajo hacia arriba (más cerca del botón principal →
+más lejos): WhatsApp, Instagram, TikTok, Facebook, YouTube, X, Correo.
+
+`site_settings.contactEmail` sigue siendo el mismo campo (sin migración,
+blob JSONB `general`) — administrable desde `/admin/contacto`. Vacío por
+defecto; si no se configura, el FAB simplemente no muestra la opción de
+correo (nunca un `mailto:` roto) — mismo criterio para cada red social si
+su URL no está configurada.
 
 ## Ajustes puntuales en Inicio (post-Contacto)
 
@@ -790,6 +831,262 @@ que vale la pena conocer antes de seguir editando esa página:
   error visible en logs. Corregido desde `/admin/inicio`, no en código. Si
   "En vivo" vuelve a no aparecer con el canal transmitiendo, revisar ese
   campo antes que el código.
+
+## Logo y color de marca (`#508A8C`)
+
+El logo (`public/logo.png`, `public/logo-square.png`, `app/icon.png`,
+`app/apple-icon.png`) se reemplazó por el diseño nuevo del usuario,
+recoloreado de negro a `#508A8C` (`ABOUT_COLORS.tealLight`) preservando el
+alpha/anti-aliasing original — procesado con `sharp` (recolor por
+`RGB=target` + alpha original tal cual, sin tocar la forma). Las versiones
+cuadradas (`logo-square.png`/`icon.png`/`apple-icon.png`) son **planas, sin
+halo ni resplandor** — se probó un halo blanco de contraste para el
+favicon y se quitó a pedido explícito ("ningún logo debe tener efectos").
+El texto "Inspira Church" del Header (junto al logo) también pasa de
+blanco a `#508A8C`. El botón "Generaciones" del Header (ver abajo) ya usa
+ese mismo color. La paleta de "Tres pasos" en Inicio (`app/(public)/
+page.tsx`) se fijó a 3 colores propios en vez de `CAMPAIGN_COLORS`
+rotativo — ver commit `ad2cd9b` para los valores exactos si se necesita
+retocar.
+
+## Header — botón "Generaciones" (reemplaza "Planea tu visita" ahí)
+
+El botón del Header que antes decía "Planea tu visita" (→ `/contacto`)
+ahora dice **"Generaciones"** y lleva a `/generaciones`, con ícono
+`Users` de `lucide-react` y fondo `ABOUT_COLORS.tealLight` en vez del
+coral estándar — deliberadamente distinto de los demás CTA del sitio.
+**Alcance acotado a propósito**: el CTA "Planea tu visita" de Inicio
+(`app/(public)/page.tsx`, sección Bienvenida) **no se tocó** y sigue
+apuntando a `/contacto` — la decisión del usuario fue "el del header", no
+todos los usos del texto. `NAV_LINKS` (`lib/constants.ts`) ganó
+"Donaciones" al final (después de "Contacto") — ese sí es un ítem normal
+del menú, sin estilo especial; aparece tanto en el nav de escritorio/móvil
+del Header como en la lista "Explora" del Footer (mismo array, sin
+duplicar datos). `Footer.tsx` ganó el ícono `HandCoins` en `NAV_ICONS`
+para esa entrada.
+
+## Página Donaciones
+
+`/donaciones` — página "próximamente" con la misma identidad cartel que
+Generaciones (Eyebrow, `PosterHeading`-style, sección "Muy pronto", CTA a
+`/contacto`). Enlazada de forma discreta desde el Footer (barra inferior,
+junto a "Política de privacidad") y desde `NAV_LINKS` (ver arriba). Sin
+tabla ni migración propia — es contenido 100% estático en código, como
+Generaciones lo era antes de su rediseño de esta sesión.
+
+## Página Generaciones — rediseño editorial completo (arquitectura final)
+
+`/generaciones` pasó de un "próximamente" de 3 secciones a una experiencia
+editorial de **13 secciones narrativas**, cada una su propio componente en
+`components/public/` con el prefijo `Generations*`: `GenerationsHero`,
+`GenerationsVision`, `GenerationsLegacy`, `GenerationsAreas`,
+`GenerationsJourney`, `GenerationsRatio`, `GenerationsAltar`,
+`GenerationsFamilies`, `GenerationsNextDate`, `GenerationsRhythm`,
+`GenerationsSafety`, `GenerationsFAQ`, `GenerationsCTA`, compuestos en
+`app/(public)/generaciones/page.tsx`. Presenta Generaciones como el pilar
+de ministerios por edad (niños/jóvenes descubriendo dones y sirviendo),
+con el mismo sistema cartel del resto del sitio (negro, Anton, coral,
+`ABOUT_COLORS`) y usando **el `Container` real compartido** (no un ancho
+propio) — el usuario pidió explícitamente cuidar los márgenes; reusar
+`Container` los deja consistentes con el resto de páginas sin esfuerzo
+extra.
+
+**Iteración: prototipo primero, código real después, a pedido explícito.**
+El usuario pidió primero "una página de ejemplo sin tocar el código
+actual" — se construyó como un Artifact HTML autocontenido (sistema visual
+Cartel replicado en CSS puro + Google Fonts Anton/Hind), se iteró ahí
+(corrección de márgenes edge-to-edge), y **solo después** de su aprobación
+("reemplaza esto la página generaciones con el código que acabas de
+crear") se migró a componentes React reales. El artifact prototipo no
+forma parte del repo — es una referencia visual externa, no una fuente de
+verdad de código.
+
+**Sin fotos reales todavía — mismo patrón de placeholder que Hero.tsx.**
+`components/public/GenerationsPhotoSlot.tsx` es el helper compartido:
+acepta `photoUrl?: string | null` (para cuando exista integración real con
+`media`) y si es `null` muestra un degradado con el color de la sección +
+etiqueta de texto ("Foto — niños y jóvenes sirviendo", etc.) — igual que
+`PLACEHOLDER_SLIDES` en `Hero.tsx` para el hero de Inicio. Nunca una foto
+inventada ni un `<img>` roto.
+
+**Reveal en scroll, reutilizado, no reinventado.** `components/public/
+Reveal.tsx` es un wrapper genérico nuevo alrededor de `useScrollReveal`
+(el mismo hook que ya usan `AboutHero`/`PastoralTeam`/`LeadershipMosaic`)
+para no repetir el hook a mano en cada bloque suelto de las 13 secciones.
+`GenerationsJourney` (línea de progreso de 4 etapas) y `GenerationsRhythm`
+(palabra activa entre Prepárate/Practica/Sirve/Crece) usan su propio
+`IntersectionObserver` en vez de `Reveal`/`useScrollReveal` porque
+necesitan saber *cuántos* elementos están activos o hacer *toggle* (no
+solo "una vez visible, se queda así") — documentado inline en cada
+archivo. **Gotcha real encontrado**: la regla de lint `react-hooks/
+set-state-in-effect` (parte del set de reglas "React Compiler" que ya usa
+este proyecto) prohíbe llamar `setState` de forma síncrona como primera
+instrucción de un efecto — el patrón correcto es un *lazy initializer* de
+`useState(() => ...)` que llama a una función de verificación aparte (no
+un `ref`, esa regla también prohíbe leer `ref.current` durante el render)
+para el estado inicial, y el efecto solo se salta el `IntersectionObserver`
+si ese valor inicial ya lo hace innecesario (`prefers-reduced-motion`) —
+ver `prefersReducedMotion()` en `GenerationsJourney.tsx`/`GenerationsRhythm.tsx`
+como referencia si se repite este patrón en otro componente.
+
+**Detalle de área vía `<dialog>` nativo, mismo patrón que la biografía de
+`PastoralTeam.tsx`.** `GenerationsAreas` (el mosaico "Descubre tu lugar",
+9 áreas de servicio en grilla asimétrica con Tailwind `col-span`/
+`row-span`) usa un único `<dialog>` compartido con estado `selected` (no
+9 diálogos independientes) — al tocar una tarjeta, `showModal()` con los
+datos de esa área (edad sugerida, horario, práctica, propósito — texto
+literal de la documentación que dio el usuario, nada inventado). El FAQ
+(`GenerationsFAQ`) reutiliza el mismo acordeón `grid-rows-[0fr]/[1fr]` +
+`aria-expanded`/`aria-controls` de `BeliefsAccordion.tsx`.
+
+**Datos sin definir → estados neutros, nunca inventados.** "Próximo
+Generaciones" (`GenerationsNextDate`) no tiene fecha real todavía → muestra
+"Próxima fecha muy pronto" en vez de una fecha falsa. "Guía para padres" y
+"Lineamientos de cuidado" (`GenerationsFamilies`/`GenerationsSafety`) no
+tienen documento real todavía → botones deshabilitados con nota explicando
+que se activan solos cuando exista el enlace real — nunca un link muerto.
+"Inscríbete en Generaciones" (`GenerationsCTA`) lleva a `/contacto` por
+ahora, no a un formulario de inscripción propio.
+
+**Pendiente real, marcado explícitamente para consulta humana antes de
+construirlo:** un flujo de inscripción real recolectaría datos de
+**menores de edad** (nombre, edad, colegio, alergias, contacto de
+emergencia) — antes de crear cualquier tabla o política RLS para esto hace
+falta decidir con el usuario: ¿tabla nueva o reutilizar alguna existente?,
+¿quién en Admin puede leerla (solo `is_admin()`, o también
+`is_editor_or_admin()`)?, ¿cómo se separa la autorización de tratamiento
+de datos de la autorización de uso de imagen? Ninguna de estas decisiones
+se tomó todavía — no existe ninguna tabla, RLS ni Server Action para
+inscripciones de Generaciones en el repo.
+
+**Otro pendiente real, más simple**: fotos reales, "Próxima fecha", "Guía
+para padres" y "Lineamientos de cuidado" siguen sin ningún dato — hoy se
+ven bien (placeholder/estado neutro), pero conectarlos a Admin de verdad
+(nuevos módulos de `media`, un campo de fecha en `site_settings` o una
+tabla propia, subida de PDF reutilizando el patrón de "Política de
+privacidad" de abajo) es trabajo aparte, no incluido en este rediseño.
+
+## Página Prédicas — corrección: grabaciones de oración se colaban
+
+**Bug real encontrado y corregido, en dos lugares.** Las grabaciones de
+oración (tema `PRAYER_TOPIC`) deben aparecer solo en `/oraciones` y
+`/admin/oraciones`, nunca en `/predicas` ni `/admin/predicas` — pero dos
+consultas no aplicaban el filtro `excludePrayerTopic` que sí usa el resto
+de `lib/queries/sermons.ts`:
+1. `getLatestSermon()` (usada para "Último mensaje" en `/predicas`) tomaba
+   la prédica publicada más reciente por fecha sin filtrar el tema — si la
+   grabación de oración más reciente era justo lo último publicado,
+   aparecía ahí. Corregido: ahora trae `limit(10)` filas ordenadas por
+   fecha y descarta las de tema oración antes de elegir la primera.
+2. `app/admin/(dashboard)/predicas/page.tsx` seleccionaba **todas** las
+   filas de `sermons` sin filtrar — a diferencia de `/admin/oraciones`,
+   que sí filtra (al revés, incluyéndolas). Corregido con el mismo
+   criterio invertido, mismo helper de comparación case-insensitive que ya
+   usa `/admin/oraciones`.
+
+## Horarios — recurrencia mensual (`schedules.recurrence`)
+
+Un horario en `/admin/horarios` ya no está limitado a "cada semana" —
+puede marcarse como recurrencia mensual (ej. "Reunión de Generaciones, el
+último domingo de cada mes"). Migración `024_schedules_recurrence.sql`:
+enum `schedule_recurrence` ('weekly'|'monthly', default 'weekly') +
+`schedules.monthly_week` (nullable, `1`/`2`/`3`/`4` = primera–cuarta
+semana, `-1` = última semana del mes, sin importar si tiene 4 o 5). El
+formulario (`ScheduleForm.tsx`) muestra un selector "¿Qué semana del mes?"
+solo cuando `recurrence = 'monthly'`. `lib/format.ts` gana
+`scheduleDayLabel(dayOfWeek, recurrence, monthlyWeek)` — "Domingo" para
+semanal, "Último domingo de cada mes" para mensual — usado en el listado
+de Admin, Inicio y `/oraciones` en vez de `dayName()` a secas (que sigue
+usándose tal cual para Grupos, que no tiene este concepto). `lib/queries/
+schedules.ts` (`getActiveSchedules()`) selecciona los dos campos nuevos.
+
+## Eventos — video promocional de YouTube
+
+`events.promo_video_url` (migración `025_events_promo_video.sql`, text
+nullable) — un evento puede tener un video promocional opcional, editable
+desde `/admin/eventos` (`EventForm.tsx`, campo "Video promocional
+(YouTube)", validado como URL). En `/eventos/[slug]` se muestra una
+sección "Video promocional" (título grande centrado, `anton`, coral) que
+reutiliza `LazySermonVideo` tal cual (mismo componente de Prédicas/
+Oraciones, miniatura + Play hasta el clic) — **la sección entera no se
+renderiza si el campo está vacío**, nunca un reproductor roto.
+
+## Política de privacidad — ahora se sube como PDF, no como link
+
+Antes `site_settings.privacyPolicyUrl` era un campo de texto donde el
+admin pegaba a mano un link externo. Ahora es un **PDF subido** desde
+`/admin/contacto` (`components/admin/DocumentUploadField.tsx`, nuevo,
+mismo patrón de subida directa navegador→Storage que `ImageUploadField`
+pero **sin pasar por la tabla `media`** — es un único documento legal, no
+un asset reutilizable de la librería). El campo `privacyPolicyUrl` en
+`site_settings` sigue llamándose igual y sigue siendo una URL — solo que
+ahora esa URL es la del archivo en el bucket `documents` (ver arriba) en
+vez de un link pegado a mano; ningún otro código tuvo que cambiar de
+nombre de campo.
+
+**Se muestra dentro del sitio, no como archivo crudo.** Nueva página
+`/politica-de-privacidad` (con Header/Footer normales) embebe el PDF vía
+`<iframe>` — si no hay `privacyPolicyUrl` configurado, muestra un mensaje
+neutro en vez de una página vacía o rota. Los 5 lugares que antes
+enlazaban directo a `privacyPolicyUrl` (Footer × 2 enlaces, y los
+formularios de Contacto/Oración/Grupos/Primera vez que piden
+consentimiento) ahora enlazan a `/politica-de-privacidad` en su lugar —
+así el visitante nunca sale del sitio a ver un PDF crudo sin la marca de
+Inspira Church. **Gotcha real**: hubo que agregar `https://*.supabase.co`
+a la directiva `frame-src` de la CSP en `next.config.ts` — sin eso, el
+`<iframe>` que apunta al PDF en Supabase Storage queda bloqueado en
+silencio por el navegador (nada en consola aparte del error de CSP).
+
+## Librería de medios (Admin) — agrupada por página, con miniaturas
+
+`/admin/medios` pasó de una sola grilla de tarjetas grandes sin orden a
+miniaturas pequeñas **agrupadas por la página del sitio a la que
+pertenecen** (Inicio, Nosotros, Primera vez, Prédicas y series, Equipo,
+Grupos, Eventos, y un grupo "Otros" para lo que no encaje). La agrupación
+usa el campo `media.module` que ya se guardaba en cada subida (los slides
+del hero de Inicio son `hero-slide-N`, Nosotros usa `nosotros-hero`/
+`nosotros-essence`, Primera vez usa `primera-vez-hero`; el resto de
+buckets sin `module` explícito caen al nombre del bucket — `sermons`,
+`pastors`, `events`, `groups`) — la función `pageGroup(bucket, module)` en
+`app/admin/(dashboard)/medios/page.tsx` mapea esos valores a la etiqueta
+de página, sin ningún campo ni migración nueva. El botón de borrar pasó de
+texto a un ícono `Trash2` que aparece solo al pasar el mouse sobre la
+miniatura.
+
+## Formularios (Admin) — ahora se pueden eliminar
+
+`/admin/formularios` (Contactos, Solicitudes de grupo, Primera vez) ganó
+botón "Eliminar" en cada fila (`ConfirmForm` + Server Action, mismo patrón
+exacto que ya usaban Eventos/Prédicas/Oración). `lib/actions/inbox.ts`
+gana `deleteContact`, `deleteGroupJoinRequest`, `deleteFirstTimeConnection`
+— cada una con `logAudit()`, siguiendo el patrón ya establecido por
+`deletePrayerRequest`. **No hizo falta ninguna migración**: las políticas
+`contacts_delete_staff`, `group_join_requests_delete_staff` y
+`first_time_connections_delete_staff` (`is_editor_or_admin()`) ya existían
+desde `008_forms.sql`/`017_first_time_connections.sql` — el hueco era solo
+de UI, no de seguridad. (Peticiones de oración ya tenían su botón "Borrar
+definitivamente" desde antes, gateado a `isAdmin` — sin cambios ahí.)
+
+## Retoques visuales puntuales (Nosotros, Liderazgo)
+
+- **Contorno oscuro en texto sobre foto**: `EssenceStatement.tsx` (sección
+  "foto" de Nosotros, "Amamos a Dios, amamos a las personas") tenía solo
+  una sombra suave que no bastaba para leerse sobre partes claras de la
+  foto de fondo — se reforzó con un contorno negro sólido en las 4
+  direcciones + resplandor, vía `text-shadow` con múltiples capas
+  (Tailwind arbitrary value, no una clase nueva).
+- **Mosaico de liderazgo con rotación automática**: `LeadershipMosaic.tsx`
+  ("Lideramos sirviendo") — antes el elemento "grande" del mosaico era
+  siempre el mismo (índice `i % 4 === 0` fijo); con menos de 4 líderes
+  activos esa fórmula a veces no le tocaba a nadie ser grande (bug real,
+  encontrado con los 3 líderes reales de producción). Ahora los **cuadros
+  son fijos** (tamaño/posición/color por posición nunca cambian, el slot 0
+  siempre es el grande) y **el contenido rota** cada 12s entre los
+  líderes disponibles (sin repetir a nadie, tipo "sillas musicales"),
+  con un disolvido lento de 4s que atenúa hasta 12% de opacidad antes de
+  cambiar la foto — así el momento del cruce queda oculto y nunca se ve
+  brusco. Respeta `prefers-reduced-motion` (sin rotación si el usuario lo
+  prefiere).
 
 ## Servicios externos
 
@@ -830,15 +1127,32 @@ oración fuera de Prédicas hacia `/oraciones`, la ficha de conexión "Déjanos
 tus datos" de Primera vez (migración 017, tabla `first_time_connections`,
 bandeja en `/admin/formularios`), el rediseño contemplativo de Oraciones
 con página individual `/oraciones/[slug]` y `sermons.meeting_type`
-(migración 021 — ver sección "Página Oraciones" arriba), el rediseño
-editorial de Eventos con estado calculado por fecha, cuenta regresiva,
-inscripción, información práctica y ubicación (migración 022 — ver sección
-"Página Eventos" arriba), el rediseño de Contacto con canal preferido,
-formulario dinámico según motivo (redirige a Oración/Grupos en vez de
-duplicar) y contexto de evento de origen (migración 023 — ver sección
-"Página Contacto" arriba), y una serie de ajustes visuales puntuales en
-Inicio — fuente local Gistesy, color fijo en el bloque "¿Eres nuevo?", `<h1>`
-faltante corregido (ver sección "Ajustes puntuales en Inicio" arriba).
+(migración 021), el rediseño editorial de Eventos con estado calculado por
+fecha, cuenta regresiva, inscripción, información práctica y ubicación
+(migración 022), y el rediseño de Contacto con canal preferido, formulario
+dinámico según motivo (redirige a Oración/Grupos en vez de duplicar) y
+contexto de evento de origen (migración 023).
+
+**Sesión más reciente (esta), también ya en `main`**: logo recoloreado a
+`#508A8C` sin efectos de brillo (favicon/OG/header/footer incluidos),
+botón "Generaciones" reemplazando "Planea tu visita" en el Header, colores
+fijos nuevos en "Tres pasos" e "Bienvenido a Inspira Church" de Inicio,
+recurrencia mensual en Horarios (migración 024), video promocional
+opcional en Eventos (migración 025), corrección de dos huecos donde
+grabaciones de oración se colaban en Prédicas (`getLatestSermon()` y el
+listado de `/admin/predicas`), refuerzo de contraste de texto en
+`EssenceStatement` (Nosotros), rediseño de `LeadershipMosaic` con rotación
+automática de fotos (cuadros fijos, contenido rota, disolvido de 4s cada
+12s — corrigiendo además un bug real donde podía no haber ninguna foto
+"grande" con menos de 4 líderes), redes sociales completas en `ContactFAB`
+(antes solo correo/WhatsApp), Política de privacidad migrada de link
+externo a PDF subido y embebido en `/politica-de-privacidad` (bucket
+`documents`, migración 026), rediseño de la librería de medios agrupada
+por página, capacidad de eliminar en Contactos/Solicitudes de
+grupo/Primera vez, páginas nuevas `/donaciones` (próximamente) y el
+rediseño editorial completo de `/generaciones` (13 secciones, ver sección
+"Página Generaciones" arriba) — ver detalle de cada uno en sus secciones
+correspondientes arriba y `git log` para los commits exactos.
 
 **Nota operativa**: `.claude/launch.json` tiene `autoPort: true` en la
 config `inspira-church-dev` porque han corrido varias sesiones de Claude
@@ -859,12 +1173,13 @@ revisar qué puerto tomó antes de asumir que está caído.
 4. Confirmar con el equipo pastoral si el Editor debe leer peticiones de
    oración privadas (`prayer_requests.is_private`).
 5. Revisión legal del texto de consentimiento de datos (Ley 1581 de 2012,
-   Colombia) en los formularios públicos — pendiente desde la Fase 12.
-   Confirmado en esta sesión: `site_settings.privacyPolicyUrl` hoy apunta a
-   `https://inspirachurch.com/privacidad-prueba` — un valor de prueba, no
-   la política real. Actualizarlo desde `/admin/contacto` en cuanto exista
-   la URL definitiva (los tres formularios públicos — Contacto, Oración,
-   Grupos — y el footer la toman automáticamente de ese mismo campo).
+   Colombia) en los formularios públicos — pendiente desde la Fase 12. El
+   mecanismo cambió esta sesión (`site_settings.privacyPolicyUrl` ahora es
+   un PDF subido desde `/admin/contacto`, embebido en
+   `/politica-de-privacidad` — ver esa sección arriba), pero **el contenido
+   legal del documento sigue sin confirmar que sea el definitivo** —
+   verificar con el usuario que el PDF actualmente cargado es la política
+   real antes de considerar este punto resuelto.
 6. ~~Nosotros — fotos de marca sin cargar~~ — resuelto: `nosotros-hero` y
    `nosotros-essence` ya tienen foto real subida desde `/admin/nosotros`,
    confirmado en vivo en `/nosotros` tras aplicar la migración `018`.
@@ -886,6 +1201,27 @@ revisar qué puerto tomó antes de asumir que está caído.
 10. El bug de `toRow()` corregido en `lib/actions/events.ts` (campos
     opcionales en `undefined` que `JSON.stringify` omite del payload, así
     que un `update` nunca los vacía aunque el admin borre el campo) tiene la
-    misma forma en varios otros `lib/actions/*.ts` no auditados en esta
-    sesión — vale la pena revisar `sermons.ts`, `growth-groups.ts`,
-    `team-members.ts`, `about.ts` y `sermon-series.ts` por el mismo patrón.
+    misma forma en varios otros `lib/actions/*.ts` no auditados — vale la
+    pena revisar `sermons.ts`, `growth-groups.ts`, `team-members.ts`,
+    `about.ts` y `sermon-series.ts` por el mismo patrón.
+11. **Generaciones — inscripción real, requiere decisión humana antes de
+    tocar Supabase.** `/generaciones` (rediseño de esta sesión) todavía no
+    tiene un formulario de inscripción propio — "Inscríbete en
+    Generaciones" enlaza a `/contacto`. Un formulario real recolectaría
+    datos de **menores de edad** (nombre, edad, colegio, alergias, contacto
+    de emergencia) y necesita, antes de crear cualquier tabla/política RLS:
+    decidir si reutiliza alguna tabla existente o crea una nueva, quién en
+    Admin puede leerla (`is_admin()` vs. `is_editor_or_admin()`), y cómo se
+    separa el consentimiento de tratamiento de datos del de uso de imagen.
+    Ver sección "Página Generaciones" arriba.
+12. Generaciones — fotos reales, "Próxima fecha", "Guía para padres" y
+    "Lineamientos de cuidado" siguen sin contenido real (todos con estado
+    neutro/deshabilitado a propósito, nunca inventado) — conectarlos exige
+    nuevos módulos de `media`/`site_settings` o subida de PDF (mismo patrón
+    que Política de privacidad), trabajo aparte no incluido en el rediseño.
+13. Discrepancia de logo reportada por el usuario durante esta sesión
+    ("sigo viendo el mismo [logo]") nunca se confirmó resuelta con
+    evidencia visual en vivo — el código y los archivos en el repo ya
+    reflejan el logo nuevo (`#508A8C`, sin brillo), pero si se reporta de
+    nuevo, sospechar primero de caché del navegador/CDN antes que del
+    código.
