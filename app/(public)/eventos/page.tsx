@@ -10,10 +10,15 @@ import { getPublishedEvents } from "@/lib/queries/events";
 import { cn } from "@/lib/utils";
 import type { ChurchEvent } from "@/types/content";
 
+const TITLE = "Eventos | Inspira Church";
+const DESCRIPTION =
+  "Descubre lo que viene, encuentra tu próximo espacio para conectar y sé parte de lo que Dios está haciendo en nuestra comunidad.";
+
 export const metadata: Metadata = {
-  title: "Eventos | Inspira Church",
-  description:
-    "Descubre lo que viene, encuentra tu próximo espacio para conectar y sé parte de lo que Dios está haciendo en nuestra comunidad.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/eventos" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/eventos", type: "website" },
 };
 
 export default async function EventsPage() {

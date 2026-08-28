@@ -9,10 +9,15 @@ import { getPublishedEventBySlug } from "@/lib/queries/events";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Contacto | Inspira Church";
+const DESCRIPTION =
+  "Queremos escucharte. Si deseas visitarnos, unirte a un grupo, pedir oración o simplemente saludarnos, estamos aquí para ti.";
+
 export const metadata: Metadata = {
-  title: "Contacto | Inspira Church",
-  description:
-    "Queremos escucharte. Si deseas visitarnos, unirte a un grupo, pedir oración o simplemente saludarnos, estamos aquí para ti.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/contacto" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/contacto", type: "website" },
 };
 
 interface PageProps {

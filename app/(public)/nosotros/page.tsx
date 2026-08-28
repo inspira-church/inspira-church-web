@@ -14,10 +14,15 @@ import { getAboutEssenceImage, getAboutHeroImage } from "@/lib/queries/media";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { getActiveTeamMembers } from "@/lib/queries/team-members";
 
+const TITLE = "Nosotros | Inspira Church";
+const DESCRIPTION =
+  "Historia, misión, visión, valores, creencias y equipo pastoral de Inspira Church.";
+
 export const metadata: Metadata = {
-  title: "Nosotros | Inspira Church",
-  description:
-    "Historia, misión, visión, valores, creencias y equipo pastoral de Inspira Church.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/nosotros" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/nosotros", type: "website" },
 };
 
 export default async function AboutPage() {

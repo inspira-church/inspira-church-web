@@ -8,10 +8,15 @@ import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { getPublicGroups } from "@/lib/queries/growth-groups";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Grupos de crecimiento | Inspira Church";
+const DESCRIPTION =
+  "Encuentra un grupo de crecimiento cerca de ti: filtra por ubicación, día y tipo de grupo.";
+
 export const metadata: Metadata = {
-  title: "Grupos de crecimiento | Inspira Church",
-  description:
-    "Encuentra un grupo de crecimiento cerca de ti: filtra por ubicación, día y tipo de grupo.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/grupos" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/grupos", type: "website" },
 };
 
 export default async function GroupsPage() {

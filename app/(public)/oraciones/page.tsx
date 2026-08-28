@@ -15,10 +15,15 @@ import { getTeamMemberById, getTeamMembersByIds } from "@/lib/queries/team-membe
 import { PRAYER_TOPIC } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Oraciones | Inspira Church";
+const DESCRIPTION =
+  "Un espacio para buscar a Dios juntos, detenernos en Su presencia y hacer de la oración parte de nuestra vida. Revive nuestros encuentros de oración y comparte tu petición.";
+
 export const metadata: Metadata = {
-  title: "Oraciones | Inspira Church",
-  description:
-    "Un espacio para buscar a Dios juntos, detenernos en Su presencia y hacer de la oración parte de nuestra vida. Revive nuestros encuentros de oración y comparte tu petición.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/oraciones" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/oraciones", type: "website" },
 };
 
 const PAGE_SIZE = 9;

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,6 +30,17 @@ import { cn } from "@/lib/utils";
  * SermonCard/EventCard/GroupCard (esos siguen tal cual para sus páginas
  * propias) sino que arma tarjetas propias, solo para Inicio.
  */
+
+const HOME_TITLE = "Inspira Church | Una comunidad que te inspira a crecer";
+const HOME_DESCRIPTION =
+  "Iglesia en Bogotá donde el amor de Dios restaura vidas y transforma familias. Prédicas, grupos de crecimiento, eventos y horarios de reunión.";
+
+export const metadata: Metadata = {
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: { title: HOME_TITLE, description: HOME_DESCRIPTION, url: "/", type: "website" },
+};
 
 /** Día y mes por separado para el bloque de fecha destacado de las tarjetas de evento. */
 function eventDateParts(iso: string) {
@@ -178,7 +190,7 @@ export default async function HomePage() {
             className={cn(gistesy.className, "mt-2 -rotate-1 text-[42px]")}
             style={{ color: ABOUT_COLORS.tealLight }}
           >
-            ¡En <span className="font-bold">Inspira Church</span> siempre habra un lugar para ti!
+            ¡En <span className="font-bold">Inspira Church</span> siempre habrá un lugar para ti!
           </p>
 
           <Link

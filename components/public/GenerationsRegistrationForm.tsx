@@ -26,7 +26,11 @@ export function GenerationsRegistrationForm({ areaOptions }: GenerationsRegistra
 
   if (state.success) {
     return (
-      <div className="border border-white/10 bg-[#0d0d0d] p-8 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="border border-white/10 bg-[#0d0d0d] p-8 text-center"
+      >
         <p className={cn(anton.className, "text-xl uppercase text-white")}>
           ¡Listo! Recibimos la inscripción
         </p>
@@ -99,10 +103,17 @@ export function GenerationsRegistrationForm({ areaOptions }: GenerationsRegistra
         <CartelCheckbox
           name="dataConsent"
           required
+          aria-describedby={state.fieldErrors?.dataConsent ? "data-consent-error" : undefined}
+          aria-invalid={Boolean(state.fieldErrors?.dataConsent)}
           label={
             <>
               Autorizo el tratamiento de los datos personales de mi hijo/a conforme a la{" "}
-              <Link href="/politica-de-privacidad" target="_blank" className="underline hover:text-[#508A8C]">
+              <Link
+                href="/politica-de-privacidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-[#508A8C]"
+              >
                 política de privacidad
               </Link>{" "}
               de Inspira Church.
@@ -110,7 +121,9 @@ export function GenerationsRegistrationForm({ areaOptions }: GenerationsRegistra
           }
         />
         {state.fieldErrors?.dataConsent && (
-          <p className="text-xs text-red-400">{state.fieldErrors.dataConsent}</p>
+          <p id="data-consent-error" className="text-xs text-red-400">
+            {state.fieldErrors.dataConsent}
+          </p>
         )}
         <CartelCheckbox
           name="imageConsent"

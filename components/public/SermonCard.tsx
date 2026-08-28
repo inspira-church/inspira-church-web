@@ -32,15 +32,15 @@ export function SermonCard({
             src={thumbnailUrl}
             alt=""
             fill
-            className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-300 ease-out motion-reduce:transition-none group-hover:scale-105"
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
         )}
         <div
-          className="absolute inset-0 bg-black/0 transition-colors duration-300 ease-out group-hover:bg-black/20"
+          className="absolute inset-0 bg-black/0 transition-colors duration-300 ease-out motion-reduce:transition-none group-hover:bg-black/20"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 ease-out motion-reduce:transition-none group-hover:opacity-100">
           <SermonPlayIndicator />
         </div>
       </div>

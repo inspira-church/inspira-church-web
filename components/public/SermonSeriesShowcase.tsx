@@ -31,14 +31,14 @@ export function SermonSeriesShowcase({ series }: { series: SeriesItem[] }) {
             <Link
               key={item.id}
               href={`/series/${item.slug}`}
-              className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden bg-black p-6 transition-transform duration-300 ease-out hover:-translate-y-1"
+              className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden bg-black p-6 transition-transform duration-300 ease-out motion-reduce:transition-none hover:-translate-y-1"
             >
               {item.cover_image_url ? (
                 <Image
                   src={item.cover_image_url}
                   alt=""
                   fill
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-105"
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 />
               ) : (

@@ -5,9 +5,14 @@ import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Política de privacidad | Inspira Church";
+const DESCRIPTION = "Política de privacidad y tratamiento de datos personales de Inspira Church.";
+
 export const metadata: Metadata = {
-  title: "Política de privacidad | Inspira Church",
-  description: "Política de privacidad y tratamiento de datos personales de Inspira Church.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/politica-de-privacidad" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/politica-de-privacidad", type: "website" },
 };
 
 export default async function PrivacyPolicyPage() {

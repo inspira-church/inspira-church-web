@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ContactFAB } from "@/components/public/ContactFAB";
 import { Footer } from "@/components/public/Footer";
 import { Header } from "@/components/public/Header";
+import { OrganizationJsonLd } from "@/components/public/OrganizationJsonLd";
 import { getSiteSettings } from "@/lib/queries/settings";
 
 /**
@@ -17,6 +18,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
 
   return (
     <div className="flex min-h-full flex-col">
+      <OrganizationJsonLd settings={settings} />
       <Header />
       <main className="flex-1">{children}</main>
       <Footer

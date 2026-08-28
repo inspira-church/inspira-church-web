@@ -39,6 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${siteUrl}/predicas/${sermon.slug}`,
       images: sermon.thumbnail_url ? [{ url: sermon.thumbnail_url }] : undefined,
     },
+    twitter: sermon.thumbnail_url
+      ? { card: "summary_large_image", title: sermon.title, description, images: [sermon.thumbnail_url] }
+      : undefined,
   };
 }
 

@@ -18,11 +18,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const group = await getPublicGroupBySlug(slug);
   if (!group) return {};
   const place = [group.sector, group.locality].filter(Boolean).join(" · ");
+  const title = `${group.name} | ${group.groupType} | Inspira Church`;
+  const description =
+    group.description ||
+    `${group.groupType} · ${dayName(group.dayOfWeek)} ${formatTime(group.timeOfDay)}${place ? ` · ${place}` : ""}.`;
   return {
-    title: `${group.name} | ${group.groupType} | Inspira Church`,
-    description:
-      group.description ||
-      `${group.groupType} · ${dayName(group.dayOfWeek)} ${formatTime(group.timeOfDay)}${place ? ` · ${place}` : ""}.`,
+    title,
+    description,
+    alternates: { canonical: `/grupos/${group.slug}` },
+    openGraph: { title, description, url: `/grupos/${group.slug}`, type: "website" },
   };
 }
 

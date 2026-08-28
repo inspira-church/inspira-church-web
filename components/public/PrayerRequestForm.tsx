@@ -17,7 +17,11 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
 
   if (state.success) {
     return (
-      <div className="rounded-lg border border-border bg-paper-raised p-8 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-lg border border-border bg-paper-raised p-8 text-center"
+      >
         <p className="font-display text-xl font-semibold text-ink">
           Recibimos tu petición
         </p>
@@ -60,9 +64,13 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
         name="request"
         required
         rows={6}
+        aria-describedby={state.fieldErrors?.requestText ? "request-error" : undefined}
+        aria-invalid={Boolean(state.fieldErrors?.requestText)}
       />
       {state.fieldErrors?.requestText && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.requestText}</p>
+        <p id="request-error" className="-mt-3 text-xs text-danger">
+          {state.fieldErrors.requestText}
+        </p>
       )}
 
       <CheckboxField
@@ -73,6 +81,8 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
       <CheckboxField
         name="consent"
         required
+        aria-describedby={state.fieldErrors?.consent ? "consent-error" : undefined}
+        aria-invalid={Boolean(state.fieldErrors?.consent)}
         label={
           privacyPolicyUrl ? (
             <>
@@ -80,6 +90,7 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
               <Link
                 href="/politica-de-privacidad"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="underline hover:text-accent"
               >
                 política de privacidad
@@ -92,7 +103,9 @@ export function PrayerRequestForm({ privacyPolicyUrl }: { privacyPolicyUrl?: str
         }
       />
       {state.fieldErrors?.consent && (
-        <p className="-mt-3 text-xs text-danger">{state.fieldErrors.consent}</p>
+        <p id="consent-error" className="-mt-3 text-xs text-danger">
+          {state.fieldErrors.consent}
+        </p>
       )}
 
       <TurnstileWidget />

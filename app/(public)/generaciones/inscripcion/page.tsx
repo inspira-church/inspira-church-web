@@ -6,9 +6,15 @@ import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { getGenerationsContent } from "@/lib/queries/generations";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Inscríbete en Generaciones | Inspira Church";
+const DESCRIPTION =
+  "Inscribe a tu hijo o hija en Generaciones — el espacio de niños y jóvenes de Inspira Church.";
+
 export const metadata: Metadata = {
-  title: "Inscríbete en Generaciones | Inspira Church",
-  description: "Inscribe a tu hijo o hija en Generaciones — el espacio de niños y jóvenes de Inspira Church.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/generaciones/inscripcion" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/generaciones/inscripcion", type: "website" },
 };
 
 export default async function GenerationsRegistrationPage() {

@@ -19,10 +19,15 @@ import { getSiteSettings } from "@/lib/queries/settings";
 import { getTeamMembersByIds } from "@/lib/queries/team-members";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Prédicas | Inspira Church";
+const DESCRIPTION =
+  "Mensajes para crecer en la fe, conocer más a Jesús y llevar Su Palabra a nuestra vida diaria.";
+
 export const metadata: Metadata = {
-  title: "Prédicas | Inspira Church",
-  description:
-    "Mensajes para crecer en la fe, conocer más a Jesús y llevar Su Palabra a nuestra vida diaria.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/predicas" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/predicas", type: "website" },
 };
 
 const PAGE_SIZE = 9;

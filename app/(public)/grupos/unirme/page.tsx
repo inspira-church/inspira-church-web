@@ -8,9 +8,14 @@ import { getPublicGroups } from "@/lib/queries/growth-groups";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Quiero pertenecer a un grupo | Inspira Church";
+const DESCRIPTION = "Cuéntanos un poco de ti y te conectamos con un grupo de crecimiento.";
+
 export const metadata: Metadata = {
-  title: "Quiero pertenecer a un grupo | Inspira Church",
-  description: "Cuéntanos un poco de ti y te conectamos con un grupo de crecimiento.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/grupos/unirme" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/grupos/unirme", type: "website" },
 };
 
 export default async function GroupJoinPage() {

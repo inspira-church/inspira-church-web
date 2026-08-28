@@ -39,7 +39,7 @@ export function FirstTimeConnectionForm({
 
   if (state.success) {
     return (
-      <div className="border border-white/10 bg-black p-8 text-center">
+      <div role="status" aria-live="polite" className="border border-white/10 bg-black p-8 text-center">
         <p className={cn(anton.className, "text-xl uppercase text-white")}>
           ¡Gracias por escribirnos!
         </p>
@@ -92,9 +92,13 @@ export function FirstTimeConnectionForm({
         hint="Máximo 200 caracteres"
         maxLength={200}
         rows={4}
+        aria-describedby={state.fieldErrors?.message ? "message-error" : undefined}
+        aria-invalid={Boolean(state.fieldErrors?.message)}
       />
       {state.fieldErrors?.message && (
-        <p className="-mt-3 text-xs text-red-400">{state.fieldErrors.message}</p>
+        <p id="message-error" className="-mt-3 text-xs text-red-400">
+          {state.fieldErrors.message}
+        </p>
       )}
 
       <CartelRadioGroup
@@ -114,6 +118,8 @@ export function FirstTimeConnectionForm({
       <CartelCheckbox
         name="consent"
         required
+        aria-describedby={state.fieldErrors?.consent ? "consent-error" : undefined}
+        aria-invalid={Boolean(state.fieldErrors?.consent)}
         label={
           privacyPolicyUrl ? (
             <>
@@ -121,6 +127,7 @@ export function FirstTimeConnectionForm({
               <Link
                 href="/politica-de-privacidad"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="underline hover:text-[#FF7F50]"
               >
                 política de privacidad
@@ -132,7 +139,9 @@ export function FirstTimeConnectionForm({
         }
       />
       {state.fieldErrors?.consent && (
-        <p className="-mt-3 text-xs text-red-400">{state.fieldErrors.consent}</p>
+        <p id="consent-error" className="-mt-3 text-xs text-red-400">
+          {state.fieldErrors.consent}
+        </p>
       )}
 
       <TurnstileWidget />

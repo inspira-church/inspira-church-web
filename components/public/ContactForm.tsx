@@ -226,6 +226,7 @@ export function ContactForm({ privacyPolicyUrl, eventContext }: ContactFormProps
                   <Link
                     href="/politica-de-privacidad"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="underline hover:text-[#FF7F50]"
                   >
                     Política de Tratamiento de Datos Personales

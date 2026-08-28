@@ -53,6 +53,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${siteUrl}/eventos/${event.slug}`,
       images: event.imageUrl ? [{ url: event.imageUrl }] : undefined,
     },
+    twitter: event.imageUrl
+      ? { card: "summary_large_image", title: event.name, description, images: [event.imageUrl] }
+      : undefined,
   };
 }
 

@@ -9,10 +9,15 @@ import { getFirstTimeHeroImage } from "@/lib/queries/media";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Primera vez | Inspira Church";
+const DESCRIPTION =
+  "¿Nos visitas por primera vez? Aquí encuentras todo lo que necesitas saber antes de tu visita a Inspira Church.";
+
 export const metadata: Metadata = {
-  title: "Primera vez | Inspira Church",
-  description:
-    "¿Nos visitas por primera vez? Aquí encuentras todo lo que necesitas saber antes de tu visita a Inspira Church.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/primera-vez" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/primera-vez", type: "website" },
 };
 
 const GROWTH_PATH = [

@@ -5,10 +5,15 @@ import { Container } from "@/components/ui/Container";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
+const TITLE = "Donaciones | Inspira Church";
+const DESCRIPTION =
+  "Muy pronto podrás dar tu ofrenda o diezmo en línea de forma segura. Toda la información aquí.";
+
 export const metadata: Metadata = {
-  title: "Donaciones | Inspira Church",
-  description:
-    "Muy pronto podrás dar tu ofrenda o diezmo en línea de forma segura. Toda la información aquí.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/donaciones" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/donaciones", type: "website" },
 };
 
 export default function DonationsPage() {

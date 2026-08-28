@@ -17,9 +17,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const series = await getSermonSeriesBySlug(slug);
   if (!series) return {};
+  const title = `${series.name} | Inspira Church`;
+  const description = series.description ?? `Prédicas de la serie ${series.name} en Inspira Church.`;
   return {
-    title: `${series.name} | Inspira Church`,
-    description: series.description ?? `Prédicas de la serie ${series.name} en Inspira Church.`,
+    title,
+    description,
+    alternates: { canonical: `/series/${series.slug}` },
+    openGraph: { title, description, url: `/series/${series.slug}`, type: "website" },
   };
 }
 

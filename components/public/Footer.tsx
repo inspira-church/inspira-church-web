@@ -166,6 +166,7 @@ export function Footer({
               <Link
                 href="/politica-de-privacidad"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="transition-colors hover:text-[#FF7F50] hover:underline"
               >
                 Política de privacidad
@@ -174,6 +175,7 @@ export function Footer({
               <Link
                 href="/politica-de-privacidad"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="transition-colors hover:text-[#FF7F50] hover:underline"
               >
                 Tratamiento de datos

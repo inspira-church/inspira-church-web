@@ -4,9 +4,14 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getSiteSettings } from "@/lib/queries/settings";
 
+const TITLE = "Petición de oración | Inspira Church";
+const DESCRIPTION = "Cuéntanos por qué quieres que oremos contigo.";
+
 export const metadata: Metadata = {
-  title: "Petición de oración | Inspira Church",
-  description: "Cuéntanos por qué quieres que oremos contigo.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/oracion" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/oracion", type: "website" },
 };
 
 export default async function PrayerPage() {

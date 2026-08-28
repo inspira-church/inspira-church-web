@@ -16,10 +16,15 @@ import { GENERATIONS_PHOTO_MODULES, generationsAreaPhotoModule } from "@/lib/gen
 import { getGenerationsContent } from "@/lib/queries/generations";
 import { getGenerationsMedia } from "@/lib/queries/generations-media";
 
+const TITLE = "Generaciones | Inspira Church";
+const DESCRIPTION =
+  "Un espacio donde niños y jóvenes descubren sus dones, sirven, crecen y encuentran su lugar en la familia de Inspira Church.";
+
 export const metadata: Metadata = {
-  title: "Generaciones | Inspira Church",
-  description:
-    "Un espacio donde niños y jóvenes descubren sus dones, sirven, crecen y encuentran su lugar en la familia de Inspira Church.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/generaciones" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/generaciones", type: "website" },
 };
 
 export default async function GenerationsPage() {
