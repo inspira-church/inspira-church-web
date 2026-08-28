@@ -84,8 +84,11 @@ formularios de arriba, `ContactForm.tsx` y `Footer.tsx`, este último con 2 enla
 transiciones de hover que no lo tenían en `components/public/SermonCard.tsx`,
 `components/public/GroupCard.tsx` y `components/public/SermonSeriesShowcase.tsx`.
 
-**Contenido** — se corrigió una tilde faltante en `app/(public)/page.tsx`
-("habra" → "habrá" en "¡En Inspira Church siempre habrá un lugar para ti!").
+**Contenido** — se intentó corregir una tilde faltante en `app/(public)/page.tsx`
+("habra" → "habrá") y se revirtió: es intencional, la fuente local `Gistesy`
+(`lib/fonts.ts`, usada solo en esa frase) no renderiza bien la "á" acentuada, así
+que el texto se dejó sin tilde a propósito. No tocar sin verificar primero cómo
+se ve esa letra con Gistesy.
 
 ### Verificación
 
@@ -132,7 +135,8 @@ expuestos en el repositorio, service role key nunca usada en cliente.
    `rel="noopener noreferrer"`.
 9. Faltaba `motion-reduce:` en 3 componentes con animación de hover
    (`SermonCard`, `GroupCard`, `SermonSeriesShowcase`).
-10. Tilde faltante en un texto de la portada.
+10. ~~Tilde faltante en un texto de la portada~~ — descartado: es intencional
+    (ver nota de la fuente `Gistesy` en la sección 2).
 11. **No corregido — requiere decisión/acceso externo**: el Hero de la portada
     (`components/public/Hero.tsx`) usa `<img>` en vez de `next/image` para las
     fotos (con un comentario explicando que es por la URL dinámica de Supabase
