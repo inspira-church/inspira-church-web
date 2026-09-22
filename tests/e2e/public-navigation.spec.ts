@@ -57,4 +57,31 @@ test.describe("Navegación del sitio público", () => {
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });
+
+  test("ContactFAB: los enlaces ocultos no son tabulables cerrado, y sí cuando se abre", async ({ page }) => {
+    await page.goto("/");
+
+    const toggle = page.getByRole("button", { name: "Abrir opciones de contacto" });
+    // Selector por atributo (no getByRole): el enlace vive dentro de un
+    // contenedor aria-hidden mientras el FAB está cerrado, y getByRole
+    // respeta el árbol de accesibilidad — no lo encontraría en ese estado.
+    const whatsapp = page.locator('a[aria-label="WhatsApp"][href*="wa.me"]');
+
+    await expect(whatsapp).toHaveAttribute("tabindex", "-1");
+
+    await toggle.click();
+    await expect(whatsapp).toHaveAttribute("tabindex", "0");
+    await expect(whatsapp).toBeVisible();
+
+    await page.getByRole("button", { name: "Cerrar opciones de contacto" }).click();
+    await expect(whatsapp).toHaveAttribute("tabindex", "-1");
+  });
+
+  test("Hero: los controles del carrusel siguen cambiando de slide", async ({ page }) => {
+    await page.goto("/");
+
+    const dot2 = page.getByRole("button", { name: "Ver foto/video 2" });
+    await dot2.click();
+    await expect(dot2).toHaveClass(/(?:^|\s)bg-white(?:$|\s)/);
+  });
 });

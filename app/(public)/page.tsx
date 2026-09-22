@@ -250,7 +250,7 @@ export default async function HomePage() {
                 href: "/grupos",
               },
               {
-                color: "#00545E",
+                color: "#508A8C",
                 num: "03",
                 step: "Paso 3",
                 title: "Crece en la palabra",
@@ -324,6 +324,7 @@ export default async function HomePage() {
           <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
             <Link
               href={prayerRecording ? `/oraciones/${prayerRecording.slug}` : "/oraciones"}
+              aria-label={prayerRecording ? prayerRecording.title : "Ver oraciones"}
               className="group relative block aspect-video overflow-hidden border border-white/10 bg-[#0d0d0d]"
             >
               {prayerRecording?.thumbnail_url ? (

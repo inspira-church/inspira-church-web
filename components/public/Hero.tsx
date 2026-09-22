@@ -232,7 +232,17 @@ export function Hero({ slides, texts }: HeroProps) {
                 aria-label={`Ver foto/video ${i + 1}`}
                 onClick={() => setActive(i)}
                 className={cn(
-                  "h-1.5 w-1.5 rounded-full transition-colors",
+                  // El punto visual se queda en 6px (h-1.5 w-1.5). El ::before
+                  // amplía el área táctil real sin mover el layout ni cambiar
+                  // la apariencia (WCAG 2.5.8) — se expande a 24px de alto
+                  // (sin vecinos verticales), pero solo hasta el punto medio
+                  // del espacio horizontal a cada lado (2px) para no invadir
+                  // el área del punto contiguo: con gap-1.5 (6px) entre
+                  // puntos de 6px, expandir más causaría que el punto
+                  // siguiente "robe" el clic del anterior por orden de
+                  // pintado. Con 5 puntos a 12px de separación no es posible
+                  // alcanzar 24x24 completos sin solape real entre vecinos.
+                  "relative h-1.5 w-1.5 rounded-full transition-colors before:absolute before:-inset-x-[2px] before:-inset-y-[9px] before:content-['']",
                   i === active ? "bg-white" : "bg-white/35"
                 )}
               />

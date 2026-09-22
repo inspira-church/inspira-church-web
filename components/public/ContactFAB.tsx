@@ -118,6 +118,7 @@ export function ContactFAB({
       className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5 sm:bottom-8 sm:right-8"
     >
       <div
+        aria-hidden={!open}
         className={cn(
           "flex flex-col items-end gap-2.5 transition-all duration-300 ease-out motion-reduce:transition-none",
           open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
@@ -130,6 +131,7 @@ export function ContactFAB({
             target={external ? "_blank" : undefined}
             rel={external ? "noopener noreferrer" : undefined}
             aria-label={label}
+            tabIndex={open ? 0 : -1}
             className="group flex items-center gap-2"
           >
             <span className={LABEL_CLASSES}>{label}</span>
