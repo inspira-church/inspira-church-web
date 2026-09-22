@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { CAMPAIGN_COLORS, hind } from "@/lib/fonts";
@@ -136,11 +137,17 @@ export function Hero({ slides, texts }: HeroProps) {
                     playsInline
                   />
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL dinámica de Supabase Storage, sin dominio fijo para next/image.
-                  <img
-                    className="h-full w-full object-cover"
+                  // *.supabase.co ya está en images.remotePatterns (next.config.ts) — next/image
+                  // sí puede optimizar esta URL. Solo la slide 0 (la visible al cargar) recibe
+                  // priority: las 5 slides están montadas a la vez (crossfade por opacidad), así
+                  // que sin esto next/image no tiene forma de saber cuál es la crítica para LCP.
+                  <Image
                     src={slide.url}
                     alt={slide.alt ?? ""}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority={i === 0}
                   />
                 )}
               </div>
