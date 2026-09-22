@@ -77,11 +77,27 @@ test.describe("Navegación del sitio público", () => {
     await expect(whatsapp).toHaveAttribute("tabindex", "-1");
   });
 
-  test("Hero: los controles del carrusel siguen cambiando de slide", async ({ page }) => {
+  test("Hero: cada dot activa su propio slide, sin robarle el clic al vecino", async ({ page }) => {
     await page.goto("/");
 
-    const dot2 = page.getByRole("button", { name: "Ver foto/video 2" });
-    await dot2.click();
-    await expect(dot2).toHaveClass(/(?:^|\s)bg-white(?:$|\s)/);
+    // Regresión real encontrada en el Ajuste 1.5: con las áreas táctiles
+    // ampliadas y solapadas, un clic en el dot 1 activaba el dot 2 por
+    // orden de pintado. Se prueban varios dots, no solo uno, para que esto
+    // no pueda repetirse en silencio.
+    for (const n of [1, 3, 5]) {
+      const dot = page.getByRole("button", { name: `Ver foto/video ${n}` });
+      await dot.click();
+      const dotSpan = dot.locator("span");
+      await expect(dotSpan).toHaveClass(/(?:^|\s)bg-white(?:$|\s)/);
+
+      // Ningún otro dot debe quedar marcado como activo al mismo tiempo.
+      for (const other of [1, 2, 3, 4, 5]) {
+        if (other === n) continue;
+        const otherSpan = page
+          .getByRole("button", { name: `Ver foto/video ${other}` })
+          .locator("span");
+        await expect(otherSpan).not.toHaveClass(/(?:^|\s)bg-white(?:$|\s)/);
+      }
+    }
   });
 });

@@ -231,6 +231,13 @@ export default async function HomePage() {
             {[
               {
                 color: "#DE672F",
+                // Foreground del eyebrow/CTA separado del fondo decorativo:
+                // #DE672F sobre su propia tarjeta (30% de opacidad sobre
+                // negro) da 4.22:1, por debajo de 4.5:1. FF7F50 (coral,
+                // mismo token que el acento principal del sitio) sobre ese
+                // mismo fondo da 5.83:1 — misma familia naranja, ya
+                // existente, cumple contraste real (no solo contra negro).
+                textColor: "#FF7F50",
                 num: "01",
                 step: "Paso 1",
                 title: "Conoce nuestra historia",
@@ -241,6 +248,8 @@ export default async function HomePage() {
               },
               {
                 color: "#AFD6D3",
+                // Ya cumple (6.84:1 contra su propio fondo compuesto) — sin
+                // textColor propio, usa el mismo color que el fondo.
                 num: "02",
                 step: "Paso 2",
                 title: "Encuentra tu grupo",
@@ -251,6 +260,11 @@ export default async function HomePage() {
               },
               {
                 color: "#508A8C",
+                // Mismo caso que Paso 1: 508A8C sobre su propio fondo da
+                // 3.85:1. 23d3d9 (teal brillante, ya usado como
+                // CAMPAIGN_COLORS[1] en el resto del sitio) da 8.20:1 sobre
+                // ese mismo fondo — misma familia teal.
+                textColor: "#23d3d9",
                 num: "03",
                 step: "Paso 3",
                 title: "Crece en la palabra",
@@ -280,7 +294,7 @@ export default async function HomePage() {
                 <div className="relative z-10 max-w-lg">
                   <p
                     className="text-xs font-bold uppercase tracking-widest"
-                    style={{ color: s.color }}
+                    style={{ color: s.textColor ?? s.color }}
                   >
                     {s.step}
                   </p>
@@ -297,7 +311,7 @@ export default async function HomePage() {
                   </p>
                   <p
                     className="mt-4 text-sm font-bold uppercase tracking-wide"
-                    style={{ color: s.color }}
+                    style={{ color: s.textColor ?? s.color }}
                   >
                     {s.cta}{" "}
                     <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">

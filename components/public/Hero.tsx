@@ -224,28 +224,28 @@ export function Hero({ slides, texts }: HeroProps) {
             </svg>
           </button>
 
-          <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+          <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2">
             {Array.from({ length: slideCount }).map((_, i) => (
+              // Botón real de 24x24 (WCAG 2.5.8) sin gap entre sí: los
+              // bordes de cada botón se tocan exactamente, así los centros
+              // quedan a 24px de distancia sin solape posible entre vecinos
+              // (confirmado con elementFromPoint). El punto visual sigue en
+              // 6px, centrado dentro con flex.
               <button
                 key={i}
                 type="button"
                 aria-label={`Ver foto/video ${i + 1}`}
                 onClick={() => setActive(i)}
-                className={cn(
-                  // El punto visual se queda en 6px (h-1.5 w-1.5). El ::before
-                  // amplía el área táctil real sin mover el layout ni cambiar
-                  // la apariencia (WCAG 2.5.8) — se expande a 24px de alto
-                  // (sin vecinos verticales), pero solo hasta el punto medio
-                  // del espacio horizontal a cada lado (2px) para no invadir
-                  // el área del punto contiguo: con gap-1.5 (6px) entre
-                  // puntos de 6px, expandir más causaría que el punto
-                  // siguiente "robe" el clic del anterior por orden de
-                  // pintado. Con 5 puntos a 12px de separación no es posible
-                  // alcanzar 24x24 completos sin solape real entre vecinos.
-                  "relative h-1.5 w-1.5 rounded-full transition-colors before:absolute before:-inset-x-[2px] before:-inset-y-[9px] before:content-['']",
-                  i === active ? "bg-white" : "bg-white/35"
-                )}
-              />
+                className="flex h-6 w-6 items-center justify-center"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full transition-colors",
+                    i === active ? "bg-white" : "bg-white/35"
+                  )}
+                />
+              </button>
             ))}
           </div>
         </>
