@@ -66,7 +66,7 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-7 lg:flex">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -93,7 +93,7 @@ export function Header() {
           })}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Button
             as={Link}
             href="/generaciones"
@@ -116,7 +116,7 @@ export function Header() {
           aria-controls="mobile-nav"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-md text-white md:hidden",
+            "flex h-10 w-10 items-center justify-center rounded-md text-white lg:hidden",
             GOLD_CLASSES
           )}
         >
@@ -144,7 +144,7 @@ export function Header() {
         <nav
           id="mobile-nav"
           aria-label="Menú principal"
-          className="border-t border-white/10 bg-black/95 backdrop-blur-md md:hidden"
+          className="border-t border-white/10 bg-black/95 backdrop-blur-md lg:hidden"
         >
           <Container className="flex flex-col gap-1 py-4">
             {NAV_LINKS.map((link) => {
