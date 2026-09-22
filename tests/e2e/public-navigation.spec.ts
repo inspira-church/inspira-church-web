@@ -43,4 +43,18 @@ test.describe("Navegación del sitio público", () => {
     expect(sitemap.ok()).toBe(true);
     expect(await sitemap.text()).toContain("<urlset");
   });
+
+  test("el modal de áreas de Generaciones cierra con Escape", async ({ page }) => {
+    await page.goto("/generaciones");
+
+    const areaButton = page.getByRole("button", { name: /alabanza/i });
+    await areaButton.scrollIntoViewIfNeeded();
+    await areaButton.click();
+
+    const dialog = page.locator("dialog[aria-labelledby='generations-area-name']");
+    await expect(dialog).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
 });

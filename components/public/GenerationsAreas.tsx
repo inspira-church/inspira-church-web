@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GenerationsPhotoSlot } from "@/components/public/GenerationsPhotoSlot";
 import { Reveal } from "@/components/public/Reveal";
 import { Container } from "@/components/ui/Container";
@@ -95,8 +95,23 @@ export function GenerationsAreas({ title, intro, areas, photoByAreaId }: Generat
 
   function openArea(area: GenerationsArea) {
     setSelected(area);
-    dialogRef.current?.showModal();
   }
+
+  // showModal() se difiere a después del render: si se llamara en el mismo
+  // manejador de clic que setSelected(), el <dialog> abriría vacío (React
+  // agrupa la actualización de estado), sin nada enfocable dentro — eso es
+  // lo que impedía que Escape lo cerrara de forma nativa. onClose (evento
+  // real del <dialog>, cubre Escape/cancel, backdrop y el botón ×) mantiene
+  // `selected` sincronizado con el estado real del diálogo.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (selected && !dialog.open) {
+      dialog.showModal();
+    } else if (!selected && dialog.open) {
+      dialog.close();
+    }
+  }, [selected]);
 
   return (
     <section className="border-b border-white/10 bg-[#0d0d0d] py-16 sm:py-24">
@@ -126,6 +141,7 @@ export function GenerationsAreas({ title, intro, areas, photoByAreaId }: Generat
         onClick={(e) => {
           if (e.target === dialogRef.current) dialogRef.current?.close();
         }}
+        onClose={() => setSelected(null)}
         className="fixed left-1/2 top-1/2 m-0 w-[calc(100vw-2.5rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 border border-white/10 bg-[#141414] p-0 text-white backdrop:bg-black/80"
         aria-labelledby="generations-area-name"
       >
