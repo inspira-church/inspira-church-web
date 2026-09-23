@@ -1,5 +1,6 @@
 "use server";
 
+import { sendContactNotifications } from "@/lib/email/contact-emails";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -76,6 +77,30 @@ export async function submitContact(
 
   if (error) {
     return { error: "No se pudo enviar tu mensaje. Intenta de nuevo en un momento." };
+  }
+
+  // El contacto ya quedó guardado — a partir de aquí el email es una
+  // notificación secundaria. sendContactNotifications nunca lanza (cada
+  // envío atrapa su propio error), pero se envuelve en try/catch de todos
+  // modos: un fallo aquí jamás debe convertirse en un error para el
+  // visitante ni afectar el resultado ya exitoso del insert.
+  try {
+    await sendContactNotifications(
+      {
+        name: parsed.data.name,
+        reason: parsed.data.reason,
+        phone: parsed.data.phone,
+        email: parsed.data.email,
+        preferredChannel: parsed.data.preferredChannel,
+        message: parsed.data.message,
+      },
+      { internalTo: settings.contactEmail || process.env.EMAIL_NOTIFICATION_TO || null }
+    );
+  } catch (err) {
+    console.error(
+      "[contact] fallo inesperado notificando por email:",
+      err instanceof Error ? err.message : err
+    );
   }
 
   return { success: true };

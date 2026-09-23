@@ -56,8 +56,8 @@ export function ContactForm({ privacyPolicyUrl, eventContext }: ContactFormProps
           ¡Recibimos tu mensaje!
         </p>
         <p className={cn(hind.className, "mt-2 text-white/60")}>
-          Gracias por escribirnos. Nuestro equipo revisará tu solicitud y se pondrá en contacto
-          contigo.
+          Gracias por escribirnos. Recibimos tu mensaje y uno de nuestros servidores se comunicará
+          contigo lo antes posible.
         </p>
         <Link
           href="/"
