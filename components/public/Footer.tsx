@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Hand,
   HandCoins,
   Heart,
   HeartHandshake,
@@ -29,6 +30,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/grupos": Users,
   "/eventos": CalendarDays,
   "/contacto": Mail,
+  "/manos-vivas": Hand,
   "/donaciones": HandCoins,
 };
 

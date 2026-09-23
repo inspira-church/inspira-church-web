@@ -18,6 +18,7 @@ const STATIC_ROUTES = [
   "/primera-vez",
   "/generaciones",
   "/generaciones/inscripcion",
+  "/manos-vivas",
   "/donaciones",
   "/politica-de-privacidad",
 ];

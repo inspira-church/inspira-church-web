@@ -66,7 +66,7 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-5 xl:flex">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -75,7 +75,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "group relative rounded-sm py-2 text-sm font-semibold transition-colors duration-200",
+                  "group relative whitespace-nowrap rounded-sm py-2 text-sm font-semibold transition-colors duration-200",
                   active ? "text-[#FF7F50]" : "text-white/70 hover:text-[#FF7F50]",
                   GOLD_CLASSES
                 )}
@@ -93,7 +93,7 @@ export function Header() {
           })}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden xl:block">
           <Button
             as={Link}
             href="/generaciones"
@@ -116,7 +116,7 @@ export function Header() {
           aria-controls="mobile-nav"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-md text-white lg:hidden",
+            "flex h-10 w-10 items-center justify-center rounded-md text-white xl:hidden",
             GOLD_CLASSES
           )}
         >
@@ -144,7 +144,7 @@ export function Header() {
         <nav
           id="mobile-nav"
           aria-label="Menú principal"
-          className="border-t border-white/10 bg-black/95 backdrop-blur-md lg:hidden"
+          className="border-t border-white/10 bg-black/95 backdrop-blur-md xl:hidden"
         >
           <Container className="flex flex-col gap-1 py-4">
             {NAV_LINKS.map((link) => {

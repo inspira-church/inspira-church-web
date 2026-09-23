@@ -51,5 +51,6 @@ export const NAV_LINKS = [
   { href: "/grupos", label: "Grupos" },
   { href: "/eventos", label: "Eventos" },
   { href: "/contacto", label: "Contacto" },
+  { href: "/manos-vivas", label: "Manos Vivas" },
   { href: "/donaciones", label: "Donaciones" },
 ] as const;

@@ -27,6 +27,34 @@ test.describe("Navegación del sitio público", () => {
 
     await nav.getByRole("link", { name: "Contacto" }).click();
     await expect(page).toHaveURL(/\/contacto$/);
+
+    await nav.getByRole("link", { name: "Manos Vivas" }).click();
+    await expect(page).toHaveURL(/\/manos-vivas$/);
+  });
+
+  test("Manos Vivas: enlace en el Header, carga la página y el menú móvil funciona", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const headerLink = page.locator('header nav a[href="/manos-vivas"]');
+    await expect(headerLink).toHaveAttribute("href", "/manos-vivas");
+
+    // Menú móvil: abre, navega a Manos Vivas, y se cierra solo al navegar.
+    // dispatchEvent en vez de click(): en modo dev el indicador flotante de
+    // Next.js (nextjs-portal, solo visible corriendo `next dev`, nunca en
+    // producción) ocupa la misma esquina y recibe cualquier clic posicional
+    // ahí, incluso con force:true. Disparar el evento directo en el elemento
+    // evita depender de coordenadas de pantalla.
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.getByRole("button", { name: "Abrir menú" }).dispatchEvent("click");
+    const mobileNav = page.locator("#mobile-nav");
+    await expect(mobileNav).toBeVisible();
+
+    await mobileNav.getByRole("link", { name: "Manos Vivas" }).click();
+    await expect(page).toHaveURL(/\/manos-vivas$/);
+    await expect(mobileNav).toBeHidden();
+    await expect(page.getByRole("heading", { level: 1, name: "Manos Vivas" })).toBeVisible();
   });
 
   test("la página de oración es accesible directamente", async ({ page }) => {
