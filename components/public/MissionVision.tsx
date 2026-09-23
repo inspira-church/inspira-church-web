@@ -68,32 +68,19 @@ export function MissionVision({
             >
               {visionHeadline}
             </p>
-            {/*
-              El CMS guarda visionText como un solo bloque de texto (una idea
-              por línea, separadas por salto de línea — así ya está escrito
-              hoy en site_settings.about). En vez de mostrarlo como un
-              párrafo corrido, se separa por línea y cada idea se presenta
-              como un bloque breve con un acento de color — sin tocar el
-              contenido ni el esquema de datos, solo la presentación.
-            */}
-            <ul className="mt-5 flex max-w-lg flex-col gap-4">
+            <p className={cn(hind.className, "mt-5 max-w-md text-base leading-relaxed text-black/70")}>
+              {/*
+                El CMS guarda visionText con saltos de línea internos (una
+                idea por línea, en site_settings.about) — se normalizan a
+                espacios para recuperar el párrafo continuo original sin
+                tocar el contenido guardado.
+              */}
               {visionText
                 .split("\n")
                 .map((line) => line.trim())
                 .filter(Boolean)
-                .map((line, i) => (
-                  <li key={i} className="flex gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2 h-[3px] w-5 shrink-0"
-                      style={{ backgroundColor: ABOUT_COLORS.orange }}
-                    />
-                    <span className={cn(hind.className, "text-sm leading-relaxed text-black/70")}>
-                      {line}
-                    </span>
-                  </li>
-                ))}
-            </ul>
+                .join(" ")}
+            </p>
           </div>
         </div>
       </Container>
