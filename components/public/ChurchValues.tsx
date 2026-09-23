@@ -40,7 +40,7 @@ function ValueRow({
         <p
           className={cn(
             anton.className,
-            "mt-5 text-3xl uppercase leading-none text-white transition-all duration-700 ease-out motion-reduce:transition-none sm:text-5xl",
+            "mt-5 text-balance text-3xl uppercase leading-[0.95] text-white transition-all duration-700 ease-out motion-reduce:transition-none sm:text-5xl",
             revealed ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           )}
           style={{ color, transitionDelay: "80ms" }}
@@ -73,7 +73,7 @@ export function ChurchValues({ eyebrow, title, values }: ChurchValuesProps) {
         <Eyebrow color={ABOUT_COLORS.coral}>{eyebrow}</Eyebrow>
         <PosterHeading>{title}</PosterHeading>
 
-        <div className="mt-16 flex flex-col gap-12 sm:gap-16">
+        <div className="mt-16 flex flex-col gap-9 sm:gap-12">
           {visibleValues.map((value, i) => (
             <ValueRow
               key={`${value.title}-${i}`}

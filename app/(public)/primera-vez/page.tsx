@@ -156,7 +156,7 @@ export default async function FirstTimePage() {
                     >
                       {item.title}
                     </h3>
-                    <p className={cn(hind.className, "mt-3 text-sm leading-relaxed text-white/60")}>
+                    <p className={cn(hind.className, "mt-3 text-base leading-relaxed text-white/60")}>
                       {item.description}
                     </p>
                   </div>

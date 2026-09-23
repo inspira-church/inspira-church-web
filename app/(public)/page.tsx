@@ -96,7 +96,7 @@ export default async function HomePage() {
               </h1>
               <p className={cn(hind.className, "mt-5 max-w-sm text-white/70")}>
                 Un lugar para encontrarte con Dios, crecer en comunidad y
-                caminar en propósito.
+                caminar con propósito.
               </p>
               <div className="mt-7">
                 <GoldButton href="/contacto" color={CAMPAIGN_COLORS[0]}>
