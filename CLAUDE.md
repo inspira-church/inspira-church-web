@@ -1340,12 +1340,22 @@ revisar qué puerto tomó antes de asumir que está caído.
    Verificado únicamente por lectura de código (`admin-nav.ts`, políticas
    RLS) en las últimas sesiones. Crear una cuenta Editor de prueba desde
    `/admin/usuarios` → "Invitar" para poder validarlo en vivo.
-10. El bug de `toRow()` corregido en `lib/actions/events.ts` (campos
-    opcionales en `undefined` que `JSON.stringify` omite del payload, así
-    que un `update` nunca los vacía aunque el admin borre el campo) tiene la
-    misma forma en varios otros `lib/actions/*.ts` no auditados — vale la
-    pena revisar `sermons.ts`, `growth-groups.ts`, `team-members.ts`,
-    `about.ts` y `sermon-series.ts` por el mismo patrón.
+10. ~~El bug de `toRow()` (campos opcionales en `undefined` que `JSON.stringify`
+    omite del payload, así que un `update` nunca los vacía)~~ — resuelto en la
+    auditoría del CMS: convención vigente en las acciones de contenido —
+    **texto libre opcional** se lee con `optionalText(formData, key)`
+    (`lib/form-data.ts`: `""` se conserva y se persiste como `""`; `undefined`
+    solo si el campo no vino) y **URLs/imágenes** se normalizan con
+    `?? null` al escribir. Nunca `formData.get(x) || undefined` en un campo
+    que el admin pueda querer vaciar. Los `update` de equipo/grupos/series/
+    prédicas/horarios/eventos piden `.select("id")` y devuelven error si
+    afectaron 0 filas (RLS o id inexistente) en vez de reportar "guardado".
+    Cada acción de contenido invalida con `revalidatePath` todas las páginas
+    **estáticas** que muestran su dato (las rutas `[slug]` son dinámicas y
+    siempre frescas). `ImageUploadField` bloquea el envío del formulario
+    mientras sube. Pendientes menores de esa auditoría: los `toggle*Active`/
+    `toggleSermonPublished` ignoran el error de Supabase (no hay feedback si
+    fallan), y el editor no tiene botón "Quitar foto".
 11. ~~Migración `027_generations.sql` sin aplicar en producción~~ —
     resuelto: aplicada (crea `generations_registrations` y extiende
     `media_select_public_hero`), verificada con una consulta de

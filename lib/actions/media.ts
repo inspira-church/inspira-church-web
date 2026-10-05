@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { publicPathsForMediaModule } from "@/lib/media-paths";
 import { createClient } from "@/lib/supabase/server";
 import { createMediaRecordSchema } from "@/lib/validations/media";
 
@@ -111,7 +112,7 @@ export async function deleteMedia(mediaId: string) {
 
   const { data: media, error: fetchError } = await supabase
     .from("media")
-    .select("bucket, path")
+    .select("bucket, path, module")
     .eq("id", mediaId)
     .single();
 
@@ -132,5 +133,7 @@ export async function deleteMedia(mediaId: string) {
   }
 
   revalidatePath("/admin/medios");
+  // Si era la foto de una página pública, ese HTML en caché apuntaría a un archivo que ya no existe.
+  for (const path of publicPathsForMediaModule(media.module)) revalidatePath(path);
   return { success: true };
 }

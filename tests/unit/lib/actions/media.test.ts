@@ -54,3 +54,15 @@ describe("createMediaRecord — revalida la página pública que usa la foto", (
     expect(revalidatePathMock).not.toHaveBeenCalledWith("/nosotros");
   });
 });
+
+describe("publicPathsForMediaModule / deleteMedia", () => {
+  it("mapea cada slot de foto a su página pública", async () => {
+    const { publicPathsForMediaModule } = await import("@/lib/media-paths");
+    expect(publicPathsForMediaModule("hero-slide-2")).toEqual(["/"]);
+    expect(publicPathsForMediaModule("primera-vez-hero")).toEqual(["/primera-vez"]);
+    expect(publicPathsForMediaModule("nosotros-essence")).toEqual(["/nosotros"]);
+    expect(publicPathsForMediaModule("generaciones-area-ninos")).toEqual(["/generaciones"]);
+    expect(publicPathsForMediaModule("pastors")).toEqual([]);
+    expect(publicPathsForMediaModule(null)).toEqual([]);
+  });
+});
