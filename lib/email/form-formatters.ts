@@ -22,10 +22,10 @@ export interface FormSubmissionEmail {
   /** true = el aviso interno NO lleva Reply-To (el correo del visitante no viaja a los destinatarios). */
   suppressReplyTo?: boolean;
   /**
-   * Contenido restringido: el aviso interno va SOLO al destinatario principal
-   * (nunca a los adicionales) y es el aviso mínimo, sin ningún dato del
-   * visitante. Reemplaza a `fields`/`note`/`title`. La respuesta automática al
-   * visitante no se ve afectada.
+   * Contenido restringido: el aviso interno es el aviso mínimo, sin ningún dato
+   * del visitante. Reemplaza a `fields`/`note`/`title`. Solo afecta QUÉ dice el
+   * correo, no quién lo recibe (todos los destinatarios configurados están
+   * autorizados). La respuesta automática al visitante no se ve afectada.
    */
   restrictedNotice?: { subject: string; headline: string };
 }
@@ -104,16 +104,16 @@ export const PRAYER_EMAIL_EXCERPT_LENGTH = 300;
 /**
  * Peticiones de oración — minimización de datos por ambos lados:
  *
- * - PRIVADA (el formulario le promete al visitante que solo el Administrador
- *   la lee): el aviso interno va ÚNICAMENTE al destinatario administrativo
- *   principal (nunca a los adicionales) y es mínimo: dice que llegó una
- *   petición privada y dónde consultarla. Ni nombre, ni texto, ni teléfono, ni
- *   correo, ni Reply-To. `visitorName`/`visitorEmail` solo alimentan la
- *   respuesta automática al visitante, que sigue funcionando y no menciona que
- *   la petición es privada.
- * - NO privada: puede usar principal + adicionales; el texto va recortado y sin
- *   teléfono ni correo en el cuerpo (Reply-To sí, para poder responder). Lo
- *   completo se consulta en el CMS.
+ * QUIÉN recibe el aviso no depende de este formatter: todos los destinatarios que
+ * el administrador configuró (principal y adicionales) están autorizados y lo
+ * reciben, sea la petición privada o no. Este formatter solo decide QUÉ dice:
+ *
+ * - PRIVADA: aviso mínimo — dice que llegó una petición privada y dónde
+ *   consultarla. Ni nombre, ni texto, ni teléfono, ni correo, ni Reply-To.
+ *   `visitorName`/`visitorEmail` solo alimentan la respuesta automática al
+ *   visitante, que sigue funcionando y no menciona que la petición es privada.
+ * - NO privada: el texto va recortado y sin teléfono ni correo en el cuerpo
+ *   (Reply-To sí, para poder responder). Lo completo se consulta en el CMS.
  *
  * La respuesta automática al visitante nunca incluye el texto de su petición.
  */

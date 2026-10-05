@@ -19,6 +19,8 @@ export interface FormDefinition {
   label: string;
   /** Ruta pública del formulario (se muestra en el CMS para identificarlo). */
   publicRoute: string;
+  /** id HTML de su tarjeta en /admin/formularios/configuracion (enlace directo con #anchor). */
+  anchor: string;
   /** Encabezado del correo interno. */
   internalTitle: string;
   /** Prefijo del asunto del correo interno; el resumen (nombre) se agrega después. */
@@ -40,6 +42,7 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     type: "contacto",
     label: "Contacto",
     publicRoute: "/contacto",
+    anchor: "contacto",
     internalTitle: "NUEVO CONTACTO RECIBIDO",
     internalSubject: "Nuevo contacto desde inspirachurch.co",
     adminPath: "/admin/formularios",
@@ -54,6 +57,7 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     type: "primera-vez",
     label: "Primera vez",
     publicRoute: "/primera-vez",
+    anchor: "primera-vez",
     internalTitle: "NUEVA FICHA DE PRIMERA VEZ",
     internalSubject: "Nueva ficha de Primera vez en inspirachurch.co",
     adminPath: "/admin/formularios",
@@ -68,11 +72,12 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     type: "oracion",
     label: "Peticiones de oración",
     publicRoute: "/oracion",
+    anchor: "peticiones-oracion",
     internalTitle: "NUEVA PETICIÓN DE ORACIÓN",
     internalSubject: "Nueva petición de oración en inspirachurch.co",
     adminPath: "/admin/oracion",
     cmsNote:
-      "Las peticiones marcadas como privadas se notifican únicamente al correo administrativo principal. Los correos adicionales no reciben avisos de peticiones privadas.",
+      "Todos los correos que agregues aquí (principal y adicionales) se consideran autorizados y reciben los avisos de TODAS las peticiones, también las privadas. Lo que cambia en una privada es el contenido del correo: no incluye el texto, el nombre, el teléfono ni el correo de quien la envió; solo avisa que llegó y dónde consultarla en el CMS. Las demás se envían recortadas y sin teléfono ni correo.",
     defaultAutoReply: {
       subject: "Recibimos tu petición de oración | Inspira Church",
       message: [
@@ -92,6 +97,7 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     type: "grupos",
     label: "Unirme a un grupo",
     publicRoute: "/grupos/unirme",
+    anchor: "grupos",
     internalTitle: "NUEVA SOLICITUD PARA UNIRSE A UN GRUPO",
     internalSubject: "Nueva solicitud de grupo en inspirachurch.co",
     adminPath: "/admin/formularios",
@@ -106,6 +112,7 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     type: "generaciones",
     label: "Inscripción de Generaciones",
     publicRoute: "/generaciones/inscripcion",
+    anchor: "generaciones",
     internalTitle: "NUEVA INSCRIPCIÓN DE GENERACIONES",
     internalSubject: "Nueva inscripción de Generaciones en inspirachurch.co",
     adminPath: "/admin/generaciones/inscripciones",

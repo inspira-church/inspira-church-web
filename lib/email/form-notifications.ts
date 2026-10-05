@@ -7,7 +7,7 @@ import {
 } from "@/lib/email/form-config";
 import { FORM_DEFINITIONS, type FormType } from "@/lib/email/form-definitions";
 import type { FormSubmissionEmail } from "@/lib/email/form-formatters";
-import { resolveInternalRecipients, resolvePrimaryRecipient } from "@/lib/email/form-recipients";
+import { resolveInternalRecipients } from "@/lib/email/form-recipients";
 import {
   buildAutoReplyEmail,
   buildInternalEmail,
@@ -85,24 +85,18 @@ async function sendInternal(
 ): Promise<{ outcome: SendOutcome; recipients: number }> {
   if (!settings.config.internal.enabled) return { outcome: "skipped", recipients: 0 };
 
-  const sources = {
+  // QUIÉN recibe es independiente de QUÉ contiene el correo: todo destinatario que el
+  // administrador configuró (principal y adicionales) está autorizado, también para el
+  // aviso de una petición privada. Lo que cambia en una privada es el contenido
+  // (aviso mínimo, ver restrictedNotice), no la lista de destinatarios.
+  const recipients = resolveInternalRecipients({
     config: settings.config,
     defaultRecipient: settings.defaultRecipient,
     envRecipient: process.env.EMAIL_NOTIFICATION_TO,
-  };
-
-  // Contenido restringido (petición de oración privada): UN solo destinatario, el
-  // principal autorizado. Los adicionales nunca reciben este aviso — ni siquiera
-  // cuando no hay principal (en ese caso el aviso se omite).
-  const restricted = Boolean(submission.restrictedNotice);
-  const recipients = restricted
-    ? [resolvePrimaryRecipient(sources)].filter((r): r is string => r !== null)
-    : resolveInternalRecipients(sources);
+  });
 
   if (recipients.length === 0) {
-    console.warn(
-      `[email] formulario "${type}": sin destinatario${restricted ? " administrativo principal" : ""} configurado, se omite el aviso interno.`
-    );
+    console.warn(`[email] formulario "${type}": sin destinatario configurado, se omite el aviso interno.`);
     return { outcome: "skipped", recipients: 0 };
   }
 

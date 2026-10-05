@@ -135,7 +135,7 @@ describe("2. petición PRIVADA — nada sensible en los correos", () => {
       },
     });
 
-  it("1. con principal y 3 adicionales: se envía UN solo aviso interno, al principal", async () => {
+  it("8. con principal y 3 adicionales: TODOS están autorizados y reciben el aviso, cada uno en su propio correo", async () => {
     withExtras();
 
     const result = await submit(privateForm);
@@ -143,14 +143,34 @@ describe("2. petición PRIVADA — nada sensible en los correos", () => {
     expect(result).toEqual({ success: true });
     expect(batchMock).toHaveBeenCalledTimes(1);
     const payloads = batchMock.mock.calls[0][0];
-    expect(payloads).toHaveLength(1);
-    expect(payloads[0].to).toEqual(["principal@example.com"]);
-    // Ningún adicional aparece en ningún destinatario, ni como cc/bcc.
-    expect(everythingSent()).not.toContain("pastor@example.com");
-    expect(everythingSent()).not.toContain("oracion@example.com");
-    expect(everythingSent()).not.toContain("equipo@example.com");
-    expect(payloads[0]).not.toHaveProperty("cc");
-    expect(payloads[0]).not.toHaveProperty("bcc");
+    expect(payloads.map((p: { to: string[] }) => p.to)).toEqual([
+      ["principal@example.com"],
+      ["pastor@example.com"],
+      ["oracion@example.com"],
+      ["equipo@example.com"],
+    ]);
+    // Sin cc/bcc: nadie ve las direcciones de los demás.
+    for (const p of payloads) {
+      expect(p).not.toHaveProperty("cc");
+      expect(p).not.toHaveProperty("bcc");
+      expect(p).not.toHaveProperty("replyTo");
+    }
+  });
+
+  it("el contenido sigue siendo el mínimo para TODOS los destinatarios autorizados", async () => {
+    withExtras();
+
+    await submit(privateForm);
+
+    for (const p of batchMock.mock.calls[0][0]) {
+      const mail = JSON.stringify({ s: p.subject, t: p.text, h: p.html });
+      expect(mail).not.toContain("enfermo");
+      expect(mail).not.toContain(PHONE);
+      expect(mail).not.toContain(VISITOR_EMAIL);
+      expect(mail).not.toContain("María");
+      // Y el correo de un destinatario no menciona a los otros.
+      expect(mail).not.toMatch(/principal@|pastor@|oracion@|equipo@/);
+    }
   });
 
   it("el aviso es el mínimo: asunto y cuerpo exactos, con el enlace al módulo de peticiones", async () => {
@@ -244,10 +264,11 @@ describe("2. petición PRIVADA — nada sensible en los correos", () => {
   });
 });
 
-describe("petición privada — destinatario único y orden de resolución", () => {
+describe("petición privada — destinatarios: mismos que una normal (principal + adicionales)", () => {
   const privateForm = { request: PRIVATE_TEXT, phone: PHONE, email: VISITOR_EMAIL, isPrivate: "on" };
+  const recipientsOf = () => batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0]);
 
-  it("1) el principal propio de Peticiones de oración, si está configurado", async () => {
+  it("el principal propio de Peticiones de oración va primero, seguido de los adicionales", async () => {
     state.configRows.push({
       form_key: "oracion",
       config: { internal: { useDefaultRecipient: false, primary: "propio@example.com", additional: ["otro@example.com"] } },
@@ -256,39 +277,50 @@ describe("petición privada — destinatario único y orden de resolución", () 
 
     await submit(privateForm);
 
-    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["propio@example.com"]);
+    expect(recipientsOf()).toEqual(["propio@example.com", "otro@example.com"]);
   });
 
-  it("2) si no hay propio, el correo administrativo global del CMS", async () => {
+  it("sin propio, el correo administrativo global del CMS más los adicionales", async () => {
     state.configRows.push({ form_key: "oracion", config: { internal: { additional: ["otro@example.com"] } } });
     vi.stubEnv("EMAIL_NOTIFICATION_TO", "respaldo@example.com");
 
     await submit(privateForm);
 
-    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["admin@example.com"]);
+    expect(recipientsOf()).toEqual(["admin@example.com", "otro@example.com"]);
   });
 
-  it("3) si tampoco hay global, EMAIL_NOTIFICATION_TO", async () => {
+  it("sin global, EMAIL_NOTIFICATION_TO más los adicionales", async () => {
     state.configRows = [{ form_key: "oracion", config: { internal: { additional: ["otro@example.com"] } } }];
     vi.stubEnv("EMAIL_NOTIFICATION_TO", "respaldo@example.com");
 
     await submit(privateForm);
 
-    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["respaldo@example.com"]);
+    expect(recipientsOf()).toEqual(["respaldo@example.com", "otro@example.com"]);
   });
 
-  it("9. sin ningún destinatario principal: la petición se guarda, no falla el formulario y los adicionales NO reciben el aviso", async () => {
-    state.configRows = [
-      { form_key: "oracion", config: { internal: { additional: ["pastor@example.com", "equipo@example.com"] } } },
-    ];
+  it("una privada y una normal con la misma configuración avisan exactamente a los mismos destinatarios", async () => {
+    state.configRows.push({
+      form_key: "oracion",
+      config: { internal: { useDefaultRecipient: false, primary: "p@example.com", additional: ["a@example.com", "b@example.com"] } },
+    });
+
+    await submit(privateForm);
+    await submit({});
+
+    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(
+      batchMock.mock.calls[1][0].map((p: { to: string[] }) => p.to[0])
+    );
+  });
+
+  it("9. sin ningún destinatario: la petición se guarda, no falla el formulario y se registra la configuración faltante sin datos de la petición", async () => {
+    state.configRows = [];
 
     const result = await submit(privateForm);
 
     expect(result).toEqual({ success: true });
     expect(state.insertedRow).toMatchObject({ request_text: PRIVATE_TEXT, is_private: true });
     expect(batchMock).not.toHaveBeenCalled();
-    // La configuración faltante se registra, sin datos de la petición.
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("sin destinatario administrativo principal"));
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("sin destinatario configurado"));
     const logged = JSON.stringify([
       ...(console.warn as unknown as { mock: { calls: unknown[] } }).mock.calls,
       ...(console.error as unknown as { mock: { calls: unknown[] } }).mock.calls,

@@ -1,7 +1,10 @@
 import { HeartHandshake } from "lucide-react";
+import Link from "next/link";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { PrayerRequestRow } from "@/components/admin/PrayerRequestRow";
+import { Button } from "@/components/ui/Button";
+import { FORM_DEFINITIONS } from "@/lib/email/form-definitions";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PrayerRequestsInboxPage() {
@@ -30,6 +33,19 @@ export default async function PrayerRequestsInboxPage() {
           isAdmin
             ? "Incluye las peticiones marcadas como privadas."
             : "Las peticiones privadas solo las puede ver el Administrador."
+        }
+        actions={
+          // La configuración vive en un solo lugar (Formularios → Correos); aquí solo se enlaza.
+          isAdmin ? (
+            <Button
+              as={Link}
+              href={`/admin/formularios/configuracion#${FORM_DEFINITIONS.oracion.anchor}`}
+              variant="secondary"
+              size="sm"
+            >
+              Configurar correos
+            </Button>
+          ) : undefined
         }
       />
 

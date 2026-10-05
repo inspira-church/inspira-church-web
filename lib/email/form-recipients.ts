@@ -47,13 +47,8 @@ export function resolveInternalRecipients(sources: RecipientSources): string[] {
   return normalizeEmailList([...(principal ? [principal] : []), ...sources.config.internal.additional]);
 }
 
-/**
- * Solo el destinatario PRINCIPAL (mismo orden de prioridad que arriba), o null
- * si ninguno existe. Es el ÚNICO destinatario de los avisos de contenido
- * restringido (una petición de oración privada): nunca los adicionales, ni
- * cuando no hay principal — en ese caso el aviso simplemente no se envía.
- */
-export function resolvePrimaryRecipient({ config, defaultRecipient, envRecipient }: RecipientSources): string | null {
+/** Solo el destinatario PRINCIPAL (mismo orden de prioridad que arriba), o null si ninguno existe. */
+function resolvePrimaryRecipient({ config, defaultRecipient, envRecipient }: RecipientSources): string | null {
   const { useDefaultRecipient, primary } = config.internal;
 
   const candidates = [useDefaultRecipient ? "" : primary, defaultRecipient, envRecipient ?? ""];

@@ -1263,24 +1263,24 @@ crear otra función de correo.
   colegio ni contacto de emergencia).
 - **Peticiones de oración** (`/oracion` → `prayer_requests`, bandeja
   `/admin/oracion`; campos `name`, `phone`, `email`, `request`, `isPrivate`,
-  `consent`): el formulario le promete al visitante que una petición privada la
-  lee "solo el administrador (no el resto del equipo)", así que el aviso
-  interno de una **privada** va a **un único destinatario**: el principal
-  autorizado (propio de oración → global del CMS → `EMAIL_NOTIFICATION_TO`,
-  `resolvePrimaryRecipient`); los adicionales **nunca** lo reciben, ni siquiera
-  si no hay principal (entonces el aviso se omite, se registra la
-  configuración faltante y la petición se guarda igual). Es un aviso mínimo
-  (`restrictedNotice` → `buildRestrictedNoticeEmail`): asunto "Nueva petición
-  de oración privada | Inspira Church" y enlace a `/admin/oracion`, **sin
-  nombre, texto, teléfono, correo ni Reply-To**. La respuesta automática al
-  visitante sigue funcionando y no menciona que es privada. Una **no privada**
-  puede ir a principal + adicionales, lleva el texto recortado a
-  300 caracteres (`PRAYER_EMAIL_EXCERPT_LENGTH`) y sin teléfono ni correo en el
-  cuerpo (Reply-To sí). La respuesta automática nunca repite la petición. Su
-  texto predeterminado ("…estaremos orando por ella") vive en
-  `form-definitions.ts` solo como valor inicial: se edita desde el CMS. La
-  tarjeta del CMS muestra estas reglas y enlaza a la bandeja (configuración y
-  bandeja son pantallas separadas).
+  `consent`). **QUIÉN recibe y QUÉ dice el correo son decisiones distintas.**
+  Quién: todo correo que el administrador configura (principal propio →
+  global del CMS → `EMAIL_NOTIFICATION_TO`, más hasta 10 adicionales) está
+  **autorizado** y recibe el aviso de TODAS las peticiones, también las
+  privadas (cada uno en su propio correo, sin ver a los demás). Qué: una
+  **privada** manda el aviso mínimo (`restrictedNotice` →
+  `buildRestrictedNoticeEmail`): asunto "Nueva petición de oración privada |
+  Inspira Church" y enlace a `/admin/oracion`, **sin nombre, texto, teléfono,
+  correo ni Reply-To**. Una **no privada** lleva el texto recortado a 300
+  caracteres (`PRAYER_EMAIL_EXCERPT_LENGTH`) y sin teléfono ni correo en el
+  cuerpo (Reply-To sí). Sin ningún destinatario configurado el aviso se omite,
+  se registra la configuración faltante y la petición se guarda igual. La
+  respuesta automática no menciona que es privada ni repite la petición; su
+  texto ("…estaremos orando por ella") vive en `form-definitions.ts` solo como
+  valor inicial: se edita desde el CMS. **Dónde se configura**:
+  `/admin/formularios/configuracion#peticiones-oracion` (cada tarjeta tiene su
+  `anchor` en `form-definitions.ts`); `/admin/oracion` solo ofrece el botón
+  "Configurar correos" (solo Administrador) y no duplica el formulario.
 - **Reply-To** del aviso interno = correo del visitante, solo si lo dejó.
   La respuesta automática solo sale si hay correo del visitante; el correo
   nunca se vuelve obligatorio por esta funcionalidad.

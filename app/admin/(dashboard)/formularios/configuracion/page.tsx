@@ -66,6 +66,7 @@ export default async function FormEmailSettingsPage() {
               formKey={type}
               label={FORM_DEFINITIONS[type].label}
               publicRoute={FORM_DEFINITIONS[type].publicRoute}
+              anchor={FORM_DEFINITIONS[type].anchor}
               inboxPath={FORM_DEFINITIONS[type].adminPath}
               note={FORM_DEFINITIONS[type].cmsNote}
               config={settings.forms[type]}

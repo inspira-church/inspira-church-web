@@ -38,6 +38,8 @@ interface FormEmailConfigFormProps {
   formKey: FormType;
   label: string;
   publicRoute: string;
+  /** id HTML de la tarjeta, para enlazarla directamente (`#anchor`). */
+  anchor: string;
   /** Ruta de la bandeja de solicitudes de este formulario en el CMS. */
   inboxPath?: string;
   /** Aviso opcional de reglas propias del formulario (ej. privacidad). */
@@ -59,6 +61,7 @@ export function FormEmailConfigForm({
   formKey,
   label,
   publicRoute,
+  anchor,
   inboxPath,
   note,
   config,
@@ -79,7 +82,11 @@ export function FormEmailConfigForm({
   const errors = state.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="space-y-6 rounded-lg border border-border bg-paper-raised p-5">
+    <form
+      id={anchor}
+      action={formAction}
+      className="scroll-mt-6 space-y-6 rounded-lg border border-border bg-paper-raised p-5 target:ring-2 target:ring-accent"
+    >
       <div>
         <h2 className="font-display text-lg font-semibold text-ink">{label}</h2>
         <p className="mt-0.5 text-xs text-ink-faint">Formulario público: {publicRoute}</p>
@@ -132,11 +139,19 @@ export function FormEmailConfigForm({
         </div>
 
         <div>
-          <p className="text-sm font-medium text-ink">Correos adicionales</p>
+          <p className="text-sm font-medium text-ink">
+            Correos adicionales{" "}
+            <span className="font-normal text-ink-faint">
+              ({extras.length} de {MAX_ADDITIONAL_RECIPIENTS})
+            </span>
+          </p>
           <p className="mt-0.5 text-xs text-ink-faint">
-            Cada uno recibe su propio correo; no ven las direcciones de los demás. Máximo {MAX_ADDITIONAL_RECIPIENTS}.
+            Cada uno recibe su propio correo; no ven las direcciones de los demás.
           </p>
           <input type="hidden" name="additionalCount" value={extras.length} />
+          {extras.length === 0 && (
+            <p className="mt-2 text-xs text-ink-faint">Todavía no hay correos adicionales.</p>
+          )}
           <div className="mt-2 space-y-2">
             {extras.map((row, i) => (
               <div key={row.key} className="flex items-center gap-2">
