@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SITE_URL } from "@/lib/constants";
 
 /**
  * Peticiones de oración de punta a punta: la Server Action REAL + el servicio
@@ -122,33 +123,90 @@ describe("2. petición PRIVADA — nada sensible en los correos", () => {
     isPrivate: "on",
   };
 
-  it("el aviso interno no contiene el texto, el teléfono ni el correo (ni en asunto, ni en cuerpo, ni en HTML)", async () => {
-    state.configRows.push({ form_key: "oracion", config: { internal: { additional: ["pastor@example.com"] } } });
+  const withExtras = () =>
+    state.configRows.push({
+      form_key: "oracion",
+      config: {
+        internal: {
+          useDefaultRecipient: false,
+          primary: "principal@example.com",
+          additional: ["pastor@example.com", "oracion@example.com", "equipo@example.com"],
+        },
+      },
+    });
 
-    await submit(privateForm);
+  it("1. con principal y 3 adicionales: se envía UN solo aviso interno, al principal", async () => {
+    withExtras();
 
-    const [payloads] = batchMock.mock.calls[0];
-    expect(payloads).toHaveLength(2);
-    for (const p of payloads) {
-      const mail = JSON.stringify({ subject: p.subject, text: p.text, html: p.html });
-      expect(mail).not.toContain(PRIVATE_TEXT);
-      expect(mail).not.toContain("enfermo");
-      expect(mail).not.toContain(PHONE);
-      expect(mail).not.toContain(VISITOR_EMAIL);
-    }
+    const result = await submit(privateForm);
+
+    expect(result).toEqual({ success: true });
+    expect(batchMock).toHaveBeenCalledTimes(1);
+    const payloads = batchMock.mock.calls[0][0];
+    expect(payloads).toHaveLength(1);
+    expect(payloads[0].to).toEqual(["principal@example.com"]);
+    // Ningún adicional aparece en ningún destinatario, ni como cc/bcc.
+    expect(everythingSent()).not.toContain("pastor@example.com");
+    expect(everythingSent()).not.toContain("oracion@example.com");
+    expect(everythingSent()).not.toContain("equipo@example.com");
+    expect(payloads[0]).not.toHaveProperty("cc");
+    expect(payloads[0]).not.toHaveProperty("bcc");
   });
 
-  it("dice que es privada, trae solo el nombre y apunta al módulo correcto del CMS", async () => {
+  it("el aviso es el mínimo: asunto y cuerpo exactos, con el enlace al módulo de peticiones", async () => {
     await submit(privateForm);
 
     const p = batchMock.mock.calls[0][0][0];
-    expect(p.subject).toContain("privada");
-    expect(p.text).toContain("NUEVA PETICIÓN DE ORACIÓN PRIVADA");
-    expect(p.text).toContain("Nombre: María López");
-    expect(p.text).toContain("La petición quedó registrada en el CMS");
-    expect(p.text).toContain("panel autorizado");
-    expect(p.text).toContain("/admin/oracion");
-    expect(p.html).toContain("/admin/oracion");
+    expect(p.subject).toBe("Nueva petición de oración privada | Inspira Church");
+    expect(p.text).toBe(
+      [
+        "Se recibió una nueva petición de oración privada.",
+        "",
+        "La solicitud quedó registrada en el CMS de Inspira Church.",
+        "",
+        "Consultar:",
+        `${SITE_URL}/admin/oracion`,
+      ].join("\n")
+    );
+    expect(p.html).toContain(`${SITE_URL}/admin/oracion`);
+  });
+
+  it("2. no incluye el nombre del visitante (ni en asunto, ni en texto, ni en HTML)", async () => {
+    await submit(privateForm);
+
+    const p = batchMock.mock.calls[0][0][0];
+    expect(JSON.stringify({ s: p.subject, t: p.text, h: p.html })).not.toContain("María");
+    expect(JSON.stringify({ s: p.subject, t: p.text, h: p.html })).not.toContain("López");
+  });
+
+  it("3. no incluye la petición (ni en asunto, ni en texto, ni en HTML)", async () => {
+    await submit(privateForm);
+
+    const p = batchMock.mock.calls[0][0][0];
+    const mail = JSON.stringify({ s: p.subject, t: p.text, h: p.html });
+    expect(mail).not.toContain(PRIVATE_TEXT);
+    expect(mail).not.toContain("enfermo");
+  });
+
+  it("4. no incluye el teléfono", async () => {
+    await submit(privateForm);
+
+    expect(JSON.stringify(batchMock.mock.calls)).not.toContain(PHONE);
+  });
+
+  it("5. no incluye el correo del visitante en ningún campo del aviso interno", async () => {
+    await submit(privateForm);
+
+    expect(JSON.stringify(batchMock.mock.calls)).not.toContain(VISITOR_EMAIL);
+  });
+
+  it("no revela que existan correos adicionales ni a quién más se avisa", async () => {
+    withExtras();
+
+    await submit(privateForm);
+
+    const p = batchMock.mock.calls[0][0][0];
+    expect(p.text).not.toMatch(/adicional|copia|cc/i);
   });
 
   it("sin Reply-To: el correo del visitante no llega a los destinatarios internos", async () => {
@@ -183,6 +241,114 @@ describe("2. petición PRIVADA — nada sensible en los correos", () => {
     await submit(privateForm);
 
     expect(state.insertedRow).toMatchObject({ request_text: PRIVATE_TEXT, is_private: true, phone: PHONE });
+  });
+});
+
+describe("petición privada — destinatario único y orden de resolución", () => {
+  const privateForm = { request: PRIVATE_TEXT, phone: PHONE, email: VISITOR_EMAIL, isPrivate: "on" };
+
+  it("1) el principal propio de Peticiones de oración, si está configurado", async () => {
+    state.configRows.push({
+      form_key: "oracion",
+      config: { internal: { useDefaultRecipient: false, primary: "propio@example.com", additional: ["otro@example.com"] } },
+    });
+    vi.stubEnv("EMAIL_NOTIFICATION_TO", "respaldo@example.com");
+
+    await submit(privateForm);
+
+    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["propio@example.com"]);
+  });
+
+  it("2) si no hay propio, el correo administrativo global del CMS", async () => {
+    state.configRows.push({ form_key: "oracion", config: { internal: { additional: ["otro@example.com"] } } });
+    vi.stubEnv("EMAIL_NOTIFICATION_TO", "respaldo@example.com");
+
+    await submit(privateForm);
+
+    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["admin@example.com"]);
+  });
+
+  it("3) si tampoco hay global, EMAIL_NOTIFICATION_TO", async () => {
+    state.configRows = [{ form_key: "oracion", config: { internal: { additional: ["otro@example.com"] } } }];
+    vi.stubEnv("EMAIL_NOTIFICATION_TO", "respaldo@example.com");
+
+    await submit(privateForm);
+
+    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["respaldo@example.com"]);
+  });
+
+  it("9. sin ningún destinatario principal: la petición se guarda, no falla el formulario y los adicionales NO reciben el aviso", async () => {
+    state.configRows = [
+      { form_key: "oracion", config: { internal: { additional: ["pastor@example.com", "equipo@example.com"] } } },
+    ];
+
+    const result = await submit(privateForm);
+
+    expect(result).toEqual({ success: true });
+    expect(state.insertedRow).toMatchObject({ request_text: PRIVATE_TEXT, is_private: true });
+    expect(batchMock).not.toHaveBeenCalled();
+    // La configuración faltante se registra, sin datos de la petición.
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("sin destinatario administrativo principal"));
+    const logged = JSON.stringify([
+      ...(console.warn as unknown as { mock: { calls: unknown[] } }).mock.calls,
+      ...(console.error as unknown as { mock: { calls: unknown[] } }).mock.calls,
+    ]);
+    expect(logged).not.toContain("enfermo");
+    expect(logged).not.toContain(VISITOR_EMAIL);
+  });
+
+  it("la notificación interna desactivada también aplica a las privadas", async () => {
+    state.configRows.push({ form_key: "oracion", config: { internal: { enabled: false } } });
+
+    await submit(privateForm);
+
+    expect(batchMock).not.toHaveBeenCalled();
+  });
+
+  it("8. la respuesta automática al visitante sigue funcionando y no menciona que es privada", async () => {
+    const result = await submit(privateForm);
+
+    expect(result).toEqual({ success: true });
+    const mail = sendMock.mock.calls[0][0];
+    expect(mail.to).toBe(VISITOR_EMAIL);
+    expect(mail.subject).toBe("Recibimos tu petición de oración | Inspira Church");
+    expect(mail.text).toContain("Hola María López,");
+    expect(mail.text).not.toMatch(/privad/i);
+    expect(mail.subject).not.toMatch(/privad/i);
+    expect(mail.text).not.toContain("enfermo");
+  });
+
+  it("6. el aviso no lleva Reply-To aunque el visitante haya dejado correo", async () => {
+    await submit(privateForm);
+
+    expect(batchMock.mock.calls[0][0][0]).not.toHaveProperty("replyTo");
+  });
+});
+
+describe("7. petición NO privada — sí usa los adicionales", () => {
+  it("principal + adicionales, un correo por destinatario, con Reply-To", async () => {
+    state.configRows.push({
+      form_key: "oracion",
+      config: { internal: { useDefaultRecipient: false, primary: "principal@example.com", additional: ["pastor@example.com", "equipo@example.com"] } },
+    });
+
+    await submit({ email: VISITOR_EMAIL });
+
+    const payloads = batchMock.mock.calls[0][0];
+    expect(payloads.map((p: { to: string[] }) => p.to[0])).toEqual([
+      "principal@example.com",
+      "pastor@example.com",
+      "equipo@example.com",
+    ]);
+    for (const p of payloads) expect(p.replyTo).toBe(VISITOR_EMAIL);
+  });
+
+  it("sin principal pero con adicionales, la no privada igual avisa a los adicionales (la restricción es solo para privadas)", async () => {
+    state.configRows = [{ form_key: "oracion", config: { internal: { additional: ["pastor@example.com"] } } }];
+
+    await submit();
+
+    expect(batchMock.mock.calls[0][0].map((p: { to: string[] }) => p.to[0])).toEqual(["pastor@example.com"]);
   });
 });
 

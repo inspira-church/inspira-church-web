@@ -7,8 +7,13 @@ import {
 } from "@/lib/email/form-config";
 import { FORM_DEFINITIONS, type FormType } from "@/lib/email/form-definitions";
 import type { FormSubmissionEmail } from "@/lib/email/form-formatters";
-import { resolveInternalRecipients } from "@/lib/email/form-recipients";
-import { buildAutoReplyEmail, buildInternalEmail, sanitizeInline } from "@/lib/email/form-templates";
+import { resolveInternalRecipients, resolvePrimaryRecipient } from "@/lib/email/form-recipients";
+import {
+  buildAutoReplyEmail,
+  buildInternalEmail,
+  buildRestrictedNoticeEmail,
+  sanitizeInline,
+} from "@/lib/email/form-templates";
 import { getEmailFrom, getResendClient, isEmailConfigured } from "@/lib/email/resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -80,25 +85,39 @@ async function sendInternal(
 ): Promise<{ outcome: SendOutcome; recipients: number }> {
   if (!settings.config.internal.enabled) return { outcome: "skipped", recipients: 0 };
 
-  const recipients = resolveInternalRecipients({
+  const sources = {
     config: settings.config,
     defaultRecipient: settings.defaultRecipient,
     envRecipient: process.env.EMAIL_NOTIFICATION_TO,
-  });
+  };
+
+  // Contenido restringido (petición de oración privada): UN solo destinatario, el
+  // principal autorizado. Los adicionales nunca reciben este aviso — ni siquiera
+  // cuando no hay principal (en ese caso el aviso se omite).
+  const restricted = Boolean(submission.restrictedNotice);
+  const recipients = restricted
+    ? [resolvePrimaryRecipient(sources)].filter((r): r is string => r !== null)
+    : resolveInternalRecipients(sources);
+
   if (recipients.length === 0) {
-    console.warn(`[email] formulario "${type}": sin destinatario configurado, se omite el aviso interno.`);
+    console.warn(
+      `[email] formulario "${type}": sin destinatario${restricted ? " administrativo principal" : ""} configurado, se omite el aviso interno.`
+    );
     return { outcome: "skipped", recipients: 0 };
   }
 
   const def = FORM_DEFINITIONS[type];
-  const { subject, text, html } = buildInternalEmail({
-    title: submission.title ?? def.internalTitle,
-    subjectPrefix: submission.subjectPrefix ?? def.internalSubject,
-    summary: sanitizeInline(submission.visitorName) || "sin nombre",
-    fields: submission.fields,
-    note: submission.note,
-    cmsUrl: `${SITE_URL}${def.adminPath}`,
-  });
+  const cmsUrl = `${SITE_URL}${def.adminPath}`;
+  const { subject, text, html } = submission.restrictedNotice
+    ? buildRestrictedNoticeEmail({ ...submission.restrictedNotice, cmsUrl })
+    : buildInternalEmail({
+        title: submission.title ?? def.internalTitle,
+        subjectPrefix: submission.subjectPrefix ?? def.internalSubject,
+        summary: sanitizeInline(submission.visitorName) || "sin nombre",
+        fields: submission.fields,
+        note: submission.note,
+        cmsUrl,
+      });
 
   try {
     // Un correo por destinatario, enviados en UNA llamada de lote: así nadie

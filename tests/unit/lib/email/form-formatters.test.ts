@@ -104,18 +104,19 @@ describe("formatPrayerSubmission", () => {
     expect(s.note).not.toContain("recortada");
   });
 
-  it("petición PRIVADA: solo nombre y aviso; el texto, teléfono y correo NO viajan", () => {
+  it("petición PRIVADA: aviso mínimo sin ningún dato del visitante (ni nombre, texto, teléfono ni correo)", () => {
     const s = formatPrayerSubmission({ ...base, isPrivate: true });
-    expect(labels(s)).toEqual(["Nombre"]);
-    // Todo lo que se escribe en el correo (visitorEmail solo es destino, no contenido).
-    const content = JSON.stringify({ fields: s.fields, note: s.note, title: s.title, subject: s.subjectPrefix });
+    expect(s.fields).toEqual([]);
+    expect(s.restrictedNotice).toEqual({
+      subject: "Nueva petición de oración privada | Inspira Church",
+      headline: "Se recibió una nueva petición de oración privada.",
+    });
+    // Todo lo que se escribe en el correo (visitorName/visitorEmail solo alimentan la respuesta automática).
+    const content = JSON.stringify({ fields: s.fields, note: s.note, title: s.title, notice: s.restrictedNotice });
+    expect(content).not.toContain("Luis");
     expect(content).not.toContain("Oren por mi familia.");
     expect(content).not.toContain("3001112233");
     expect(content).not.toContain("luis@example.com");
-    expect(s.title).toContain("PRIVADA");
-    expect(s.subjectPrefix).toContain("privada");
-    expect(s.note).toContain("registrada en el CMS");
-    expect(s.note).toContain("panel autorizado");
   });
 
   it("petición PRIVADA: sin Reply-To (el correo del visitante no llega a todos los destinatarios), pero la respuesta automática sigue posible", () => {

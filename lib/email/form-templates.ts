@@ -115,6 +115,34 @@ export function buildInternalEmail(input: InternalEmailInput) {
   return { subject, text, html };
 }
 
+export interface RestrictedNoticeInput {
+  /** Asunto exacto (sin datos del visitante). */
+  subject: string;
+  /** Una frase que dice qué ocurrió, sin datos del visitante. */
+  headline: string;
+  cmsUrl: string;
+}
+
+/**
+ * Aviso interno MÍNIMO para contenido restringido: no incluye ningún dato del
+ * visitante (ni nombre) ni campos del formulario; solo que llegó algo y dónde
+ * consultarlo con la sesión autorizada del CMS.
+ */
+export function buildRestrictedNoticeEmail(input: RestrictedNoticeInput) {
+  const registered = "La solicitud quedó registrada en el CMS de Inspira Church.";
+
+  const text = [input.headline, "", registered, "", "Consultar:", input.cmsUrl].join("\n");
+  const html = `
+    <div style="${WRAPPER_STYLE}">
+      <p style="margin: 0 0 14px;">${escapeHtml(input.headline)}</p>
+      <p style="margin: 0 0 14px;">${escapeHtml(registered)}</p>
+      <p style="margin: 0;">Consultar:<br><a href="${escapeHtml(input.cmsUrl)}">${escapeHtml(input.cmsUrl)}</a></p>
+    </div>
+  `.trim();
+
+  return { subject: sanitizeInline(input.subject, 150), text, html };
+}
+
 export function buildAutoReplyEmail(config: { subject: string; message: string }, vars: { nombre?: string | null }) {
   const subject = sanitizeInline(renderTemplate(config.subject, vars), 150);
   const body = renderTemplate(config.message, vars);

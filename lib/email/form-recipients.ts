@@ -42,15 +42,20 @@ export interface RecipientSources {
  * Los adicionales se suman siempre, sin repetir al principal. Si no hay
  * principal pero sí adicionales, los adicionales igual reciben el aviso.
  */
-export function resolveInternalRecipients({ config, defaultRecipient, envRecipient }: RecipientSources): string[] {
-  const { useDefaultRecipient, primary, additional } = config.internal;
+export function resolveInternalRecipients(sources: RecipientSources): string[] {
+  const principal = resolvePrimaryRecipient(sources);
+  return normalizeEmailList([...(principal ? [principal] : []), ...sources.config.internal.additional]);
+}
 
-  const candidates = [
-    useDefaultRecipient ? "" : primary,
-    defaultRecipient,
-    envRecipient ?? "",
-  ];
-  const principal = candidates.map((c) => c.trim()).find((c) => c && isValidEmail(c)) ?? null;
+/**
+ * Solo el destinatario PRINCIPAL (mismo orden de prioridad que arriba), o null
+ * si ninguno existe. Es el ÚNICO destinatario de los avisos de contenido
+ * restringido (una petición de oración privada): nunca los adicionales, ni
+ * cuando no hay principal — en ese caso el aviso simplemente no se envía.
+ */
+export function resolvePrimaryRecipient({ config, defaultRecipient, envRecipient }: RecipientSources): string | null {
+  const { useDefaultRecipient, primary } = config.internal;
 
-  return normalizeEmailList([...(principal ? [principal] : []), ...additional]);
+  const candidates = [useDefaultRecipient ? "" : primary, defaultRecipient, envRecipient ?? ""];
+  return candidates.map((c) => c.trim()).find((c) => c && isValidEmail(c)) ?? null;
 }

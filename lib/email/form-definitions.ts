@@ -72,7 +72,7 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
     internalSubject: "Nueva petición de oración en inspirachurch.co",
     adminPath: "/admin/oracion",
     cmsNote:
-      "Privacidad: una petición marcada como privada nunca incluye su texto en el correo (solo el nombre y un aviso para consultarla en el CMS, donde únicamente la lee el Administrador). Las demás se envían recortadas y sin teléfono ni correo. La petición completa siempre se consulta en Peticiones de oración.",
+      "Las peticiones marcadas como privadas se notifican únicamente al correo administrativo principal. Los correos adicionales no reciben avisos de peticiones privadas.",
     defaultAutoReply: {
       subject: "Recibimos tu petición de oración | Inspira Church",
       message: [

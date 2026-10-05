@@ -21,6 +21,13 @@ export interface FormSubmissionEmail {
   subjectPrefix?: string;
   /** true = el aviso interno NO lleva Reply-To (el correo del visitante no viaja a los destinatarios). */
   suppressReplyTo?: boolean;
+  /**
+   * Contenido restringido: el aviso interno va SOLO al destinatario principal
+   * (nunca a los adicionales) y es el aviso mínimo, sin ningún dato del
+   * visitante. Reemplaza a `fields`/`note`/`title`. La respuesta automática al
+   * visitante no se ve afectada.
+   */
+  restrictedNotice?: { subject: string; headline: string };
 }
 
 const clean = (value: string | null | undefined) => {
@@ -98,12 +105,15 @@ export const PRAYER_EMAIL_EXCERPT_LENGTH = 300;
  * Peticiones de oración — minimización de datos por ambos lados:
  *
  * - PRIVADA (el formulario le promete al visitante que solo el Administrador
- *   la lee, no el resto del equipo): el aviso lleva únicamente el nombre y la
- *   indicación de consultarla en el CMS. Ni el texto, ni el teléfono, ni el
- *   correo en el cuerpo, ni Reply-To (el correo del visitante no viaja a
- *   destinatarios que podrían no ser Administradores).
- * - NO privada: el texto va recortado y sin teléfono ni correo en el cuerpo
- *   (Reply-To sí, para poder responder). Lo completo se consulta en el CMS.
+ *   la lee): el aviso interno va ÚNICAMENTE al destinatario administrativo
+ *   principal (nunca a los adicionales) y es mínimo: dice que llegó una
+ *   petición privada y dónde consultarla. Ni nombre, ni texto, ni teléfono, ni
+ *   correo, ni Reply-To. `visitorName`/`visitorEmail` solo alimentan la
+ *   respuesta automática al visitante, que sigue funcionando y no menciona que
+ *   la petición es privada.
+ * - NO privada: puede usar principal + adicionales; el texto va recortado y sin
+ *   teléfono ni correo en el cuerpo (Reply-To sí, para poder responder). Lo
+ *   completo se consulta en el CMS.
  *
  * La respuesta automática al visitante nunca incluye el texto de su petición.
  */
@@ -113,11 +123,12 @@ export function formatPrayerSubmission(data: PrayerSubmissionInput): FormSubmiss
   if (data.isPrivate) {
     return {
       ...base,
-      title: "NUEVA PETICIÓN DE ORACIÓN PRIVADA",
-      subjectPrefix: "Nueva petición de oración privada en inspirachurch.co",
+      fields: [],
       suppressReplyTo: true,
-      fields: [{ label: "Nombre", value: data.name }],
-      note: "Nueva petición de oración privada recibida. La petición quedó registrada en el CMS: ingresa al panel autorizado (solo Administrador) para consultar su contenido.",
+      restrictedNotice: {
+        subject: "Nueva petición de oración privada | Inspira Church",
+        headline: "Se recibió una nueva petición de oración privada.",
+      },
     };
   }
 

@@ -1265,9 +1265,16 @@ crear otra función de correo.
   `/admin/oracion`; campos `name`, `phone`, `email`, `request`, `isPrivate`,
   `consent`): el formulario le promete al visitante que una petición privada la
   lee "solo el administrador (no el resto del equipo)", así que el aviso
-  interno de una **privada** lleva solo el nombre y "ingresa al panel
-  autorizado": sin texto, sin teléfono ni correo en el cuerpo y **sin
-  Reply-To** (`suppressReplyTo`). Una **no privada** lleva el texto recortado a
+  interno de una **privada** va a **un único destinatario**: el principal
+  autorizado (propio de oración → global del CMS → `EMAIL_NOTIFICATION_TO`,
+  `resolvePrimaryRecipient`); los adicionales **nunca** lo reciben, ni siquiera
+  si no hay principal (entonces el aviso se omite, se registra la
+  configuración faltante y la petición se guarda igual). Es un aviso mínimo
+  (`restrictedNotice` → `buildRestrictedNoticeEmail`): asunto "Nueva petición
+  de oración privada | Inspira Church" y enlace a `/admin/oracion`, **sin
+  nombre, texto, teléfono, correo ni Reply-To**. La respuesta automática al
+  visitante sigue funcionando y no menciona que es privada. Una **no privada**
+  puede ir a principal + adicionales, lleva el texto recortado a
   300 caracteres (`PRAYER_EMAIL_EXCERPT_LENGTH`) y sin teléfono ni correo en el
   cuerpo (Reply-To sí). La respuesta automática nunca repite la petición. Su
   texto predeterminado ("…estaremos orando por ella") vive en
