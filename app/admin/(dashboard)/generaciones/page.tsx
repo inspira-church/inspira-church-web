@@ -33,6 +33,7 @@ export default async function AdminGenerationsPage() {
               <ImageUploadField
                 label={photo.label}
                 name={`_${photo.key}`}
+                removable
                 bucket="site"
                 module={photo.key}
                 defaultValue={mediaMap[photo.key] ?? null}

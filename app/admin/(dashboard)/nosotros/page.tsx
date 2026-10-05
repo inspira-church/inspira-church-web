@@ -47,6 +47,7 @@ export default async function AdminAboutPage() {
             <ImageUploadField
               label="Foto principal"
               name="_nosotros_hero"
+              removable
               bucket="site"
               module={NOSOTROS_HERO_MODULE}
               defaultValue={heroUrl}
@@ -64,6 +65,7 @@ export default async function AdminAboutPage() {
             <ImageUploadField
               label="Foto de identidad"
               name="_nosotros_essence"
+              removable
               bucket="site"
               module={NOSOTROS_ESSENCE_MODULE}
               defaultValue={essenceUrl}

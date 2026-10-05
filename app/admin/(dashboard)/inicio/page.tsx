@@ -49,6 +49,7 @@ export default async function AdminHomePage() {
               key={slot}
               label={`Slide ${slot}`}
               name={`_hero_slide_${slot}`}
+              removable
               bucket="site"
               module={heroSlotModule(slot)}
               defaultValue={heroSlotUrl(slot)}

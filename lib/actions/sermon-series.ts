@@ -6,6 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { sermonSeriesSchema } from "@/lib/validations/sermon-series";
 
 function parseForm(formData: FormData) {
@@ -113,9 +114,10 @@ export async function updateSermonSeries(
   redirect("/admin/series");
 }
 
-export async function toggleSermonSeriesActive(id: string, nextActive: boolean) {
-  const supabase = await createClient();
-  await supabase.from("sermon_series").update({ active: nextActive }).eq("id", id);
+export async function toggleSermonSeriesActive(id: string, nextActive: boolean): Promise<ActionState> {
+  const failure = await setFlag("sermon_series", id, "active", nextActive);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "sermons",
     action: nextActive ? "activate" : "deactivate",
@@ -125,4 +127,5 @@ export async function toggleSermonSeriesActive(id: string, nextActive: boolean) 
   });
   revalidatePath("/admin/series");
   revalidatePath("/predicas");
+  return { success: true };
 }

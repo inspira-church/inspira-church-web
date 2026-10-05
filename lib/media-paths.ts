@@ -12,3 +12,15 @@ export function publicPathsForMediaModule(module: string | null | undefined): st
   if (module.startsWith("generaciones-")) return ["/generaciones"];
   return [];
 }
+
+/** Módulo de auditoría/permisos al que pertenece un slot de foto; null si `module` no es un slot. */
+export function auditModuleForMediaSlot(
+  module: string | null | undefined
+): "home" | "first_time" | "about" | "generations" | null {
+  if (!module) return null;
+  if (module.startsWith("hero-slide-")) return "home";
+  if (module === "primera-vez-hero") return "first_time";
+  if (module === "nosotros-hero" || module === "nosotros-essence") return "about";
+  if (module.startsWith("generaciones-")) return "generations";
+  return null;
+}

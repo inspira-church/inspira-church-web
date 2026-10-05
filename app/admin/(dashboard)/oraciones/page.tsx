@@ -2,6 +2,7 @@ import Image from "next/image";
 import { HandHeart } from "lucide-react";
 import Link from "next/link";
 import { ConfirmForm } from "@/components/admin/ConfirmForm";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
@@ -90,11 +91,9 @@ export default async function PrayerRecordingsAdminPage() {
               >
                 Editar
               </Link>
-              <form action={toggleSermonPublished.bind(null, sermon.id, !sermon.published)}>
-                <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-                  {sermon.published ? "Despublicar" : "Publicar"}
-                </button>
-              </form>
+              <ToggleButton action={toggleSermonPublished.bind(null, sermon.id, !sermon.published)}>
+                {sermon.published ? "Despublicar" : "Publicar"}
+              </ToggleButton>
               <ConfirmForm
                 action={deleteSermon.bind(null, sermon.id, sermon.title)}
                 confirmMessage={`¿Eliminar "${sermon.title}"? Esta acción no se puede deshacer.`}

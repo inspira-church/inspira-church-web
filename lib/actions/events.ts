@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { eventSchema } from "@/lib/validations/event";
 
 /** Mismo patrón que BeliefsEditor: `practicalInfoCount` oculto le dice al action cuántas filas leer de FormData. */
@@ -173,9 +174,10 @@ export async function updateEvent(
   redirect("/admin/eventos");
 }
 
-export async function toggleEventPublished(id: string, nextPublished: boolean) {
-  const supabase = await createClient();
-  await supabase.from("events").update({ published: nextPublished }).eq("id", id);
+export async function toggleEventPublished(id: string, nextPublished: boolean): Promise<ActionState> {
+  const failure = await setFlag("events", id, "published", nextPublished);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "events",
     action: nextPublished ? "publish" : "unpublish",
@@ -186,6 +188,7 @@ export async function toggleEventPublished(id: string, nextPublished: boolean) {
   revalidatePath("/admin/eventos");
   revalidatePath("/eventos");
   revalidatePath("/");
+  return { success: true };
 }
 
 export async function deleteEvent(id: string, name: string) {

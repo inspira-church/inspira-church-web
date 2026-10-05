@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { createMediaRecord } from "@/lib/actions/media";
+import { createMediaRecord, unlinkMediaSlot } from "@/lib/actions/media";
 import { ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_SIZE_BYTES } from "@/lib/validations/media";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,16 @@ interface ImageUploadFieldProps {
   acceptedMimeTypes?: readonly string[];
   /** Por defecto 5 MB. Debe coincidir con el límite real del bucket en Supabase Storage. */
   maxSizeBytes?: number;
+  /**
+   * Muestra "Quitar foto" cuando hay una imagen. Solo para imágenes opcionales.
+   * - Campo de una fila (sin `module`): deja el valor vacío y se persiste como
+   *   null al guardar el formulario.
+   * - Slot (con `module`): la foto vigente es la última fila de `media` de ese
+   *   módulo, así que se desvincula de inmediato en el servidor (igual que una
+   *   subida se publica de inmediato). En ambos casos el archivo NO se borra de
+   *   Storage: eso se decide en /admin/medios.
+   */
+  removable?: boolean;
 }
 
 /** El valor guardado es solo una URL — el formato se infiere de la extensión para decidir <video> vs <img>. */
@@ -54,10 +64,13 @@ export function ImageUploadField({
   module: mediaModule,
   acceptedMimeTypes = ALLOWED_IMAGE_MIME_TYPES,
   maxSizeBytes = MAX_IMAGE_SIZE_BYTES,
+  removable = false,
 }: ImageUploadFieldProps) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Mientras la imagen sube, el input oculto `name` todavía está vacío (o con
@@ -74,6 +87,7 @@ export function ImageUploadField({
     const file = e.target.files?.[0];
     if (!file || uploading) return;
     setError(null);
+    setNotice(null);
 
     if (!acceptedMimeTypes.includes(file.type)) {
       setError("Ese formato de archivo no está permitido.");
@@ -117,6 +131,38 @@ export function ImageUploadField({
     }
   }
 
+  async function handleRemove() {
+    setError(null);
+    setNotice(null);
+
+    if (mediaModule) {
+      if (
+        !window.confirm(
+          "¿Quitar esta foto del sitio? Dejará de mostrarse de inmediato; el archivo seguirá en la librería de medios."
+        )
+      ) {
+        return;
+      }
+      setRemoving(true);
+      try {
+        const result = await unlinkMediaSlot(mediaModule);
+        if ("error" in result) {
+          setError(result.error);
+          return;
+        }
+      } finally {
+        setRemoving(false);
+      }
+      setNotice("Foto quitada del sitio.");
+    } else {
+      setNotice("Foto quitada. Guarda el formulario para aplicar el cambio.");
+    }
+
+    setUrl("");
+    // Permite volver a elegir el mismo archivo después de quitarlo.
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   return (
     <div>
       <label className="text-sm font-medium text-ink">{label}</label>
@@ -151,8 +197,23 @@ export function ImageUploadField({
             className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-md file:border file:border-border-strong file:bg-paper-raised file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-paper"
           />
           {uploading && <p className="mt-1 text-xs text-ink-faint">Subiendo…</p>}
+          {removable && url && !uploading && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              disabled={removing}
+              className="mt-2 text-sm text-ink-soft underline-offset-2 hover:text-danger hover:underline disabled:opacity-50"
+            >
+              {removing ? "Quitando…" : "Quitar foto"}
+            </button>
+          )}
           {error && <p className="mt-1 text-xs text-danger">{error}</p>}
-          {hint && !error && <p className="mt-1 text-xs text-ink-faint">{hint}</p>}
+          {notice && !error && (
+            <p role="status" className="mt-1 text-xs text-ink-soft">
+              {notice}
+            </p>
+          )}
+          {hint && !error && !notice && <p className="mt-1 text-xs text-ink-faint">{hint}</p>}
         </div>
       </div>
     </div>

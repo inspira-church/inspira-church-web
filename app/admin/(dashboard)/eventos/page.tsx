@@ -2,6 +2,7 @@ import Image from "next/image";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { ConfirmForm } from "@/components/admin/ConfirmForm";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
@@ -93,11 +94,9 @@ export default async function EventsListPage() {
               >
                 Editar
               </Link>
-              <form action={toggleEventPublished.bind(null, event.id, !event.published)}>
-                <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-                  {event.published ? "Despublicar" : "Publicar"}
-                </button>
-              </form>
+              <ToggleButton action={toggleEventPublished.bind(null, event.id, !event.published)}>
+                {event.published ? "Despublicar" : "Publicar"}
+              </ToggleButton>
               <ConfirmForm
                 action={deleteEvent.bind(null, event.id, event.name)}
                 confirmMessage={`¿Eliminar "${event.name}"? Esta acción no se puede deshacer.`}

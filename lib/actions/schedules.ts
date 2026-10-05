@@ -6,6 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { scheduleSchema } from "@/lib/validations/schedule";
 
 function parseForm(formData: FormData) {
@@ -115,9 +116,10 @@ export async function updateSchedule(
   redirect("/admin/horarios");
 }
 
-export async function toggleScheduleActive(id: string, nextActive: boolean) {
-  const supabase = await createClient();
-  await supabase.from("schedules").update({ active: nextActive }).eq("id", id);
+export async function toggleScheduleActive(id: string, nextActive: boolean): Promise<ActionState> {
+  const failure = await setFlag("schedules", id, "active", nextActive);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "schedules",
     action: nextActive ? "activate" : "deactivate",
@@ -128,4 +130,5 @@ export async function toggleScheduleActive(id: string, nextActive: boolean) {
   revalidatePath("/admin/horarios");
   revalidatePath("/");
   revalidatePath("/oraciones");
+  return { success: true };
 }

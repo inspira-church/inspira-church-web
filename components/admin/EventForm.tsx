@@ -136,6 +136,7 @@ export function EventForm({ action, defaultValues }: EventFormProps) {
         <ImageUploadField
           label="Imagen"
           name="imageUrl"
+          removable
           bucket="events"
           defaultValue={defaultValues?.imageUrl}
         />

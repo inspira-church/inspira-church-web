@@ -1,6 +1,7 @@
 import { Clock } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -69,11 +70,9 @@ export default async function SchedulesListPage() {
               >
                 Editar
               </Link>
-              <form action={toggleScheduleActive.bind(null, schedule.id, !schedule.active)}>
-                <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-                  {schedule.active ? "Ocultar" : "Mostrar"}
-                </button>
-              </form>
+              <ToggleButton action={toggleScheduleActive.bind(null, schedule.id, !schedule.active)}>
+                {schedule.active ? "Ocultar" : "Mostrar"}
+              </ToggleButton>
             </div>
           ))}
         </div>

@@ -8,6 +8,7 @@ import { optionalText } from "@/lib/form-data";
 import { getSiteUrl } from "@/lib/get-site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { inviteUserSchema, updateUserSchema } from "@/lib/validations/user";
 
 const NOT_ADMIN_ERROR = "Solo un Administrador puede gestionar usuarios.";
@@ -142,12 +143,15 @@ export async function updateStaffUser(
   redirect("/admin/usuarios");
 }
 
-export async function toggleStaffActive(id: string, nextActive: boolean) {
+export async function toggleStaffActive(id: string, nextActive: boolean): Promise<ActionState> {
   const admin = await requireAdmin();
-  if (!admin) return;
+  if (!admin) return { error: NOT_ADMIN_ERROR };
 
-  const supabase = await createClient();
-  await supabase.from("profiles").update({ active: nextActive }).eq("id", id);
+  // El trigger protect_primary_admin_trigger rechaza desactivar al admin
+  // principal — es el error de base de datos más probable aquí.
+  const failure = await setFlag("profiles", id, "active", nextActive, PRIMARY_ADMIN_ERROR);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "users",
     action: nextActive ? "activate" : "deactivate",
@@ -156,4 +160,5 @@ export async function toggleStaffActive(id: string, nextActive: boolean) {
     description: `${nextActive ? "Activó" : "Desactivó"} a un usuario del staff.`,
   });
   revalidatePath("/admin/usuarios");
+  return { success: true };
 }

@@ -1,6 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -65,11 +66,9 @@ export default async function UsersListPage() {
                 Editar
               </Link>
               {!staffUser.is_primary && (
-                <form action={toggleStaffActive.bind(null, staffUser.id, !staffUser.active)}>
-                  <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-                    {staffUser.active ? "Desactivar" : "Activar"}
-                  </button>
-                </form>
+                <ToggleButton action={toggleStaffActive.bind(null, staffUser.id, !staffUser.active)}>
+                  {staffUser.active ? "Desactivar" : "Activar"}
+                </ToggleButton>
               )}
             </div>
           ))}

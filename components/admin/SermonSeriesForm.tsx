@@ -71,6 +71,7 @@ export function SermonSeriesForm({ action, defaultValues }: SermonSeriesFormProp
       <ImageUploadField
         label="Imagen de portada"
         name="coverImageUrl"
+        removable
         bucket="sermons"
         defaultValue={defaultValues?.coverImageUrl}
       />

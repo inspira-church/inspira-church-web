@@ -2,6 +2,7 @@ import Image from "next/image";
 import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -36,11 +37,9 @@ function MemberRow({ member }: { member: TeamMemberRow }) {
       <Link href={`/admin/equipo/${member.id}`} className="text-sm font-medium text-accent hover:underline">
         Editar
       </Link>
-      <form action={toggleTeamMemberActive.bind(null, member.id, !member.active)}>
-        <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-          {member.active ? "Ocultar" : "Mostrar"}
-        </button>
-      </form>
+      <ToggleButton action={toggleTeamMemberActive.bind(null, member.id, !member.active)}>
+        {member.active ? "Ocultar" : "Mostrar"}
+      </ToggleButton>
     </div>
   );
 }

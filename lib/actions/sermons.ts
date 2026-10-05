@@ -7,6 +7,7 @@ import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { getPublishedPrayerSermonsPage, getPublishedSermonsPage } from "@/lib/queries/sermons";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { sermonSchema } from "@/lib/validations/sermon";
 
 function parseForm(formData: FormData) {
@@ -151,9 +152,10 @@ export async function updateSermon(
   redirect("/admin/predicas");
 }
 
-export async function toggleSermonPublished(id: string, nextPublished: boolean) {
-  const supabase = await createClient();
-  await supabase.from("sermons").update({ published: nextPublished }).eq("id", id);
+export async function toggleSermonPublished(id: string, nextPublished: boolean): Promise<ActionState> {
+  const failure = await setFlag("sermons", id, "published", nextPublished);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "sermons",
     action: nextPublished ? "publish" : "unpublish",
@@ -162,6 +164,7 @@ export async function toggleSermonPublished(id: string, nextPublished: boolean) 
     description: `${nextPublished ? "Publicó" : "Despublicó"} una prédica.`,
   });
   revalidateSermonPages();
+  return { success: true };
 }
 
 export async function deleteSermon(id: string, title: string) {

@@ -179,6 +179,7 @@ export function SermonForm({
         <ImageUploadField
           label="Miniatura"
           name="thumbnailUrl"
+          removable
           bucket="sermons"
           defaultValue={defaultValues?.thumbnailUrl}
         />

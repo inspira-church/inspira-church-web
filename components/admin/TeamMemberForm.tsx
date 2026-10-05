@@ -76,6 +76,7 @@ export function TeamMemberForm({ action, defaultValues }: TeamMemberFormProps) {
         <ImageUploadField
           label="Foto"
           name="photoUrl"
+          removable
           bucket="pastors"
           defaultValue={defaultValues?.photoUrl}
         />

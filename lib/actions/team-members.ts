@@ -6,6 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { teamMemberSchema } from "@/lib/validations/team-member";
 
 function parseForm(formData: FormData) {
@@ -123,9 +124,10 @@ export async function updateTeamMember(
 }
 
 /** Baja lógica — sermons.preacher_id y growth_groups.leader_id apuntan aquí. */
-export async function toggleTeamMemberActive(id: string, nextActive: boolean) {
-  const supabase = await createClient();
-  await supabase.from("team_members").update({ active: nextActive }).eq("id", id);
+export async function toggleTeamMemberActive(id: string, nextActive: boolean): Promise<ActionState> {
+  const failure = await setFlag("team_members", id, "active", nextActive);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "team",
     action: nextActive ? "activate" : "deactivate",
@@ -134,4 +136,5 @@ export async function toggleTeamMemberActive(id: string, nextActive: boolean) {
     description: `${nextActive ? "Activó" : "Desactivó"} a un miembro del equipo.`,
   });
   revalidateTeamPages();
+  return { success: true };
 }

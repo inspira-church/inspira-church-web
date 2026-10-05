@@ -195,6 +195,7 @@ export function GenerationsAreasEditor({
             <ImageUploadField
               label="Foto"
               name={`_generaciones_area_${i}`}
+              removable
               bucket="site"
               module={generationsAreaPhotoModule(row.id)}
               defaultValue={mediaMap[generationsAreaPhotoModule(row.id)] ?? null}

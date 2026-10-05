@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Layers } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { ToggleButton } from "@/components/admin/ToggleButton";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -68,11 +69,9 @@ export default async function SermonSeriesListPage() {
               >
                 Editar
               </Link>
-              <form action={toggleSermonSeriesActive.bind(null, item.id, !item.active)}>
-                <button type="submit" className="text-sm text-ink-soft hover:text-ink">
-                  {item.active ? "Ocultar" : "Mostrar"}
-                </button>
-              </form>
+              <ToggleButton action={toggleSermonSeriesActive.bind(null, item.id, !item.active)}>
+                {item.active ? "Ocultar" : "Mostrar"}
+              </ToggleButton>
             </div>
           ))}
         </div>

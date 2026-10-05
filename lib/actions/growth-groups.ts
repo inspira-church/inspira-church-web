@@ -6,6 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
+import { setFlag } from "@/lib/toggle-flag";
 import { growthGroupSchema } from "@/lib/validations/growth-group";
 
 function parseForm(formData: FormData) {
@@ -138,9 +139,10 @@ export async function updateGrowthGroup(
   redirect("/admin/grupos");
 }
 
-export async function toggleGrowthGroupActive(id: string, nextActive: boolean) {
-  const supabase = await createClient();
-  await supabase.from("growth_groups").update({ active: nextActive }).eq("id", id);
+export async function toggleGrowthGroupActive(id: string, nextActive: boolean): Promise<ActionState> {
+  const failure = await setFlag("growth_groups", id, "active", nextActive);
+  if (failure) return { error: failure };
+
   await logAudit({
     module: "groups",
     action: nextActive ? "activate" : "deactivate",
@@ -151,4 +153,5 @@ export async function toggleGrowthGroupActive(id: string, nextActive: boolean) {
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
   revalidatePath("/grupos/unirme");
+  return { success: true };
 }

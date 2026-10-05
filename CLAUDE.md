@@ -1353,9 +1353,17 @@ revisar qué puerto tomó antes de asumir que está caído.
     Cada acción de contenido invalida con `revalidatePath` todas las páginas
     **estáticas** que muestran su dato (las rutas `[slug]` son dinámicas y
     siempre frescas). `ImageUploadField` bloquea el envío del formulario
-    mientras sube. Pendientes menores de esa auditoría: los `toggle*Active`/
-    `toggleSermonPublished` ignoran el error de Supabase (no hay feedback si
-    fallan), y el editor no tiene botón "Quitar foto".
+    mientras sube.
+    **Interruptores** (`toggle*Active`/`toggleSermonPublished`/
+    `toggleEventPublished`/`toggleStaffActive`): usan `setFlag`
+    (`lib/toggle-flag.ts`, comprueba error y filas afectadas), devuelven
+    `ActionState` y la UI es `components/admin/ToggleButton.tsx` (muestra el
+    error); si falla no se audita ni revalida. **"Quitar foto"**
+    (`ImageUploadField removable`): en campos de una fila deja el valor vacío y
+    se persiste `null` al Guardar; en *slots* de `media` (con `module`)
+    llama `unlinkMediaSlot` (`module = null`, de inmediato). En ningún caso
+    se borra el archivo de Storage: queda en `/admin/medios` (grupo "Otros"
+    para los slots) para borrarlo allí con confirmación.
 11. ~~Migración `027_generations.sql` sin aplicar en producción~~ —
     resuelto: aplicada (crea `generations_registrations` y extiende
     `media_select_public_hero`), verificada con una consulta de

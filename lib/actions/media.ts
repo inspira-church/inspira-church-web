@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
-import { publicPathsForMediaModule } from "@/lib/media-paths";
+import { auditModuleForMediaSlot, publicPathsForMediaModule } from "@/lib/media-paths";
 import { createClient } from "@/lib/supabase/server";
 import { createMediaRecordSchema } from "@/lib/validations/media";
 
@@ -135,5 +135,45 @@ export async function deleteMedia(mediaId: string) {
   revalidatePath("/admin/medios");
   // Si era la foto de una página pública, ese HTML en caché apuntaría a un archivo que ya no existe.
   for (const path of publicPathsForMediaModule(media.module)) revalidatePath(path);
+  return { success: true };
+}
+
+/**
+ * "Quitar foto" de un slot (hero de Inicio, Nosotros, Primera vez,
+ * Generaciones). La foto vigente de un slot es la fila más reciente de
+ * `media` con ese `module`, así que quitarla significa desvincular TODAS las
+ * filas de ese módulo (si quedara una anterior, reaparecería).
+ *
+ * Solo se desvincula (`module = null`): la fila y el archivo siguen en la
+ * librería (/admin/medios, grupo "Otros") y en Storage. Borrar el archivo
+ * físico es una decisión aparte que se toma allí, con confirmación — no se
+ * hace desde un botón de formulario porque el mismo archivo podría haberse
+ * reutilizado. Usa la política de update de staff que ya existe (009).
+ */
+export async function unlinkMediaSlot(module: string): Promise<{ error: string } | { success: true }> {
+  const auditModule = auditModuleForMediaSlot(module);
+  if (!auditModule) return { error: "Esa imagen no se puede quitar desde aquí." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("media")
+    .update({ module: null })
+    .eq("module", module)
+    .select("id");
+
+  if (error) return { error: "No se pudo quitar la foto. Intenta de nuevo." };
+  if (!data || data.length === 0) {
+    return { error: "No se quitó nada: la foto no existe o no tienes permiso para modificarla." };
+  }
+
+  await logAudit({
+    module: auditModule,
+    action: "update",
+    entityType: "media",
+    description: `Quitó la foto del slot "${module}" (el archivo sigue en la librería de medios).`,
+  });
+
+  revalidatePath("/admin/medios");
+  for (const path of publicPathsForMediaModule(module)) revalidatePath(path);
   return { success: true };
 }

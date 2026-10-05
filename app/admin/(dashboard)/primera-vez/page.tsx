@@ -39,6 +39,7 @@ export default async function AdminFirstTimePage() {
           <ImageUploadField
             label="Foto de portada"
             name="_primera_vez_hero"
+            removable
             bucket="site"
             module={PRIMERA_VEZ_HERO_MODULE}
             defaultValue={heroUrl}
