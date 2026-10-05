@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
 import { scheduleSchema } from "@/lib/validations/schedule";
 
@@ -13,7 +14,7 @@ function parseForm(formData: FormData) {
     name: formData.get("name"),
     dayOfWeek: formData.get("dayOfWeek"),
     timeOfDay: formData.get("timeOfDay"),
-    location: formData.get("location") || undefined,
+    location: optionalText(formData, "location"),
     orderIndex: formData.get("orderIndex") || 0,
     active: formData.get("active") === "on",
     recurrence: formData.get("recurrence") || "weekly",
@@ -61,6 +62,7 @@ export async function createSchedule(
 
   revalidatePath("/admin/horarios");
   revalidatePath("/");
+  revalidatePath("/oraciones");
   redirect("/admin/horarios");
 }
 
@@ -75,7 +77,8 @@ export async function updateSchedule(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // .select("id"): sin filas afectadas (RLS o id inexistente) no hay error de Supabase.
+  const { data: updated, error } = await supabase
     .from("schedules")
     .update({
       type: parsed.data.type,
@@ -88,10 +91,14 @@ export async function updateSchedule(
       recurrence: parsed.data.recurrence,
       monthly_week: parsed.data.monthlyWeek,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: el horario no existe o no tienes permiso para editarlo." };
   }
 
   await logAudit({
@@ -104,6 +111,7 @@ export async function updateSchedule(
 
   revalidatePath("/admin/horarios");
   revalidatePath("/");
+  revalidatePath("/oraciones");
   redirect("/admin/horarios");
 }
 
@@ -119,4 +127,5 @@ export async function toggleScheduleActive(id: string, nextActive: boolean) {
   });
   revalidatePath("/admin/horarios");
   revalidatePath("/");
+  revalidatePath("/oraciones");
 }

@@ -142,13 +142,21 @@ export async function updateEvent(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("events").update(toRow(parsed.data)).eq("id", id);
+  // .select("id"): sin filas afectadas (RLS o id inexistente) no hay error de Supabase.
+  const { data: updated, error } = await supabase
+    .from("events")
+    .update(toRow(parsed.data))
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     if (isDuplicateSlugError(error)) {
       return { fieldErrors: { slug: "Ese slug ya está en uso — elige otro." } };
     }
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: el evento no existe o no tienes permiso para editarlo." };
   }
 
   await logAudit({

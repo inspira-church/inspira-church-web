@@ -23,7 +23,7 @@ export default async function GroupJoinPage() {
   const groupOptions = groups.map((g) => ({
     id: g.id,
     slug: g.slug,
-    label: `${g.name} — ${g.locality ?? g.city}`,
+    label: `${g.name} — ${g.locality || g.city}`,
   }));
 
   return (

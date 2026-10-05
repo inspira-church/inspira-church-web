@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { getPublishedPrayerSermonsPage, getPublishedSermonsPage } from "@/lib/queries/sermons";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSchema } from "@/lib/validations/sermon";
@@ -15,7 +16,7 @@ function parseForm(formData: FormData) {
     slug: formData.get("slug"),
     seriesId: formData.get("seriesId") || undefined,
     preacherId: formData.get("preacherId") || undefined,
-    description: formData.get("description") || undefined,
+    description: optionalText(formData, "description"),
     youtubeUrl: formData.get("youtubeUrl"),
     thumbnailUrl: formData.get("thumbnailUrl") || undefined,
     sermonDate: formData.get("sermonDate"),
@@ -31,6 +32,20 @@ function parseForm(formData: FormData) {
 
 function isDuplicateSlugError(error: { code?: string } | null) {
   return error?.code === "23505";
+}
+
+/**
+ * Prédicas y grabaciones de oración comparten la tabla `sermons`: un cambio
+ * puede afectar /predicas, /oraciones y los bloques "Último mensaje"/"Ora con
+ * nosotros" de Inicio. Las páginas estáticas con ISR sirven la copia vieja
+ * hasta que alguien las regenera, así que se invalidan a mano.
+ */
+function revalidateSermonPages() {
+  revalidatePath("/admin/predicas");
+  revalidatePath("/admin/oraciones");
+  revalidatePath("/predicas");
+  revalidatePath("/oraciones");
+  revalidatePath("/");
 }
 
 export async function createSermon(
@@ -52,7 +67,8 @@ export async function createSermon(
       preacher_id: parsed.data.preacherId ?? null,
       description: parsed.data.description,
       youtube_url: parsed.data.youtubeUrl,
-      thumbnail_url: parsed.data.thumbnailUrl,
+      // `?? null`: si queda undefined, JSON.stringify omite la clave y la miniatura anterior no se limpia.
+      thumbnail_url: parsed.data.thumbnailUrl ?? null,
       sermon_date: parsed.data.sermonDate,
       topics: parsed.data.topics,
       published: parsed.data.published,
@@ -77,8 +93,7 @@ export async function createSermon(
     description: `Creó la prédica "${parsed.data.title}".`,
   });
 
-  revalidatePath("/admin/predicas");
-  revalidatePath("/predicas");
+  revalidateSermonPages();
   redirect("/admin/predicas");
 }
 
@@ -93,7 +108,8 @@ export async function updateSermon(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // .select("id"): sin filas afectadas (RLS o id inexistente) no hay error de Supabase.
+  const { data: updated, error } = await supabase
     .from("sermons")
     .update({
       title: parsed.data.title,
@@ -102,20 +118,25 @@ export async function updateSermon(
       preacher_id: parsed.data.preacherId ?? null,
       description: parsed.data.description,
       youtube_url: parsed.data.youtubeUrl,
-      thumbnail_url: parsed.data.thumbnailUrl,
+      // `?? null`: si queda undefined, JSON.stringify omite la clave y la miniatura anterior no se limpia.
+      thumbnail_url: parsed.data.thumbnailUrl ?? null,
       sermon_date: parsed.data.sermonDate,
       topics: parsed.data.topics,
       published: parsed.data.published,
       featured: parsed.data.featured,
       meeting_type: parsed.data.meetingType ?? null,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     if (isDuplicateSlugError(error)) {
       return { fieldErrors: { slug: "Ese slug ya está en uso — elige otro." } };
     }
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: la prédica no existe o no tienes permiso para editarla." };
   }
 
   await logAudit({
@@ -126,8 +147,7 @@ export async function updateSermon(
     description: `Actualizó la prédica "${parsed.data.title}".`,
   });
 
-  revalidatePath("/admin/predicas");
-  revalidatePath("/predicas");
+  revalidateSermonPages();
   redirect("/admin/predicas");
 }
 
@@ -141,8 +161,7 @@ export async function toggleSermonPublished(id: string, nextPublished: boolean) 
     entityId: id,
     description: `${nextPublished ? "Publicó" : "Despublicó"} una prédica.`,
   });
-  revalidatePath("/admin/predicas");
-  revalidatePath("/predicas");
+  revalidateSermonPages();
 }
 
 export async function deleteSermon(id: string, title: string) {

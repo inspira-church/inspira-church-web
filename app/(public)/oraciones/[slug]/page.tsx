@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const siteUrl = await getSiteUrl();
   const title = `Oración · ${dayNameFromDate(sermon.sermon_date)} ${formatDate(sermon.sermon_date)} | Inspira Church`;
   const description =
-    sermon.description ??
+    sermon.description ||
     `Revive este encuentro de oración de Inspira Church, ${formatDate(sermon.sermon_date)}.`;
 
   return {

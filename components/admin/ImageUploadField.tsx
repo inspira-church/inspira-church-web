@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createMediaRecord } from "@/lib/actions/media";
 import { ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_SIZE_BYTES } from "@/lib/validations/media";
 import { createClient } from "@/lib/supabase/client";
@@ -60,9 +60,19 @@ export function ImageUploadField({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Mientras la imagen sube, el input oculto `name` todavía está vacío (o con
+  // la foto anterior). Si el formulario se enviara ahora, guardaría sin la
+  // foto nueva y la subida terminaría "en el vacío". Un customValidity en el
+  // input de archivo hace que el navegador bloquee el envío y lo explique.
+  useEffect(() => {
+    inputRef.current?.setCustomValidity(
+      uploading ? "Espera a que termine de subir la imagen antes de guardar." : ""
+    );
+  }, [uploading]);
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || uploading) return;
     setError(null);
 
     if (!acceptedMimeTypes.includes(file.type)) {
@@ -136,7 +146,8 @@ export function ImageUploadField({
             type="file"
             accept={acceptedMimeTypes.join(",")}
             onChange={handleFileChange}
-            disabled={uploading}
+            // Sin `disabled`: un input deshabilitado queda fuera de la validación
+            // del formulario y el customValidity de arriba no bloquearía el envío.
             className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-md file:border file:border-border-strong file:bg-paper-raised file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-paper"
           />
           {uploading && <p className="mt-1 text-xs text-ink-faint">Subiendo…</p>}

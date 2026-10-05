@@ -72,3 +72,34 @@ describe("siteSettingsSchema", () => {
     );
   });
 });
+
+describe("siteSettingsSchema — coordenadas de la sede", () => {
+  it("null (sede sin coordenadas) no se convierte en 0,0", () => {
+    // saveSettingsPartial mergea sobre getSiteSettings(), donde "sin sede" es null.
+    const result = siteSettingsSchema.safeParse({ ...valid, churchLat: null, churchLng: null });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.churchLat).toBeUndefined();
+      expect(result.data.churchLng).toBeUndefined();
+    }
+  });
+
+  it('"" (campo vaciado en el formulario) tampoco es 0', () => {
+    const result = siteSettingsSchema.safeParse({ ...valid, churchLat: "", churchLng: "" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.churchLat).toBeUndefined();
+  });
+
+  it("un valor real sigue aceptándose y coaccionándose", () => {
+    const result = siteSettingsSchema.safeParse({ ...valid, churchLat: "4.722", churchLng: "-74.052727" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.churchLat).toBe(4.722);
+      expect(result.data.churchLng).toBe(-74.052727);
+    }
+  });
+
+  it("sigue rechazando coordenadas fuera de rango", () => {
+    expect(siteSettingsSchema.safeParse({ ...valid, churchLat: 120 }).success).toBe(false);
+  });
+});

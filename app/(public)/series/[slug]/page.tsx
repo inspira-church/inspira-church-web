@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const series = await getSermonSeriesBySlug(slug);
   if (!series) return {};
   const title = `${series.name} | Inspira Church`;
-  const description = series.description ?? `Prédicas de la serie ${series.name} en Inspira Church.`;
+  const description = series.description || `Prédicas de la serie ${series.name} en Inspira Church.`;
   return {
     title,
     description,

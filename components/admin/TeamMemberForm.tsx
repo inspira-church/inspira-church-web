@@ -70,7 +70,7 @@ export function TeamMemberForm({ action, defaultValues }: TeamMemberFormProps) {
           label="Biografía"
           name="bio"
           defaultValue={defaultValues?.bio ?? ""}
-          hint="Opcional — se muestra en la página Nosotros."
+          hint="Opcional. Si la dejas vacía, en /nosotros no aparece el botón «Conocer su historia»."
         />
 
         <ImageUploadField

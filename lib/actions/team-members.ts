@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
 import { teamMemberSchema } from "@/lib/validations/team-member";
 
@@ -12,11 +13,42 @@ function parseForm(formData: FormData) {
     fullName: formData.get("fullName"),
     type: formData.get("type"),
     roleTitle: formData.get("roleTitle"),
-    bio: formData.get("bio") || undefined,
+    // Texto: "" es válido (biografía vaciada a propósito). Ver lib/form-data.ts.
+    bio: optionalText(formData, "bio"),
+    // URL: un vacío no es una URL válida, se normaliza a null en toRow.
     photoUrl: formData.get("photoUrl") || undefined,
     orderIndex: formData.get("orderIndex") || 0,
     active: formData.get("active") === "on",
   };
+}
+
+function toRow(data: ReturnType<typeof teamMemberSchema.parse>) {
+  return {
+    full_name: data.fullName,
+    type: data.type,
+    role_title: data.roleTitle,
+    // Sin `?? null`: "" debe persistirse como "" y `undefined` (campo ausente)
+    // no debe tocar la columna.
+    bio: data.bio,
+    // `?? null` y no `data.photoUrl` a secas: si queda `undefined`,
+    // JSON.stringify omite la clave y la foto anterior nunca se limpiaría.
+    photo_url: data.photoUrl ?? null,
+    order_index: data.orderIndex,
+    active: data.active,
+  };
+}
+
+/**
+ * Los miembros del equipo se muestran en /nosotros (pastores y liderazgo) y
+ * sus nombres/fotos como predicador en Inicio, /predicas y /oraciones. Las
+ * páginas estáticas con ISR sirven la copia vieja hasta que alguien las
+ * regenera, así que cada cambio las invalida a mano.
+ */
+function revalidateTeamPages() {
+  revalidatePath("/admin/equipo");
+  revalidatePath("/nosotros");
+  revalidatePath("/oraciones");
+  revalidatePath("/");
 }
 
 export async function createTeamMember(
@@ -31,15 +63,7 @@ export async function createTeamMember(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("team_members")
-    .insert({
-      full_name: parsed.data.fullName,
-      type: parsed.data.type,
-      role_title: parsed.data.roleTitle,
-      bio: parsed.data.bio,
-      photo_url: parsed.data.photoUrl,
-      order_index: parsed.data.orderIndex,
-      active: parsed.data.active,
-    })
+    .insert(toRow(parsed.data))
     .select("id")
     .single();
 
@@ -55,7 +79,7 @@ export async function createTeamMember(
     description: `Creó a "${parsed.data.fullName}" en el equipo.`,
   });
 
-  revalidatePath("/admin/equipo");
+  revalidateTeamPages();
   redirect("/admin/equipo");
 }
 
@@ -70,21 +94,20 @@ export async function updateTeamMember(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // .select("id"): un update bloqueado por RLS o sobre un id inexistente no
+  // devuelve error, solo 0 filas — sin esto el formulario diría "guardado"
+  // sin haber guardado nada.
+  const { data: updated, error } = await supabase
     .from("team_members")
-    .update({
-      full_name: parsed.data.fullName,
-      type: parsed.data.type,
-      role_title: parsed.data.roleTitle,
-      bio: parsed.data.bio,
-      photo_url: parsed.data.photoUrl,
-      order_index: parsed.data.orderIndex,
-      active: parsed.data.active,
-    })
-    .eq("id", id);
+    .update(toRow(parsed.data))
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: el miembro no existe o no tienes permiso para editarlo." };
   }
 
   await logAudit({
@@ -95,7 +118,7 @@ export async function updateTeamMember(
     description: `Actualizó a "${parsed.data.fullName}" en el equipo.`,
   });
 
-  revalidatePath("/admin/equipo");
+  revalidateTeamPages();
   redirect("/admin/equipo");
 }
 
@@ -110,5 +133,5 @@ export async function toggleTeamMemberActive(id: string, nextActive: boolean) {
     entityId: id,
     description: `${nextActive ? "Activó" : "Desactivó"} a un miembro del equipo.`,
   });
-  revalidatePath("/admin/equipo");
+  revalidateTeamPages();
 }

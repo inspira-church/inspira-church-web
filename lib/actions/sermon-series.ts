@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
 import { sermonSeriesSchema } from "@/lib/validations/sermon-series";
 
@@ -11,7 +12,7 @@ function parseForm(formData: FormData) {
   return {
     name: formData.get("name"),
     slug: formData.get("slug"),
-    description: formData.get("description") || undefined,
+    description: optionalText(formData, "description"),
     coverImageUrl: formData.get("coverImageUrl") || undefined,
     active: formData.get("active") === "on",
   };
@@ -38,7 +39,7 @@ export async function createSermonSeries(
       name: parsed.data.name,
       slug: parsed.data.slug,
       description: parsed.data.description,
-      cover_image_url: parsed.data.coverImageUrl,
+      cover_image_url: parsed.data.coverImageUrl ?? null,
       active: parsed.data.active,
     })
     .select("id")
@@ -60,6 +61,7 @@ export async function createSermonSeries(
   });
 
   revalidatePath("/admin/series");
+  revalidatePath("/predicas");
   redirect("/admin/series");
 }
 
@@ -74,22 +76,28 @@ export async function updateSermonSeries(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // .select("id"): sin filas afectadas (RLS o id inexistente) no hay error de Supabase.
+  const { data: updated, error } = await supabase
     .from("sermon_series")
     .update({
       name: parsed.data.name,
       slug: parsed.data.slug,
       description: parsed.data.description,
-      cover_image_url: parsed.data.coverImageUrl,
+      // `?? null`: si queda undefined, JSON.stringify omite la clave y la portada anterior no se limpia.
+      cover_image_url: parsed.data.coverImageUrl ?? null,
       active: parsed.data.active,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     if (isDuplicateSlugError(error)) {
       return { fieldErrors: { slug: "Ese slug ya está en uso — elige otro." } };
     }
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: la serie no existe o no tienes permiso para editarla." };
   }
 
   await logAudit({
@@ -101,6 +109,7 @@ export async function updateSermonSeries(
   });
 
   revalidatePath("/admin/series");
+  revalidatePath("/predicas");
   redirect("/admin/series");
 }
 
@@ -115,4 +124,5 @@ export async function toggleSermonSeriesActive(id: string, nextActive: boolean) 
     description: `${nextActive ? "Activó" : "Desactivó"} una serie.`,
   });
   revalidatePath("/admin/series");
+  revalidatePath("/predicas");
 }

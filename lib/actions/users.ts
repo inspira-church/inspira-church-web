@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { getSiteUrl } from "@/lib/get-site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -104,7 +105,7 @@ export async function updateStaffUser(
 
   const parsed = updateUserSchema.safeParse({
     fullName: formData.get("fullName"),
-    phone: formData.get("phone") || undefined,
+    phone: optionalText(formData, "phone"),
     role: formData.get("role"),
     active: formData.get("active") === "on",
   });

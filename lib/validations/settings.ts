@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+/**
+ * saveSettingsPartial mergea sobre getSiteSettings(), donde "sin coordenadas"
+ * es `null`. z.coerce.number() convierte null en 0, así que guardar cualquier
+ * otra sección (Inicio, Contacto…) sin sede configurada escribía lat/lng = 0
+ * (un punto en el océano) y `hasLocation` pasaba a verdadero. null y "" son
+ * "sin valor", no un número.
+ */
+const optionalCoordinate = (min: number, max: number) =>
+  z.preprocess(
+    (value) => (value === null || value === "" ? undefined : value),
+    z.coerce.number().min(min).max(max).optional()
+  );
+
 export const siteSettingsSchema = z.object({
   whatsappNumber: z
     .string()
@@ -14,8 +27,8 @@ export const siteSettingsSchema = z.object({
   youtubeUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   privacyPolicyUrl: z.string().trim().url("Ingresa una URL válida.").optional().or(z.literal("")),
   churchAddress: z.string().trim().max(300).optional(),
-  churchLat: z.coerce.number().min(-90).max(90).optional(),
-  churchLng: z.coerce.number().min(-180).max(180).optional(),
+  churchLat: optionalCoordinate(-90, 90),
+  churchLng: optionalCoordinate(-180, 180),
   youtubeChannelId: z
     .string()
     .trim()

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
+import { optionalText } from "@/lib/form-data";
 import { createClient } from "@/lib/supabase/server";
 import { growthGroupSchema } from "@/lib/validations/growth-group";
 
@@ -12,10 +13,10 @@ function parseForm(formData: FormData) {
     name: formData.get("name"),
     slug: formData.get("slug"),
     groupType: formData.get("groupType"),
-    description: formData.get("description") || undefined,
+    description: optionalText(formData, "description"),
     city: formData.get("city"),
-    locality: formData.get("locality") || undefined,
-    sector: formData.get("sector") || undefined,
+    locality: optionalText(formData, "locality"),
+    sector: optionalText(formData, "sector"),
     latApprox: formData.get("latApprox") || undefined,
     lngApprox: formData.get("lngApprox") || undefined,
     locationPublic: formData.get("locationPublic") === "on",
@@ -23,9 +24,9 @@ function parseForm(formData: FormData) {
     timeOfDay: formData.get("timeOfDay"),
     leaderId: formData.get("leaderId") || undefined,
     coleaderId: formData.get("coleaderId") || undefined,
-    exactAddress: formData.get("exactAddress") || undefined,
-    leaderPhonePrivate: formData.get("leaderPhonePrivate") || undefined,
-    internalNotes: formData.get("internalNotes") || undefined,
+    exactAddress: optionalText(formData, "exactAddress"),
+    leaderPhonePrivate: optionalText(formData, "leaderPhonePrivate"),
+    internalNotes: optionalText(formData, "internalNotes"),
     active: formData.get("active") === "on",
   };
 }
@@ -34,6 +35,7 @@ function isDuplicateSlugError(error: { code?: string } | null) {
   return error?.code === "23505";
 }
 
+/** Texto opcional: "" se persiste tal cual (ver lib/form-data.ts); lat/lng y líderes sí usan null. */
 function toRow(data: ReturnType<typeof growthGroupSchema.parse>) {
   return {
     name: data.name,
@@ -90,6 +92,7 @@ export async function createGrowthGroup(
 
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
+  revalidatePath("/grupos/unirme");
   redirect("/admin/grupos");
 }
 
@@ -104,16 +107,21 @@ export async function updateGrowthGroup(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // .select("id"): sin filas afectadas (RLS o id inexistente) no hay error de Supabase.
+  const { data: updated, error } = await supabase
     .from("growth_groups")
     .update(toRow(parsed.data))
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     if (isDuplicateSlugError(error)) {
       return { fieldErrors: { slug: "Ese slug ya está en uso — elige otro." } };
     }
     return { error: "No se pudo guardar. Intenta de nuevo." };
+  }
+  if (!updated || updated.length === 0) {
+    return { error: "No se guardó nada: el grupo no existe o no tienes permiso para editarlo." };
   }
 
   await logAudit({
@@ -126,6 +134,7 @@ export async function updateGrowthGroup(
 
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
+  revalidatePath("/grupos/unirme");
   redirect("/admin/grupos");
 }
 
@@ -141,4 +150,5 @@ export async function toggleGrowthGroupActive(id: string, nextActive: boolean) {
   });
   revalidatePath("/admin/grupos");
   revalidatePath("/grupos");
+  revalidatePath("/grupos/unirme");
 }

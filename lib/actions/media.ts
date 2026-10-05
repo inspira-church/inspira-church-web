@@ -93,6 +93,16 @@ export async function createMediaRecord(input: CreateMediaInput): Promise<Create
           : 'Reemplazó la foto de la sección "Amamos a Dios. Amamos a las personas." en Nosotros.',
     });
   }
+  if (parsed.data.module?.startsWith("generaciones-")) {
+    revalidatePath("/generaciones");
+    await logAudit({
+      module: "generations",
+      action: "update",
+      entityType: "media",
+      entityId: data.id,
+      description: `Reemplazó una foto de la página Generaciones (${parsed.data.module}).`,
+    });
+  }
   return { data: { id: data.id, url: publicUrl } };
 }
 
