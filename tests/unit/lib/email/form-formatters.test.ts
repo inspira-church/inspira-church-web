@@ -5,6 +5,7 @@ import {
   formatGenerationsSubmission,
   formatGroupJoinSubmission,
   formatPrayerSubmission,
+  PRAYER_EMAIL_EXCERPT_LENGTH,
 } from "@/lib/email/form-formatters";
 
 const labels = (s: { fields: { label: string; value: string | null }[] }) => s.fields.map((f) => f.label);
@@ -69,24 +70,62 @@ describe("formatFirstTimeSubmission", () => {
 });
 
 describe("formatPrayerSubmission", () => {
-  const base = { name: "Luis", phone: null, email: null, requestText: "Oren por mi familia." };
+  const base = {
+    name: "Luis",
+    phone: "3001112233",
+    email: "luis@example.com",
+    requestText: "Oren por mi familia.",
+  };
 
-  it("petición pública: incluye el texto", () => {
+  it("petición NO privada: incluye el texto, pero sin teléfono ni correo en el cuerpo", () => {
     const s = formatPrayerSubmission({ ...base, isPrivate: false });
+    expect(labels(s)).toEqual(["Nombre", "Petición"]);
     expect(value(s, "Petición")).toBe("Oren por mi familia.");
-    expect(s.note).toBeNull();
+    expect(JSON.stringify(s.fields)).not.toContain("3001112233");
+    expect(JSON.stringify(s.fields)).not.toContain("luis@example.com");
+    // El correo del visitante sí viaja como destino de la respuesta y Reply-To.
+    expect(s.visitorEmail).toBe("luis@example.com");
+    expect(s.suppressReplyTo).toBeUndefined();
   });
 
-  it("petición PRIVADA: el texto NO viaja por correo (solo el Administrador la lee en el CMS)", () => {
+  it("petición NO privada larga: se recorta y avisa que la completa está en el CMS", () => {
+    const long = "a".repeat(PRAYER_EMAIL_EXCERPT_LENGTH + 150);
+    const s = formatPrayerSubmission({ ...base, requestText: long, isPrivate: false });
+    const sent = value(s, "Petición") as string;
+    expect(sent.length).toBeLessThanOrEqual(PRAYER_EMAIL_EXCERPT_LENGTH + 1);
+    expect(sent.endsWith("…")).toBe(true);
+    expect(s.note).toContain("recortada");
+  });
+
+  it("petición NO privada corta no se recorta", () => {
+    const exact = "b".repeat(PRAYER_EMAIL_EXCERPT_LENGTH);
+    const s = formatPrayerSubmission({ ...base, requestText: exact, isPrivate: false });
+    expect(value(s, "Petición")).toBe(exact);
+    expect(s.note).not.toContain("recortada");
+  });
+
+  it("petición PRIVADA: solo nombre y aviso; el texto, teléfono y correo NO viajan", () => {
     const s = formatPrayerSubmission({ ...base, isPrivate: true });
-    expect(JSON.stringify(s)).not.toContain("Oren por mi familia.");
-    expect(value(s, "Petición")).toContain("Privada");
-    expect(s.note).toContain("privada");
+    expect(labels(s)).toEqual(["Nombre"]);
+    // Todo lo que se escribe en el correo (visitorEmail solo es destino, no contenido).
+    const content = JSON.stringify({ fields: s.fields, note: s.note, title: s.title, subject: s.subjectPrefix });
+    expect(content).not.toContain("Oren por mi familia.");
+    expect(content).not.toContain("3001112233");
+    expect(content).not.toContain("luis@example.com");
+    expect(s.title).toContain("PRIVADA");
+    expect(s.subjectPrefix).toContain("privada");
+    expect(s.note).toContain("registrada en el CMS");
+    expect(s.note).toContain("panel autorizado");
   });
 
-  it("sin correo ni teléfono, esos campos no aparecen", () => {
-    const s = formatPrayerSubmission({ ...base, isPrivate: false });
-    expect(value(s, "Teléfono")).toBeNull();
+  it("petición PRIVADA: sin Reply-To (el correo del visitante no llega a todos los destinatarios), pero la respuesta automática sigue posible", () => {
+    const s = formatPrayerSubmission({ ...base, isPrivate: true });
+    expect(s.suppressReplyTo).toBe(true);
+    expect(s.visitorEmail).toBe("luis@example.com");
+  });
+
+  it("sin correo: visitorEmail null", () => {
+    const s = formatPrayerSubmission({ ...base, email: null, isPrivate: false });
     expect(s.visitorEmail).toBeNull();
   });
 });

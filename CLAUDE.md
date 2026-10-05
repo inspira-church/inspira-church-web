@@ -1258,10 +1258,22 @@ crear otra función de correo.
   saludo neutro). No es un motor de plantillas: no hay expresiones ni HTML; todo
   se escapa. El CMS rechaza cualquier otra `{{variable}}`. Para añadir una
   variable hay que agregarla a `ALLOWED_VARIABLES` y a `renderTemplate`.
-- **Minimización de datos**: una petición de oración privada no manda su texto
-  por correo (solo el Administrador la lee en el CMS); la inscripción de
-  Generaciones (datos de un menor) manda solo lo necesario para contactar al
-  acudiente (sin alergias, colegio ni contacto de emergencia).
+- **Minimización de datos**: la inscripción de Generaciones (datos de un
+  menor) manda solo lo necesario para contactar al acudiente (sin alergias,
+  colegio ni contacto de emergencia).
+- **Peticiones de oración** (`/oracion` → `prayer_requests`, bandeja
+  `/admin/oracion`; campos `name`, `phone`, `email`, `request`, `isPrivate`,
+  `consent`): el formulario le promete al visitante que una petición privada la
+  lee "solo el administrador (no el resto del equipo)", así que el aviso
+  interno de una **privada** lleva solo el nombre y "ingresa al panel
+  autorizado": sin texto, sin teléfono ni correo en el cuerpo y **sin
+  Reply-To** (`suppressReplyTo`). Una **no privada** lleva el texto recortado a
+  300 caracteres (`PRAYER_EMAIL_EXCERPT_LENGTH`) y sin teléfono ni correo en el
+  cuerpo (Reply-To sí). La respuesta automática nunca repite la petición. Su
+  texto predeterminado ("…estaremos orando por ella") vive en
+  `form-definitions.ts` solo como valor inicial: se edita desde el CMS. La
+  tarjeta del CMS muestra estas reglas y enlaza a la bandeja (configuración y
+  bandeja son pantallas separadas).
 - **Reply-To** del aviso interno = correo del visitante, solo si lo dejó.
   La respuesta automática solo sale si hay correo del visitante; el correo
   nunca se vuelve obligatorio por esta funcionalidad.

@@ -25,6 +25,8 @@ export interface FormDefinition {
   internalSubject: string;
   /** Ruta del CMS donde se ve la solicitud — solo rutas que existen. */
   adminPath: string;
+  /** Aviso opcional que el CMS muestra en la tarjeta del formulario (ej. reglas de privacidad). */
+  cmsNote?: string;
   /** Texto predeterminado de la respuesta automática. */
   defaultAutoReply: { subject: string; message: string };
 }
@@ -64,14 +66,26 @@ export const FORM_DEFINITIONS: Record<FormType, FormDefinition> = {
   },
   oracion: {
     type: "oracion",
-    label: "Petición de oración",
+    label: "Peticiones de oración",
     publicRoute: "/oracion",
     internalTitle: "NUEVA PETICIÓN DE ORACIÓN",
     internalSubject: "Nueva petición de oración en inspirachurch.co",
     adminPath: "/admin/oracion",
+    cmsNote:
+      "Privacidad: una petición marcada como privada nunca incluye su texto en el correo (solo el nombre y un aviso para consultarla en el CMS, donde únicamente la lee el Administrador). Las demás se envían recortadas y sin teléfono ni correo. La petición completa siempre se consulta en Peticiones de oración.",
     defaultAutoReply: {
       subject: "Recibimos tu petición de oración | Inspira Church",
-      message: message("Hemos recibido tu petición de oración."),
+      message: [
+        "Hola {{nombre}},",
+        "",
+        "Gracias por compartir tu petición de oración con Inspira Church.",
+        "",
+        "Hemos recibido tu solicitud y estaremos orando por ella.",
+        "",
+        "Dios te bendiga.",
+        "",
+        "Inspira Church",
+      ].join("\n"),
     },
   },
   grupos: {

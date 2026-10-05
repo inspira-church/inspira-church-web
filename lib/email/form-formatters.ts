@@ -16,6 +16,11 @@ export interface FormSubmissionEmail {
   visitorEmail: string | null;
   fields: EmailField[];
   note?: string | null;
+  /** Encabezado y prefijo de asunto propios de esta solicitud (si difieren de los del formulario). Nunca deben contener datos sensibles. */
+  title?: string;
+  subjectPrefix?: string;
+  /** true = el aviso interno NO lleva Reply-To (el correo del visitante no viaja a los destinatarios). */
+  suppressReplyTo?: boolean;
 }
 
 const clean = (value: string | null | undefined) => {
@@ -86,21 +91,50 @@ export interface PrayerSubmissionInput {
   isPrivate: boolean;
 }
 
+/** Cuántos caracteres de una petición NO privada viajan por correo; el resto se lee en el CMS. */
+export const PRAYER_EMAIL_EXCERPT_LENGTH = 300;
+
+/**
+ * Peticiones de oración — minimización de datos por ambos lados:
+ *
+ * - PRIVADA (el formulario le promete al visitante que solo el Administrador
+ *   la lee, no el resto del equipo): el aviso lleva únicamente el nombre y la
+ *   indicación de consultarla en el CMS. Ni el texto, ni el teléfono, ni el
+ *   correo en el cuerpo, ni Reply-To (el correo del visitante no viaja a
+ *   destinatarios que podrían no ser Administradores).
+ * - NO privada: el texto va recortado y sin teléfono ni correo en el cuerpo
+ *   (Reply-To sí, para poder responder). Lo completo se consulta en el CMS.
+ *
+ * La respuesta automática al visitante nunca incluye el texto de su petición.
+ */
 export function formatPrayerSubmission(data: PrayerSubmissionInput): FormSubmissionEmail {
+  const base = { visitorName: clean(data.name), visitorEmail: clean(data.email) };
+
+  if (data.isPrivate) {
+    return {
+      ...base,
+      title: "NUEVA PETICIÓN DE ORACIÓN PRIVADA",
+      subjectPrefix: "Nueva petición de oración privada en inspirachurch.co",
+      suppressReplyTo: true,
+      fields: [{ label: "Nombre", value: data.name }],
+      note: "Nueva petición de oración privada recibida. La petición quedó registrada en el CMS: ingresa al panel autorizado (solo Administrador) para consultar su contenido.",
+    };
+  }
+
+  const text = data.requestText.trim();
+  const truncated = text.length > PRAYER_EMAIL_EXCERPT_LENGTH;
   return {
-    visitorName: clean(data.name),
-    visitorEmail: clean(data.email),
+    ...base,
     fields: [
       { label: "Nombre", value: data.name },
-      { label: "Teléfono", value: clean(data.phone) },
-      { label: "Correo", value: clean(data.email) },
-      // Una petición privada solo la lee el Administrador en el CMS (RLS): su
-      // texto no viaja por correo a destinatarios que podrían no tener ese acceso.
-      { label: "Petición", value: data.isPrivate ? "Privada — el texto no se incluye en este correo." : data.requestText },
+      {
+        label: "Petición",
+        value: truncated ? `${text.slice(0, PRAYER_EMAIL_EXCERPT_LENGTH).trimEnd()}…` : text,
+      },
     ],
-    note: data.isPrivate
-      ? "Es una petición privada: léela en el CMS (solo Administrador) y respeta su confidencialidad."
-      : null,
+    note: truncated
+      ? "La petición está recortada: léela completa en el CMS. El teléfono y el correo también están allí."
+      : "El teléfono y el correo de contacto, si los dejó, están en el CMS.",
   };
 }
 

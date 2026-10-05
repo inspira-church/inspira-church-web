@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/admin/FormError";
 import { FormSection } from "@/components/admin/FormSection";
@@ -37,6 +38,10 @@ interface FormEmailConfigFormProps {
   formKey: FormType;
   label: string;
   publicRoute: string;
+  /** Ruta de la bandeja de solicitudes de este formulario en el CMS. */
+  inboxPath?: string;
+  /** Aviso opcional de reglas propias del formulario (ej. privacidad). */
+  note?: string;
   config: FormEmailConfig;
   /** Correo administrativo predeterminado vigente (global), solo informativo. */
   defaultRecipient: string;
@@ -54,6 +59,8 @@ export function FormEmailConfigForm({
   formKey,
   label,
   publicRoute,
+  inboxPath,
+  note,
   config,
   defaultRecipient,
 }: FormEmailConfigFormProps) {
@@ -76,6 +83,18 @@ export function FormEmailConfigForm({
       <div>
         <h2 className="font-display text-lg font-semibold text-ink">{label}</h2>
         <p className="mt-0.5 text-xs text-ink-faint">Formulario público: {publicRoute}</p>
+        {inboxPath && (
+          <p className="mt-0.5 text-xs text-ink-faint">
+            Las solicitudes recibidas se ven en{" "}
+            <Link href={inboxPath} className="text-accent underline">
+              su bandeja
+            </Link>
+            ; esta pantalla solo configura los correos.
+          </p>
+        )}
+        {note && (
+          <p className="mt-3 rounded-md border border-border bg-paper px-3 py-2 text-xs text-ink-soft">{note}</p>
+        )}
       </div>
 
       <FormError message={state.error} />

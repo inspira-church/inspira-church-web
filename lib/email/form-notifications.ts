@@ -92,8 +92,8 @@ async function sendInternal(
 
   const def = FORM_DEFINITIONS[type];
   const { subject, text, html } = buildInternalEmail({
-    title: def.internalTitle,
-    subjectPrefix: def.internalSubject,
+    title: submission.title ?? def.internalTitle,
+    subjectPrefix: submission.subjectPrefix ?? def.internalSubject,
     summary: sanitizeInline(submission.visitorName) || "sin nombre",
     fields: submission.fields,
     note: submission.note,
@@ -111,8 +111,11 @@ async function sendInternal(
         subject,
         text,
         html,
-        // Solo si el visitante dejó correo — nunca un replyTo inventado.
-        ...(submission.visitorEmail ? { replyTo: submission.visitorEmail } : {}),
+        // Solo si el visitante dejó correo — nunca un replyTo inventado — y salvo que el
+        // formulario lo suprima por privacidad (petición de oración privada).
+        ...(submission.visitorEmail && !submission.suppressReplyTo
+          ? { replyTo: submission.visitorEmail }
+          : {}),
       }))
     );
     if (error) {
