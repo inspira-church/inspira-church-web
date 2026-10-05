@@ -118,7 +118,7 @@ export default async function FirstTimePage() {
       <section className="border-b border-white/10 bg-black py-16 sm:py-24">
         <Container>
           <Eyebrow color={CAMPAIGN_COLORS[0]}>Tu camino con nosotros</Eyebrow>
-          <p className={cn(hind.className, "mt-5 max-w-2xl text-base text-white/70")}>
+          <p className={cn(hind.className, "mt-5 max-w-2xl text-lg text-white/70")}>
             Ya sea que nos visites por primera vez o que estés buscando una comunidad para
             crecer, aquí encontrarás diferentes maneras de dar tus primeros pasos con nosotros.
           </p>
@@ -135,7 +135,7 @@ export default async function FirstTimePage() {
                     aria-hidden="true"
                     className={cn(
                       anton.className,
-                      "pointer-events-none absolute right-3 top-3 select-none text-5xl leading-none text-[#008080] opacity-[0.18] transition-opacity duration-300 ease-out group-hover:opacity-[0.28]"
+                      "pointer-events-none absolute right-3 top-3 select-none text-6xl leading-none text-[#008080] opacity-[0.18] transition-opacity duration-300 ease-out group-hover:opacity-[0.28]"
                     )}
                   >
                     {item.num}
@@ -151,12 +151,12 @@ export default async function FirstTimePage() {
                     <h3
                       className={cn(
                         anton.className,
-                        "mt-6 text-xl uppercase leading-tight text-white"
+                        "mt-6 text-2xl uppercase leading-tight text-white"
                       )}
                     >
                       {item.title}
                     </h3>
-                    <p className={cn(hind.className, "mt-3 text-base leading-relaxed text-white/60")}>
+                    <p className={cn(hind.className, "mt-3 text-lg leading-relaxed text-white/60")}>
                       {item.description}
                     </p>
                   </div>
