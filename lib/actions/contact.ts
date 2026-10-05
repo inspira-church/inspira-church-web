@@ -1,6 +1,7 @@
 "use server";
 
-import { sendContactNotifications } from "@/lib/email/contact-emails";
+import { formatContactSubmission } from "@/lib/email/form-formatters";
+import { sendFormNotifications } from "@/lib/email/form-notifications";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -80,22 +81,23 @@ export async function submitContact(
   }
 
   // El contacto ya quedó guardado — a partir de aquí el email es una
-  // notificación secundaria. sendContactNotifications nunca lanza (cada
-  // envío atrapa su propio error), pero se envuelve en try/catch de todos
-  // modos: un fallo aquí jamás debe convertirse en un error para el
-  // visitante ni afectar el resultado ya exitoso del insert.
+  // notificación secundaria. sendFormNotifications nunca lanza (cada envío
+  // atrapa su propio error), pero se envuelve en try/catch de todos modos: un
+  // fallo aquí jamás debe convertirse en un error para el visitante ni
+  // afectar el resultado ya exitoso del insert. Destinatarios, activación y
+  // textos salen de la configuración del CMS (/admin/formularios/configuracion).
   try {
-    await sendContactNotifications(
-      {
+    await sendFormNotifications({
+      formType: "contacto",
+      submission: formatContactSubmission({
         name: parsed.data.name,
         reason: parsed.data.reason,
         phone: parsed.data.phone,
         email: parsed.data.email,
         preferredChannel: parsed.data.preferredChannel,
         message: parsed.data.message,
-      },
-      { internalTo: settings.contactEmail || process.env.EMAIL_NOTIFICATION_TO || null }
-    );
+      }),
+    });
   } catch (err) {
     console.error(
       "[contact] fallo inesperado notificando por email:",

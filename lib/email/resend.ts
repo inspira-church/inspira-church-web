@@ -2,8 +2,9 @@ import { Resend } from "resend";
 
 /**
  * Server-only por construcción: este módulo solo lo importa lib/email/
- * contact-emails.ts, que a su vez solo lo importa lib/actions/contact.ts
- * ("use server"). Nunca se referencia desde un Client Component, así que
+ * form-notifications.ts, que a su vez solo lo importan las Server Actions de
+ * los formularios públicos ("use server"). Nunca se referencia desde un
+ * Client Component, así que
  * Next.js nunca lo incluye en el bundle del navegador — mismo criterio que
  * lib/supabase/admin.ts (service_role) para módulos con credenciales.
  */
@@ -17,7 +18,7 @@ function warnNotConfiguredOnce() {
   if (warned) return;
   warned = true;
   console.warn(
-    "[email] RESEND_API_KEY o EMAIL_FROM no están configuradas — las notificaciones de contacto se omiten. Configúralas en .env.local antes de producción."
+    "[email] RESEND_API_KEY o EMAIL_FROM no están configuradas — las notificaciones de formularios se omiten. Configúralas en .env.local antes de producción."
   );
 }
 

@@ -28,9 +28,9 @@ vi.mock("@/lib/turnstile", () => ({
 }));
 
 // --- Capa de email: nunca se llama al Resend real desde un test. ---
-const sendContactNotificationsMock = vi.fn();
-vi.mock("@/lib/email/contact-emails", () => ({
-  sendContactNotifications: (...args: unknown[]) => sendContactNotificationsMock(...args),
+const sendFormNotificationsMock = vi.fn();
+vi.mock("@/lib/email/form-notifications", () => ({
+  sendFormNotifications: (...args: unknown[]) => sendFormNotificationsMock(...args),
 }));
 
 const { submitContact } = await import("@/lib/actions/contact");
@@ -54,8 +54,10 @@ describe("submitContact", () => {
   beforeEach(() => {
     fakeIp = `203.0.113.${Math.floor(Math.random() * 250) + 1}`; // evita chocar con el rate limit entre tests
     insertMock.mockReset().mockResolvedValue({ error: null });
-    getSiteSettingsMock.mockReset().mockResolvedValue({ contactEmail: "iglesia@example.com" });
-    sendContactNotificationsMock.mockReset().mockResolvedValue({ internal: "sent", visitor: "sent" });
+    getSiteSettingsMock.mockReset().mockResolvedValue({ privacyPolicyUrl: "" });
+    sendFormNotificationsMock
+      .mockReset()
+      .mockResolvedValue({ internal: "sent", visitor: "sent", internalRecipients: 1 });
   });
 
   it("guarda el contacto en Supabase y responde éxito en el caso normal", async () => {
@@ -65,7 +67,7 @@ describe("submitContact", () => {
   });
 
   it("el contacto se guarda aunque el envío de email interno falle", async () => {
-    sendContactNotificationsMock.mockRejectedValue(new Error("Resend caído"));
+    sendFormNotificationsMock.mockRejectedValue(new Error("Resend caído"));
 
     const result = await submitContact({}, buildFormData({ email: "juan@example.com" }));
 
@@ -74,7 +76,7 @@ describe("submitContact", () => {
   });
 
   it("un fallo en la confirmación al visitante no revierte el contacto ya guardado", async () => {
-    sendContactNotificationsMock.mockResolvedValue({ internal: "sent", visitor: "error" });
+    sendFormNotificationsMock.mockResolvedValue({ internal: "sent", visitor: "error", internalRecipients: 1 });
 
     const result = await submitContact({}, buildFormData({ email: "juan@example.com" }));
 
@@ -82,34 +84,37 @@ describe("submitContact", () => {
     expect(insertMock).toHaveBeenCalledTimes(1);
   });
 
-  it("sin correo del visitante, se llama a la capa de email sin email (no se inventa confirmación)", async () => {
+  it("sin correo del visitante, se llama al servicio central sin email (no se inventa confirmación)", async () => {
     const result = await submitContact({}, buildFormData());
 
     expect(result).toEqual({ success: true });
-    const [data] = sendContactNotificationsMock.mock.calls[0];
-    expect(data.email).toBeUndefined();
+    const [{ formType, submission }] = sendFormNotificationsMock.mock.calls[0];
+    expect(formType).toBe("contacto");
+    expect(submission.visitorEmail).toBeNull();
   });
 
-  it("con correo del visitante, se pasa el email a la capa de notificaciones", async () => {
+  it("con correo del visitante, se pasa al servicio central (respuesta automática y Reply-To)", async () => {
     await submitContact({}, buildFormData({ email: "juan@example.com" }));
 
-    const [data] = sendContactNotificationsMock.mock.calls[0];
-    expect(data.email).toBe("juan@example.com");
+    const [{ formType, submission }] = sendFormNotificationsMock.mock.calls[0];
+    expect(formType).toBe("contacto");
+    expect(submission.visitorEmail).toBe("juan@example.com");
+    expect(submission.visitorName).toBe("Juan Pérez");
   });
 
-  it("reutiliza site_settings.contactEmail como destinatario interno cuando existe", async () => {
-    getSiteSettingsMock.mockResolvedValue({ contactEmail: "pastor@inspirachurch.co" });
-
+  it("el correo interno lo decide la configuración del CMS: la acción ya no resuelve destinatarios", async () => {
     await submitContact({}, buildFormData({ email: "juan@example.com" }));
 
-    const [, opts] = sendContactNotificationsMock.mock.calls[0];
-    expect(opts.internalTo).toBe("pastor@inspirachurch.co");
+    const [arg] = sendFormNotificationsMock.mock.calls[0];
+    expect(arg).not.toHaveProperty("internalTo");
+    expect(arg).not.toHaveProperty("config");
   });
 
   it("proveedor de email no configurado no rompe el flujo (sigue guardando y respondiendo éxito)", async () => {
-    sendContactNotificationsMock.mockResolvedValue({
+    sendFormNotificationsMock.mockResolvedValue({
       internal: "not_configured",
       visitor: "not_configured",
+      internalRecipients: 0,
     });
 
     const result = await submitContact({}, buildFormData({ email: "juan@example.com" }));
@@ -125,6 +130,6 @@ describe("submitContact", () => {
 
     expect(result.success).toBeUndefined();
     expect(result.error).toBeTruthy();
-    expect(sendContactNotificationsMock).not.toHaveBeenCalled();
+    expect(sendFormNotificationsMock).not.toHaveBeenCalled();
   });
 });

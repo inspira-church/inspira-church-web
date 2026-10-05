@@ -1,5 +1,7 @@
 "use server";
 
+import { formatFirstTimeSubmission } from "@/lib/email/form-formatters";
+import { sendFormNotifications } from "@/lib/email/form-notifications";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -58,6 +60,21 @@ export async function submitFirstTimeConnection(
   if (error) {
     return { error: "No se pudo enviar tus datos. Intenta de nuevo en un momento." };
   }
+
+  // La ficha ya quedó guardada: el correo es secundario y nunca lanza ni cambia el resultado.
+  await sendFormNotifications({
+    formType: "primera-vez",
+    submission: formatFirstTimeSubmission({
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
+      gender: parsed.data.gender,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      message: parsed.data.message,
+      attendsOtherChurch: parsed.data.attendsOtherChurch,
+      wantsCall: parsed.data.wantsCall,
+    }),
+  });
 
   return { success: true };
 }

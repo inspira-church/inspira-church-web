@@ -1,7 +1,10 @@
 "use server";
 
+import { formatGroupJoinSubmission } from "@/lib/email/form-formatters";
+import { sendFormNotifications } from "@/lib/email/form-notifications";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { groupJoinSchema } from "@/lib/validations/group-join";
@@ -26,6 +29,21 @@ function parseForm(formData: FormData) {
     notes: formData.get("notes") || undefined,
     consent: formData.get("consent") === "on",
   };
+}
+
+/** Nombre del grupo elegido, solo para el aviso por correo. Si falla, el aviso sale sin él: nunca bloquea nada. */
+async function resolveGroupName(groupId: string | undefined): Promise<string | null> {
+  if (!groupId) return null;
+  try {
+    const { data } = await createPublicClient()
+      .from("public_growth_groups")
+      .select("name")
+      .eq("id", groupId)
+      .maybeSingle();
+    return data?.name ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function submitGroupJoin(
@@ -66,6 +84,26 @@ export async function submitGroupJoin(
   if (error) {
     return { error: "No se pudo enviar tu solicitud. Intenta de nuevo en un momento." };
   }
+
+  // La solicitud ya quedó guardada: el correo es secundario y nunca lanza
+  // ni cambia el resultado (ver lib/email/form-notifications.ts).
+  await sendFormNotifications({
+    formType: "grupos",
+    submission: formatGroupJoinSubmission({
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
+      phone: parsed.data.phone,
+      whatsapp: parsed.data.whatsapp,
+      email: parsed.data.email,
+      age: parsed.data.age,
+      city: parsed.data.city,
+      locality: parsed.data.locality,
+      neighborhood: parsed.data.neighborhood,
+      groupName: await resolveGroupName(parsed.data.groupId),
+      availability: parsed.data.availability,
+      notes: parsed.data.notes,
+    }),
+  });
 
   return { success: true };
 }

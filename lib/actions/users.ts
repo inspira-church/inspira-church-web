@@ -6,6 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { optionalText } from "@/lib/form-data";
 import { getSiteUrl } from "@/lib/get-site-url";
+import { requireAdmin } from "@/lib/require-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { setFlag } from "@/lib/toggle-flag";
@@ -14,28 +15,6 @@ import { inviteUserSchema, updateUserSchema } from "@/lib/validations/user";
 const NOT_ADMIN_ERROR = "Solo un Administrador puede gestionar usuarios.";
 const PRIMARY_ADMIN_ERROR =
   "No se puede modificar la cuenta del administrador principal de esa forma.";
-
-/**
- * El cliente admin (service_role) bypasea RLS por completo, así que a
- * diferencia del resto de módulos (protegidos solo por políticas RLS), aquí
- * hay que verificar el rol a mano antes de tocarlo.
- */
-async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, active")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || profile.role !== "admin" || !profile.active) return null;
-  return user;
-}
 
 function parseInviteForm(formData: FormData) {
   return {

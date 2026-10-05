@@ -153,7 +153,7 @@ cubierto por completo — vale la pena cerrarlo antes de producción.
 
 ## Base de datos — Supabase
 
-27 migraciones en `supabase/migrations/`, 001 a 027 (`018` agregó
+28 migraciones en `supabase/migrations/`, 001 a 028 (`028` crea `form_email_settings`, ver "Emails de formularios"; `018` agregó
 `nosotros-hero`/`nosotros-essence` a la política de lectura pública de
 `media`; `019` agregó `growth_groups.location_public`; `020` agregó
 `sermons.featured`; `021` agregó `sermons.meeting_type`; `022` agregó 12
@@ -1212,6 +1212,59 @@ definitivamente" desde antes, gateado a `isAdmin` — sin cambios ahí.)
   cambiar la foto — así el momento del cruce queda oculto y nunca se ve
   brusco. Respeta `prefers-reduced-motion` (sin rotación si el usuario lo
   prefiere).
+
+## Emails de formularios — servicio central (Bloque 4)
+
+Los 5 formularios públicos (Contacto, Primera vez, Petición de oración,
+Unirme a un grupo, Inscripción de Generaciones) notifican por email con **un
+solo servicio**: `sendFormNotifications({ formType, submission })` en
+`lib/email/form-notifications.ts`. Flujo fijo en cada Server Action: validar →
+antispam/Turnstile → INSERT en Supabase → `sendFormNotifications` → éxito. La
+base de datos va siempre primero; el servicio nunca lanza, nunca revierte y
+registra errores sin datos personales (el visitante ve éxito aunque Resend
+falle). Para sumar un formulario: agregarlo a `lib/email/form-definitions.ts`,
+escribir su formatter en `form-formatters.ts` y llamar al servicio — **no**
+crear otra función de correo.
+
+- **Piezas** (`lib/email/`): `resend.ts` (cliente; `EMAIL_FROM` y
+  `RESEND_API_KEY` server-only), `form-definitions.ts` (catálogo, textos
+  predeterminados, ruta del CMS de cada formulario), `form-config.ts` (modelo,
+  defaults, merge que respeta `""`), `form-recipients.ts` (prioridad y
+  deduplicado), `form-templates.ts` (plantillas), `form-formatters.ts` (un
+  formatter por formulario: qué campos viajan), `form-notifications.ts` (envío).
+- **Configuración editable** en `/admin/formularios/configuracion` (solo
+  Administrador): por formulario, notificación interna ON/OFF, principal propio
+  o el predeterminado, hasta 10 correos adicionales, respuesta automática
+  ON/OFF con asunto y mensaje; más el "Correo administrativo predeterminado"
+  global. Server Actions en `lib/actions/form-email-settings.ts`. El CMS **no**
+  edita el remitente.
+- **Almacenamiento: tabla `form_email_settings`** (migración `028`, aplicada),
+  RLS solo-Administrador sin política para `anon`. **No** se usó `site_settings`
+  porque es de lectura pública (`site_settings_select_public`): habría expuesto
+  los correos internos con la clave anónima. El envío la lee con `service_role`
+  en el servidor, en cada solicitud (sin caché: un cambio aplica a la siguiente
+  solicitud). Si la lectura falla se usan los defaults y la solicitud no se ve
+  afectada.
+- **Destinatario principal**, en este orden: el propio del formulario (si no
+  usa el predeterminado) → predeterminado global del CMS → `EMAIL_NOTIFICATION_TO`
+  (respaldo de emergencia) → ninguno (se omite el aviso y se registra). Los
+  adicionales se suman sin repetir al principal. `site_settings.contactEmail`
+  (correo público del FAB) **ya no** es destinatario de avisos.
+- **Privacidad entre destinatarios**: un correo individual por destinatario,
+  enviados en una sola llamada `resend.batch.send` (nadie ve las direcciones de
+  los demás y se respeta el límite de peticiones por segundo). No se usa BCC
+  porque el principal sería visible para los adicionales.
+- **Plantillas**: texto plano; la única variable es `{{nombre}}` (sin nombre →
+  saludo neutro). No es un motor de plantillas: no hay expresiones ni HTML; todo
+  se escapa. El CMS rechaza cualquier otra `{{variable}}`. Para añadir una
+  variable hay que agregarla a `ALLOWED_VARIABLES` y a `renderTemplate`.
+- **Minimización de datos**: una petición de oración privada no manda su texto
+  por correo (solo el Administrador la lee en el CMS); la inscripción de
+  Generaciones (datos de un menor) manda solo lo necesario para contactar al
+  acudiente (sin alergias, colegio ni contacto de emergencia).
+- **Reply-To** del aviso interno = correo del visitante, solo si lo dejó.
+  La respuesta automática solo sale si hay correo del visitante; el correo
+  nunca se vuelve obligatorio por esta funcionalidad.
 
 ## Servicios externos
 

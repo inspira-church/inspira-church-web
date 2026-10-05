@@ -1,5 +1,7 @@
 "use server";
 
+import { formatPrayerSubmission } from "@/lib/email/form-formatters";
+import { sendFormNotifications } from "@/lib/email/form-notifications";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -52,6 +54,19 @@ export async function submitPrayerRequest(
   if (error) {
     return { error: "No se pudo enviar tu petición. Intenta de nuevo en un momento." };
   }
+
+  // La petición ya quedó guardada: el correo es secundario y nunca lanza ni
+  // cambia el resultado. Una petición privada no incluye su texto en el aviso.
+  await sendFormNotifications({
+    formType: "oracion",
+    submission: formatPrayerSubmission({
+      name: parsed.data.name,
+      phone: parsed.data.phone,
+      email: parsed.data.email,
+      requestText: parsed.data.requestText,
+      isPrivate: parsed.data.isPrivate,
+    }),
+  });
 
   return { success: true };
 }

@@ -1,13 +1,18 @@
 import { DoorOpen, Inbox, UserPlus } from "lucide-react";
+import Link from "next/link";
 import { ContactRow } from "@/components/admin/ContactRow";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { FirstTimeConnectionRow } from "@/components/admin/FirstTimeConnectionRow";
 import { GroupJoinRequestRow } from "@/components/admin/GroupJoinRequestRow";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { Button } from "@/components/ui/Button";
+import { requireAdmin } from "@/lib/require-admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function FormsInboxPage() {
   const supabase = await createClient();
+  // La configuración de correos es solo-admin: el enlace solo se ofrece a quien puede usarla.
+  const isAdmin = Boolean(await requireAdmin());
 
   const [
     { data: contacts },
@@ -40,6 +45,13 @@ export default async function FormsInboxPage() {
       <PageHeader
         title="Formularios"
         description="Contactos, solicitudes para pertenecer a un grupo y fichas de conexión de Primera vez."
+        actions={
+          isAdmin ? (
+            <Button as={Link} href="/admin/formularios/configuracion" variant="secondary" size="sm">
+              Configurar correos
+            </Button>
+          ) : undefined
+        }
       />
 
       <h2 className="mt-8 font-display text-lg font-semibold text-ink">

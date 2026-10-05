@@ -1,5 +1,7 @@
 "use server";
 
+import { formatGenerationsSubmission } from "@/lib/email/form-formatters";
+import { sendFormNotifications } from "@/lib/email/form-notifications";
 import { type ActionState, firstFieldErrors } from "@/lib/form-errors";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -74,6 +76,22 @@ export async function submitGenerationsRegistration(
   if (error) {
     return { error: "No se pudo enviar la inscripción. Intenta de nuevo en un momento." };
   }
+
+  // La inscripción ya quedó guardada: el correo es secundario y nunca lanza ni
+  // cambia el resultado. Son datos de un menor: el aviso solo incluye lo necesario
+  // para contactar al acudiente; el resto se consulta en el CMS.
+  await sendFormNotifications({
+    formType: "generaciones",
+    submission: formatGenerationsSubmission({
+      childFirstName: parsed.data.childFirstName,
+      childLastName: parsed.data.childLastName,
+      childAge: parsed.data.childAge,
+      areaInterest: parsed.data.areaInterest,
+      guardianName: parsed.data.guardianName,
+      guardianPhone: parsed.data.guardianPhone,
+      guardianEmail: parsed.data.guardianEmail,
+    }),
+  });
 
   return { success: true };
 }
