@@ -293,7 +293,7 @@ export default async function HomePage() {
 
                 <div className="relative z-10 max-w-lg">
                   <p
-                    className="text-xs font-bold uppercase tracking-widest"
+                    className="text-sm font-bold uppercase tracking-widest"
                     style={{ color: s.textColor ?? s.color }}
                   >
                     {s.step}
