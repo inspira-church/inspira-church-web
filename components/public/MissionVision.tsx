@@ -68,19 +68,25 @@ export function MissionVision({
             >
               {visionHeadline}
             </p>
-            <p className={cn(hind.className, "mt-5 max-w-md text-base leading-relaxed text-black/70")}>
-              {/*
-                El CMS guarda visionText con saltos de línea internos (una
-                idea por línea, en site_settings.about) — se normalizan a
-                espacios para recuperar el párrafo continuo original sin
-                tocar el contenido guardado.
-              */}
+            {/*
+              site_settings.about.visionText guarda una idea por línea (editable
+              desde /admin/nosotros): cada línea no vacía es un <li>. La viñeta
+              es la nativa del navegador (list-disc), coloreada con el acento —
+              el color va en el <li> y el texto lo restablece en el <span>.
+            */}
+            <ul
+              className={cn(hind.className, "mt-5 max-w-md list-disc space-y-3 pl-5 text-base leading-relaxed")}
+            >
               {visionText
                 .split("\n")
                 .map((line) => line.trim())
                 .filter(Boolean)
-                .join(" ")}
-            </p>
+                .map((line, i) => (
+                  <li key={i} className="pl-1" style={{ color: ABOUT_COLORS.orange }}>
+                    <span className="text-black/70">{line}</span>
+                  </li>
+                ))}
+            </ul>
           </div>
         </div>
       </Container>
