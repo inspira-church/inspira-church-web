@@ -93,7 +93,7 @@ export function ValuesEditor({ defaultValues }: { defaultValues: AboutValue[] })
             defaultValue={row.description}
             onChange={(e) => updateRow(row.key, { description: e.target.value })}
             rows={2}
-            hint="Vacía = no se muestra en /nosotros aunque esté marcado como visible."
+            hint="Opcional. Si la dejas vacía, en /nosotros se mostrará únicamente el título."
           />
 
           <CheckboxField

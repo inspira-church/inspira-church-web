@@ -3,6 +3,7 @@
 import { Eyebrow, PosterHeading } from "@/components/public/cartel";
 import { useScrollReveal } from "@/components/public/useScrollReveal";
 import { Container } from "@/components/ui/Container";
+import { getVisibleValues } from "@/lib/about-values";
 import { ABOUT_COLORS, anton, hind } from "@/lib/fonts";
 import type { AboutValue } from "@/lib/queries/about";
 import { cn } from "@/lib/utils";
@@ -47,24 +48,26 @@ function ValueRow({
         >
           {value.title}
         </p>
-        <p
-          className={cn(
-            hind.className,
-            "mt-3 max-w-md text-base text-white/65 transition-all duration-700 ease-out motion-reduce:transition-none",
-            align === "right" && "ml-auto",
-            revealed ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-          )}
-          style={{ transitionDelay: "160ms" }}
-        >
-          {value.description}
-        </p>
+        {value.description.trim() && (
+          <p
+            className={cn(
+              hind.className,
+              "mt-3 max-w-md text-base text-white/65 transition-all duration-700 ease-out motion-reduce:transition-none",
+              align === "right" && "ml-auto",
+              revealed ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+            )}
+            style={{ transitionDelay: "160ms" }}
+          >
+            {value.description}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
 export function ChurchValues({ eyebrow, title, values }: ChurchValuesProps) {
-  const visibleValues = values.filter((v) => v.visible && v.title.trim() && v.description.trim());
+  const visibleValues = getVisibleValues(values);
   if (visibleValues.length === 0) return null;
 
   return (

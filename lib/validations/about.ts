@@ -1,13 +1,14 @@
 import { z } from "zod";
 
 const valueItemSchema = z.object({
-  title: z.string().trim().min(1, "Ingresa un título."),
-  description: z.string().trim().min(1, "Ingresa una descripción."),
+  title: z.string().trim().min(1, "Cada valor necesita un título."),
+  /** Opcional a propósito: "" = el usuario quiere mostrar solo el título en /nosotros. */
+  description: z.string().trim(),
   visible: z.boolean(),
 });
 
 const beliefItemSchema = z.object({
-  category: z.string().trim().min(1, "Ingresa el nombre de la categoría."),
+  category: z.string().trim().min(1, "Cada categoría de creencias necesita un nombre."),
   content: z.string().trim(),
   visible: z.boolean(),
 });

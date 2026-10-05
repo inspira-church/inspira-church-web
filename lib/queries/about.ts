@@ -185,6 +185,21 @@ function normalizeValues(raw: unknown): AboutValue[] | null {
   }));
 }
 
+/**
+ * Lo guardado en site_settings SIEMPRE gana a los defaults. Se usa spread (no
+ * `||`) a propósito: un campo guardado como "" es una decisión del usuario
+ * (ej. una descripción de valor vacía) y no debe volver a ser reemplazado por
+ * el texto predeterminado. Los defaults solo rellenan campos que no existen.
+ */
+export function mergeAboutContent(saved: Partial<AboutContent>): AboutContent {
+  return {
+    ...DEFAULT_ABOUT_CONTENT,
+    ...saved,
+    values: normalizeValues(saved.values) ?? DEFAULT_ABOUT_CONTENT.values,
+    beliefs: normalizeBeliefs(saved.beliefs) ?? DEFAULT_ABOUT_CONTENT.beliefs,
+  };
+}
+
 /** Igual que site_settings.general, pero en su propia fila (key='about') por ser un bloque de texto grande y aparte. */
 export async function getAboutContent(): Promise<AboutContent> {
   const supabase = await createClient();
@@ -195,11 +210,5 @@ export async function getAboutContent(): Promise<AboutContent> {
     .maybeSingle();
 
   if (!data?.value) return DEFAULT_ABOUT_CONTENT;
-  const saved = data.value as Partial<AboutContent>;
-  return {
-    ...DEFAULT_ABOUT_CONTENT,
-    ...saved,
-    values: normalizeValues(saved.values) ?? DEFAULT_ABOUT_CONTENT.values,
-    beliefs: normalizeBeliefs(saved.beliefs) ?? DEFAULT_ABOUT_CONTENT.beliefs,
-  };
+  return mergeAboutContent(data.value as Partial<AboutContent>);
 }

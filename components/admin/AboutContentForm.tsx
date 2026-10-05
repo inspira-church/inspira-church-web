@@ -13,12 +13,55 @@ import type { AboutContent } from "@/lib/queries/about";
 
 const initialState: ActionState = {};
 
+/** Sección del formulario a la que pertenece cada campo que puede fallar la validación. */
+const FIELD_LABELS: Record<string, string> = {
+  historyEyebrow: "Historia — texto pequeño",
+  historyTitle: "Historia — título",
+  historyText: "Historia — texto",
+  purposeEyebrow: "Propósito — texto pequeño",
+  purposeTitle: "Propósito — título",
+  missionTitle: "Misión — etiqueta",
+  missionHeadline: "Misión — frase",
+  missionText: "Misión — texto",
+  visionTitle: "Visión — etiqueta",
+  visionHeadline: "Visión — frase",
+  visionText: "Visión — texto",
+  essenceTitle: "Identidad — título",
+  essenceText: "Identidad — texto",
+  valuesEyebrow: "Valores — texto pequeño",
+  valuesTitle: "Valores — título de la sección",
+  values: "Nuestros valores",
+  beliefsEyebrow: "Creencias — texto pequeño",
+  beliefsTitle: "Creencias — título de la sección",
+  beliefsIntro: "Creencias — introducción",
+  beliefs: "Nuestras creencias",
+  visitEyebrow: "Visita — texto pequeño",
+  visitTitle: "Visita — título",
+  ctaTitle: "CTA final — título",
+  ctaText: "CTA final — texto",
+};
+
 export function AboutContentForm({ defaultValues }: { defaultValues: AboutContent }) {
   const [state, formAction] = useActionState(updateAboutContent, initialState);
 
   return (
     <form action={formAction} className="max-w-2xl space-y-10">
       <FormError message={state.error} />
+      {state.fieldErrors && Object.keys(state.fieldErrors).length > 0 && (
+        <div
+          role="alert"
+          className="rounded-md border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-ink"
+        >
+          <p className="font-semibold">No se guardó nada. Corrige lo siguiente y vuelve a guardar:</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {Object.entries(state.fieldErrors).map(([field, message]) => (
+              <li key={field}>
+                <span className="font-medium">{FIELD_LABELS[field] ?? field}:</span> {message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {state.success && (
         <p className="rounded-md border border-accent/30 bg-accent-soft px-4 py-3 text-sm text-ink">
           Contenido guardado.
@@ -164,8 +207,8 @@ export function AboutContentForm({ defaultValues }: { defaultValues: AboutConten
           />
         </div>
         <p className="text-sm text-ink-soft">
-          Los valores con descripción vacía, o marcados como no visibles, no aparecen en el
-          sitio público — quedan preparados para completarlos después.
+          Puedes dejar la descripción vacía para mostrar únicamente el título. Desmarca
+          &ldquo;Visible en /nosotros&rdquo; si quieres ocultar completamente el valor.
         </p>
         <ValuesEditor defaultValues={defaultValues.values} />
       </section>
